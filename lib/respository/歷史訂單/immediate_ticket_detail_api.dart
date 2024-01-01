@@ -33,7 +33,7 @@ class ImmediateTicketDetailApi {
 
         return ImmediateTicketDetailResponse(statusCode: response.statusCode, data: ticketDetail);
       } else {
-        print("hey E : Failed to fetch data");
+        print("hey E : Failed to fetch data: ${response.statusCode};; $orderId" );
         throw Exception('Failed to fetch data');
       }
     } catch (error) {

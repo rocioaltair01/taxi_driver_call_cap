@@ -12,6 +12,8 @@ import '歷史訂單/history_page.dart';
 import '設定/setting_page.dart';
 import '預約單/reservation_page.dart';
 
+final GlobalKey<PersistentBottomBarScaffoldState> pertabbarPageKey = GlobalKey<PersistentBottomBarScaffoldState>();
+
 class TabbarPage extends StatefulWidget {
 
   const TabbarPage({Key? key}) : super(key: key);
@@ -21,9 +23,7 @@ class TabbarPage extends StatefulWidget {
 }
 
 class _TabbarPageState extends State<TabbarPage> {
-  int pageIndex = 2;
-  late Timer _timer;
-
+  // late Timer _timer;
   late List<Widget> pages;
 
 
@@ -33,52 +33,53 @@ class _TabbarPageState extends State<TabbarPage> {
     pages = [
       const HistoryPage(),
       const ReservationPage(),
-      const MainPage(),
+      MainPage(
+        key: mainPageKey,
+      ),
       SettingPage(),
-      //const SettingPage(),
-     ChatPage(),
+      ChatPage(),
     ];
-    _timer = Timer.periodic(Duration(seconds: 15), (Timer timer) {
-      // 在这里调用你的API
-      callAPI();
-    });
+    // _timer = Timer.periodic(Duration(seconds: 15), (Timer timer) {
+    //   // 在这里调用你的API
+    //   callAPI();
+    // });
   }
 
-  void callAPI() async {
-
-    UserData loginResult = UserDataSingleton.instance;
-
-    print('Token: ${loginResult.token}');
-
-    ApiService apiService = ApiService();
-
-    double latitude = 1.0;
-    double longitude = 1.0;
-    int plan = 1;
-    int status = 1;
-    int taxiSort = 1;
-// Trigger driver's GPS update
-    try {
-      await apiService.triggerDriverGps(
-          latitude,
-          longitude,
-          plan,
-          status,
-          taxiSort,
-          loginResult.token
-      );
-    } catch (error) {
-      // Handle error accordingly (show message, retry logic, etc.)
-    }
-    // // 这里是调用API的逻辑
-    // try {
-    //   var response = await http.get(Uri.parse('https://your-api-endpoint.com'));
-    //   // 处理响应...
-    //   print('API called at ${DateTime.now()}');
-    // } catch (e) {
-    //   print('Error calling API: $e');
-    // }
-  }
+//   void callAPI() async {
+//
+//     UserData loginResult = UserDataSingleton.instance;
+//
+//     print('Token: ${loginResult.token}');
+//
+//     ApiService apiService = ApiService();
+//
+//     double latitude = 1.0;
+//     double longitude = 1.0;
+//     int plan = 1;
+//     int status = 1;
+//     int taxiSort = 1;
+// // Trigger driver's GPS update
+//     try {
+//       await apiService.triggerDriverGps(
+//           latitude,
+//           longitude,
+//           plan,
+//           status,
+//           taxiSort,
+//           loginResult.token
+//       );
+//     } catch (error) {
+//       // Handle error accordingly (show message, retry logic, etc.)
+//     }
+//     // // 这里是调用API的逻辑
+//     // try {
+//     //   var response = await http.get(Uri.parse('https://your-api-endpoint.com'));
+//     //   // 处理响应...
+//     //   print('API called at ${DateTime.now()}');
+//     // } catch (e) {
+//     //   print('Error calling API: $e');
+//     // }
+//   }
 
   final _tab1navigatorKey = GlobalKey<NavigatorState>();
   final _tab2navigatorKey = GlobalKey<NavigatorState>();
@@ -92,6 +93,7 @@ class _TabbarPageState extends State<TabbarPage> {
     return ChangeNotifierProvider(
         create: (context) => StatusProvider(),
         child: PersistentBottomBarScaffold(
+          key: pertabbarPageKey,
           items: [
             PersistentTabItem(
               tab: pages[0],
@@ -159,23 +161,23 @@ class PersistentBottomBarScaffold extends StatefulWidget {
 
 
   @override
-  _PersistentBottomBarScaffoldState createState() =>
-      _PersistentBottomBarScaffoldState();
+  PersistentBottomBarScaffoldState createState() =>
+      PersistentBottomBarScaffoldState();
 }
 
 
-class _PersistentBottomBarScaffoldState
+class PersistentBottomBarScaffoldState
     extends State<PersistentBottomBarScaffold> {
-  int _selectedTab = 2;
+  int selectedTab = 2;
 
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (widget.items[_selectedTab].navigatorkey?.currentState?.canPop() ??
+        if (widget.items[selectedTab].navigatorkey?.currentState?.canPop() ??
             false) {
-          widget.items[_selectedTab].navigatorkey?.currentState?.pop();
+          widget.items[selectedTab].navigatorkey?.currentState?.pop();
           return false;
         } else {
           return true;
@@ -183,7 +185,7 @@ class _PersistentBottomBarScaffoldState
       },
       child: Scaffold(
         body: IndexedStack(
-          index: _selectedTab,
+          index: selectedTab,
           children: widget.items
               .map((page) => Navigator(
             key: page.navigatorkey,
@@ -227,7 +229,7 @@ class _PersistentBottomBarScaffoldState
     return InkWell(
       onTap: () {
         //     /// Check if the tab that the user is pressing is currently selected
-        if (index == _selectedTab) {
+        if (index == selectedTab) {
           /// if you want to pop the current tab to its root then use
           widget.items[index].navigatorkey?.currentState
               ?.popUntil((route) => route.isFirst);
@@ -238,7 +240,7 @@ class _PersistentBottomBarScaffoldState
           // widget.items[index].navigatorkey?.currentState?.pop();
         } else {
           setState(() {
-            _selectedTab = index;
+            selectedTab = index;
           });
         }
       },
@@ -246,7 +248,7 @@ class _PersistentBottomBarScaffoldState
         width: itemWidth, // Adjust the width as needed
         child: Column(
           children: [
-            _selectedTab == index
+            selectedTab == index
                 ? Image.asset(
               outlinedIcon,
                 width: 30,

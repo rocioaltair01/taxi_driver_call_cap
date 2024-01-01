@@ -1,4 +1,6 @@
 
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import 'login_response_model.dart';
 
 class UserDataSingleton {
@@ -67,6 +69,7 @@ class UserData {
   final int count;
   final LoginSetting setting;
   String _phoneNumber;
+  LatLng _currentLocation;
 
   UserData({
     required this.id,
@@ -83,10 +86,12 @@ class UserData {
     required this.count,
     required this.setting,
     required String phoneNumber,
-  }):_phoneNumber = phoneNumber;
+    required LatLng currentLocation
+  }):_phoneNumber = phoneNumber, _currentLocation = currentLocation;
 
   // Getter for phoneNumber
   String get phoneNumber => _phoneNumber;
+  LatLng get currentLocation => _currentLocation;
 
   // Method to update phoneNumber
   UserData updatePhoneNumber(String newPhoneNumber) {
@@ -105,6 +110,27 @@ class UserData {
       count: this.count,
       setting: this.setting,
       phoneNumber: newPhoneNumber,
+        currentLocation: currentLocation
+    );
+  }
+
+  UserData updateLocation(LatLng newLocation) {
+    return UserData(
+        id: this.id,
+        teamCode: this.teamCode,
+        serviceList: this.serviceList,
+        token: this.token,
+        type: this.type,
+        authorize: this.authorize,
+        initialGps: this.initialGps,
+        mongoTable: this.mongoTable,
+        plan: this.plan,
+        callNumber: this.callNumber,
+        name: this.name,
+        count: this.count,
+        setting: this.setting,
+        phoneNumber: this.phoneNumber,
+        currentLocation: newLocation
     );
   }
 
@@ -124,6 +150,7 @@ class UserData {
       count: json['count'],
       setting: LoginSetting.fromJson(json['setting']),
       phoneNumber: (json['phoneNumber'] == null) ? '' : json['phoneNumber'],
+      currentLocation: (json['currentLocation'] == null) ? LatLng(0, 0) : json['currentLocation'],
     );
   }
 }

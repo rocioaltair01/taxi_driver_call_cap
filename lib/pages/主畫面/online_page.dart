@@ -1,11 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/util/dialog_util.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import '../../model/user_data_singleton.dart';
+import '../../respository/主畫面/grab_ticket_api.dart';
 import '../../respository/主畫面/order_request_api.dart';
-import '../../respository/主畫面/submit_order_api.dart';
 import 'main_page.dart';
 import '細節頁/driver_map.dart';
 import '細節頁/estimate_price.dart';
@@ -20,16 +26,90 @@ class OnlinePage extends StatefulWidget {
 }
 
 class _OnlinePageState extends State<OnlinePage> {
+  // late IOWebSocketChannel channel;
+  String message = '';
+
   bool isLoading = false;
-  InstantListModel? ticketDetail = InstantListModel(event: '', success: true,
-    result: [ {"id": 1234}]
-  );
+  List<InstantItemModel> ticketDetail = [];
+
   Map<String, dynamic>? submitTicket;
+  LatLng? _currentPosition;
+  late IO.Socket socket;
 
   @override
   void initState() {
     super.initState();
-    fetchData();
+    getLocation();
+    connectSocket();
+  }
+
+  void connectSocket() {
+    UserData loginResult = UserDataSingleton.instance;
+    socket = IO.io('https://test-fleet-of-taxi.shopinn.tw', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+      'query': {'token': loginResult.token},
+    });
+
+    socket.onConnect((_) {
+      print('Socket: connected');
+    });
+
+    socket.onDisconnect((_) {
+      print('Socket: disconnected');
+    });
+
+    socket.onReconnect((_) {
+      print('Socket: reconnected');
+    });
+
+    socket.onReconnectAttempt((_) {
+      print('Socket: reconnect attempt');
+    });
+
+    socket.onError((error) {
+      print('Socket: error: $error');
+    });
+
+    socket.on('GetOrderInfo', (data) {
+      if (mounted)
+        fetchData();
+      print('Socket: Received GetOrderInfo event: $data');
+    });
+
+    socket.on('Cancel', (data) {
+      int cancelledOrderId = data['orderId']; // Assuming orderId is available in the 'Cancel' event data
+      print('Socket: Received Cancel event: $data');
+      if (mounted)
+      {
+        setState(() {
+          ticketDetail.removeWhere((item) => item.orderId == cancelledOrderId);
+        });
+      }
+    });
+
+    socket.connect();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  getLocation() async {
+    LocationPermission permission;
+    permission = await Geolocator.requestPermission();
+
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    double lat = position.latitude;
+    double long = position.longitude;
+
+
+    LatLng location = LatLng(lat, long);
+    _currentPosition = location;
   }
 
   Future<void> fetchData() async {
@@ -38,13 +118,17 @@ class _OnlinePageState extends State<OnlinePage> {
     });
 
     try {
-      final response = await OrderRequestAboveApi.getOrderRequestAbove(23.0091547, 120.174854);
+      print("hey ${_currentPosition?.latitude} ${_currentPosition?.longitude}");
+      final response = await OrderRequestAboveApi.getOrderRequestAbove(_currentPosition?.latitude ?? 0, _currentPosition?.longitude ?? 0);
 
       if (response.statusCode == 200) {
-        setState(() {
-          ticketDetail = response.data;
-          isLoading = false;
-        });
+        if (mounted)
+        {
+          setState(() {
+            ticketDetail = response.data!;
+            isLoading = false;
+          });
+        }
       } else {
         throw Exception('Failed to fetch data');
       }
@@ -71,6 +155,7 @@ class _OnlinePageState extends State<OnlinePage> {
                 color: Colors.white,
                 child: Column(
                   children: [
+                    Text("message $message"),
                     Expanded(child: Container()),
                     Row(
                       children: [
@@ -99,6 +184,7 @@ class _OnlinePageState extends State<OnlinePage> {
                                     fontSize: 16, // Set font size as needed
                                   ),
                                 ),
+                                Text("message $message"),
                               ],
                             )
                         ),
@@ -112,9 +198,12 @@ class _OnlinePageState extends State<OnlinePage> {
                               ),
                             ),
                             onPressed: () {
-                              setState(() {
-                                statusProvider.updateStatus(GuestStatus.IS_NOT_OPEN);
-                              });
+                              if (mounted)
+                              {
+                                setState(() {
+                                  statusProvider.updateStatus(GuestStatus.IS_NOT_OPEN);
+                                });
+                              }
                             },
                             child: const Text(
                               '休息',
@@ -135,100 +224,74 @@ class _OnlinePageState extends State<OnlinePage> {
             ),
             Container(
               height: 300,
-              color: Colors.white,// Set the height you desire
-              child: ListView.builder(
-                itemCount: ticketDetail?.result.length,
-                itemBuilder: (context, index) {
-                  return Slidable(
-                      endActionPane: ActionPane(
-                        motion: const BehindMotion(),
-                        children: [
-                          SlidableAction(
-                              backgroundColor: Colors.grey,
-                              //icon: Icons.shape_line,
-                              label: "拒絕",
-                              onPressed: (context){
-                              }
-                          ),
-                          SlidableAction(
-                              backgroundColor: Colors.red,
-                              //icon: Icons.shape_line,
-                              label: "搶單",
-                              onPressed: (context) async{
-                                // SubmitOrderResponse res = await  SubmitOrderApi.submitOrder(
-                                //     passengerNum: 1,
-                                //     passengerComment:"備註",
-                                //     register: "4",
-                                //     onLocationLng: 120.195,
-                                //     onLocationLat: 23.013,
-                                //     offLocationLng: 23,
-                                //     offLocationLat: 120.2,
-                                //     serviceList: null,
-                                //     cars:1,
-                                //     designationDriver: [],
-                                //     customerId: 1,
-                                //     passengerId: 1,
-                                //     onLocation: "海佃路",
-                                //     offLocation: null,
-                                //     searchInterval: 1,
-                                //     blackDriver: []
-                                // );
-                                // submitTicket = res.result;
-                                DialogUtils.showGrabTicketDialog("12345","上車地點: 台南市中西區成功路1號","",context);
+              color: Colors.white,
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                        return Slidable(
+                          endActionPane: ActionPane(
+                            motion: const BehindMotion(),
+                            children: [
+                              SlidableAction(
+                                backgroundColor: Colors.grey,
+                                label: "拒絕",
+                                onPressed: (context) {
+                                  if (mounted)
+                                    {
+                                      setState(() {
+                                        ticketDetail.removeWhere((item) => item.orderId == ticketDetail[index].orderId);
+                                      });
+                                    }
 
-                                print('object $index');
-                              }
-                          )
-                        ],
-                      ),
-                      child:
-                      Padding(
-                        padding: EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("2.5公里"),
-                            Text("上車地點:台南市中西區成功路1號"),
-                            Text("上車地點:台南市中西區成功路1號"),
-                            Text("備註:XXXX"),
-                            Container(
-                              height: 1,
-                              color: Colors.black,
+                                },
+                              ),
+                              SlidableAction(
+                                backgroundColor: Colors.red,
+                                label: "搶單",
+                                onPressed: (context) async {
+                                  GrabTicketResponse response = await GrabTicketApi.grabTicket(orderId: ticketDetail[index].orderId.toString(), time: 1, status: 0);
+                                  if (response.success)
+                                    {
+                                      if (mounted)
+                                        {
+                                          setState(() {
+                                            ticketDetail.removeWhere((item) => item.orderId == ticketDetail[index].orderId);
+                                          });
+                                        }
+                                    }
+                                  //DialogUtils.showGrabTicketDialog("12345", "上車地點: 台南市中西區成功路1號", "", context);
+                                  print('object $index');
+                                },
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("${ticketDetail[index].distance.toString()}公里"),
+                                Text(ticketDetail[index].onLocation),
+                                Text(ticketDetail[index].offLocation ?? ""),
+                                Text(ticketDetail[index].note ?? ""),
+                                Container(
+                                  height: 1,
+                                  color: Colors.black,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      )
-                  );
-                },
-              )
-              // CustomScrollView(
-              //   slivers: <Widget>[
-              //     SliverList(
-              //       delegate: SliverChildBuilderDelegate(
-              //             (context, idx) {
-              //           return Padding(
-              //             padding: EdgeInsets.all(12),
-              //             child: Column(
-              //               crossAxisAlignment: CrossAxisAlignment.start,
-              //               children: [
-              //                 Text("2.5公里"),
-              //                 Text("上車地點:台南市中西區成功路1號"),
-              //                 Text("上車地點:台南市中西區成功路1號"),
-              //                 Text("備註:XXXX"),
-              //                 Container(
-              //                   height: 1,
-              //                   color: Colors.black,
-              //                 ),
-              //               ],
-              //             ),
-              //           );
-              //         },
-              //         childCount: 2,
-              //       ),
-              //     ),
-              //   ],
-              // ),
+                          ),
+                        );
+                      },
+                      childCount: ticketDetail.length ?? 0,
+                    ),
+                  ),
+                ],
+              ),
             ),
+
 
             Expanded(child: Container()),
             Padding(

@@ -6,7 +6,7 @@ import '../../model/user_data_singleton.dart';
 
 class OrderRequestAboveResponse {
   final int statusCode;
-  InstantListModel? data;
+  List<InstantItemModel>? data;
 
   OrderRequestAboveResponse({required this.statusCode, this.data});
 }
@@ -14,7 +14,7 @@ class OrderRequestAboveResponse {
 class OrderRequestAboveApi {
   static Future<OrderRequestAboveResponse> getOrderRequestAbove(double lat, double lng) async {
     UserData loginResult = UserDataSingleton.instance;
-    final Uri uri = Uri.parse('$baseUrl/test-fleet-of-taxi.shopinn.tw/api/order-info?lat=$lat&lng=$lng');
+    final Uri uri = Uri.parse('https://test-fleet-of-taxi.shopinn.tw/api/order-info?lat=$lat&lng=$lng&orderIdsToExclude=0&orderIdsToExclude=0');
 
     try {
       final response = await http.get(
@@ -25,38 +25,50 @@ class OrderRequestAboveApi {
       );
 
       if (response.statusCode == 200) {
-        print("Order Request Above Response: ${response.body}");
+        print("Order Request:: Above Response: ${response.body}");
         final jsonData = json.decode(response.body);
-        final ticketDetail = InstantListModel.fromJson(jsonData['result']);
 
-        return OrderRequestAboveResponse(statusCode: response.statusCode, data: ticketDetail);
+        List<InstantItemModel> items = (jsonData['result'] as List)
+            .map((item) => InstantItemModel.fromJson(item))
+            .toList();
+
+        return OrderRequestAboveResponse(statusCode: response.statusCode, data: items);
       } else {
-        print("Order Request Above Failed: Failed to fetch data");
+        print("Order Request:: Above Failed: Failed to fetch data${response.statusCode}");
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
-      print("Order Request Above Error: Failed to fetch data: $error");
+      print("Order Request:: Above Error: Failed to fetch data: $error");
       throw Exception('Failed to fetch data: $error');
     }
   }
 }
 
-class InstantListModel {
-  final String event;
-  final bool success;
-  final List<dynamic> result; // Change the type to match the actual data type of "result"
+class InstantItemModel {
+  final int orderId;
+  final String onLocation;
+  final String? note;
+  final String? offLocation;
+  final double distance;
+  final int time;
 
-  InstantListModel({
-    required this.event,
-    required this.success,
-    required this.result,
+  InstantItemModel({
+    required this.orderId,
+    required this.onLocation,
+    this.note,
+    this.offLocation,
+    required this.distance,
+    required this.time,
   });
 
-  factory InstantListModel.fromJson(Map<String, dynamic> json) {
-    return InstantListModel(
-      event: json['event'],
-      success: json['success'],
-      result: List<dynamic>.from(json['result']),
+  factory InstantItemModel.fromJson(Map<String, dynamic> json) {
+    return InstantItemModel(
+      orderId: json['orderId'],
+      onLocation: json['onLocation'],
+      note: json['note'],
+      offLocation: json['offLocation'],
+      distance: json['distance'],
+      time: json['time'],
     );
   }
 }

@@ -329,7 +329,7 @@ class GrabTicketDialog extends StatelessWidget {
   }
 
   Widget contentBox(BuildContext context) {
-    List<String> numbers = ["6", "9", "12"];
+    List<int> numbers = [6, 9, 12];
     List<int> numbers2 = [14, 16, 20];
     return Container(
       height: 380,
@@ -365,22 +365,28 @@ class GrabTicketDialog extends StatelessWidget {
                   itemBuilder: (BuildContext context, int index) {
                     return Padding(
                       padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.black,
-                            width: 1,
+                      child: GestureDetector(
+                        onTap: () {
+                          print("grabTicket ${numbers[index].toString()}");
+                          GrabTicketApi.grabTicket(orderId: id, time: numbers2[index], status: 0);
+                        },
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.black,
+                              width: 1,
+                            ),
                           ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            numbers[index],
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                          child: Center(
+                            child: Text(
+                              numbers[index].toString(),
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),

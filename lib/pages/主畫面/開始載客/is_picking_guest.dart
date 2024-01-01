@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:untitled1/util/dialog_util.dart';
 
 import '../../../model/預約單/reservation_model.dart';
 import '../../../respository/主畫面/arrived_destination_api.dart';
-import '../../../respository/主畫面/giveup_api.dart';
-import '../../../respository/主畫面/start_picking_passenger_api.dart';
-import '../細節頁/customer_message_page.dart';
 import '../細節頁/estimate_price.dart';
 import '../main_page.dart';
 
 class IsPickingQuestPage extends StatefulWidget {
-  final BillList bill;
-  const IsPickingQuestPage({super.key, required this.bill});
+  final BillList? bill;
+  const IsPickingQuestPage({super.key, this.bill});
 
   @override
   State<IsPickingQuestPage> createState() => _IsPickingQuestPageState();
@@ -34,8 +32,6 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
   }
 
   getLocation() async {
-    LocationPermission permission;
-    permission = await Geolocator.requestPermission();
 
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
@@ -60,12 +56,37 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
         children: [
           Stack(
             children: [
-              Container(
+              (_currentPosition != null) ?
+              Stack(
+                children: [
+                  Container(
+                    height: 250,
+                    child: GoogleMap(
+                      onMapCreated: _onMapCreated,
+                      initialCameraPosition: CameraPosition(
+                        target: _currentPosition ?? LatLng(0, 0),
+                        zoom: 16.0,
+                      ),
+                      myLocationEnabled: true,
+                    ),
+                  ),
+                  Positioned(
+                      top: 50,
+                      left: 20,
+                      child: Text(
+                        pick_status,
+                        style: TextStyle(
+                            fontSize: 18
+                        ),
+                      )
+                  )
+                ],
+              ) : Container(
                 height: 250,
                 child: GoogleMap(
                   onMapCreated: _onMapCreated,
                   initialCameraPosition: CameraPosition(
-                    target: _currentPosition!,
+                    target: LatLng(0,0),
                     zoom: 16.0,
                   ),
                   myLocationEnabled: true,
@@ -79,8 +100,6 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
               ),
             ],
           ),
-
-
           //Expanded(child: Container()),
           Expanded(
               child: Stack(
@@ -89,26 +108,28 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                     padding: EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      //crossAxisAlignment: WrapCrossAlignment.start,
                       children: [
                         Row(
                           children: [
                             Text(
                               "訂單編號:",
                               style: TextStyle(
-                                color: Colors.black, // Set text color to black
-                                fontSize: 16, // Set font size as needed
+                                color: Colors.black,
+                                fontSize: 16,
                               ),
                             ),
+                            Expanded(child: SizedBox()),
+                            (widget.bill != null) ?
                             Text(
-                              widget.bill.billInfo.reservationId.toString(),
+                              widget.bill!.billInfo.reservationId.toString(),
                               style: TextStyle(
                                 color: Colors.black, // Set text color to black
                                 fontSize: 16, // Set font size as needed
                               ),
-                            )
+                            ) : Container()
                           ],
                         ),
+                        const Expanded(child: SizedBox()),
                         Row(
                           children: [
                             Column(
@@ -121,13 +142,14 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                                     fontSize: 16, // Set font size as needed
                                   ),
                                 ),
+                                (widget.bill != null) ?
                                 Text(
-                                  widget.bill.billInfo.onLocation.toString(),
+                                  widget.bill!.billInfo.onLocation.toString(),
                                   style: TextStyle(
                                     color: Colors.black, // Set text color to black
                                     fontSize: 20, // Set font size as needed
                                   ),
-                                ),
+                                ) : Container()
                               ],
                             ),
                             Expanded(child: Container()),
@@ -159,13 +181,14 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                                       fontSize: 16, // Set font size as needed
                                     ),
                                   ),
+                                  (widget.bill != null) ?
                                   Text(
-                                    widget.bill.billInfo.offLocation.toString(),
+                                    widget.bill!.billInfo.offLocation.toString(),
                                     style: TextStyle(
                                       color: Colors.black, // Set text color to black
                                       fontSize: 20, // Set font size as needed
                                     ),
-                                  ),
+                                  ) : Container()
                                 ],
                               ),
                             ),
@@ -192,13 +215,14 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                             fontSize: 16, // Set font size as needed
                           ),
                         ),
+                        (widget.bill != null) ?
                         Text(
-                          widget.bill.billInfo.passengerNote,
+                          widget.bill!.billInfo.passengerNote,
                           style: TextStyle(
                             color: Colors.black, // Set text color to black
                             fontSize: 20, // Set font size as needed
                           ),
-                        )
+                        ) : Container()
                       ],
                     ),
                   ),
@@ -252,9 +276,8 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                                           if (result.success == true)
                                           {
                                             GlobalDialog.showAlertDialog(context, "結帳金額成功", result.message);
-                                            // mainPageKey.currentState?.setState(() {
-                                            //   mainPageKey.currentState?.current_status = GuestStatus.IS_OPEN;
-                                            // });
+                                            StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
+                                            statusProvider.updateStatus(GuestStatus.IS_OPEN);
                                           } else {
                                             GlobalDialog.showAlertDialog(context, "結束載客失敗", result.message);
                                           }
@@ -271,7 +294,33 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                                   ],
                                 )
                             ),
-                            Container(width: 180,)
+                            Container(width: 60,),
+                            Expanded(
+                                child: Column(
+                                  children: [
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
+                                        ),
+                                        minimumSize: const Size(double.infinity, 50), // Set the button height
+                                      ),
+                                      onPressed: () {
+
+                                      },
+                                      child: const Text(
+                                        '聯絡客人',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(height: 20,),
+                                    Container(height: 50,)
+                                  ],
+                                )
+                            ),
                           ],
                         ),
                       )

@@ -55,7 +55,7 @@ class _ReservationPageState extends State<ReservationPage> {
         body: TabBarView(
           children: [
             NotYetReservation(),
-            FinishedReservation()
+            FinishedReservationView()
           ],
         ),
       ),

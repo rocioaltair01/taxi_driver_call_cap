@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -14,13 +15,12 @@ import 'respository/navigation_service.dart';
 
 
 void main() async{
-
-
   WidgetsFlutterBinding.ensureInitialized();
   // // cameras = await availableCameras();
   // // print("ca $cameras");
   // // setupLocator();
-  // await Firebase.initializeApp();
+  await dotenv.load(fileName: ".env");
+  await Firebase.initializeApp();
   initializeDateFormatting('zh', null).then((_) {
     runApp(
         ChangeNotifierProvider(
@@ -29,24 +29,7 @@ void main() async{
         )
     );
   });
-
-  // initializeDateFormatting('zh', null).then((_) {
-  //   runApp(
-  //       ChangeNotifierProvider(
-  //           create: (context) => StatusProvider(),
-  //           child: MyApp()
-  //       )
-  //   );
-  // });
-  // runApp(
-  //     ChangeNotifierProvider(
-  //         create: (context) => StatusProvider(),
-  //         child: LoginApp()
-  //     )
-  // );
 }
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -84,7 +67,6 @@ class MyApp extends StatelessWidget {
 }
 
 class RouteGenerator {
-
   static Route<dynamic> generateRoutes(RouteSettings settings) {
     switch(settings.name) {
       case '/':

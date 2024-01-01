@@ -31,7 +31,7 @@ class ArrivedSuccessApiResponse {
 class ArrivedSuccessApi {
   Future<ArrivedSuccessApiResponse> markArrivalSuccess(int orderId, int orderType) async {
     UserData loginResult = UserDataSingleton.instance;
-    print("orderId$orderId");
+    print("orderId$orderType");
     try {
       String url = '$baseUrl/app/api/others/get_in_time/$orderId/?order_state=1&order_type=$orderType';
 
@@ -47,7 +47,8 @@ class ArrivedSuccessApi {
         print("arrived ${response.body}");
         return ArrivedSuccessApiResponse.fromJson(decodedResponse);
       } else {
-        throw Exception('Failed to mark arrival success');
+        print("arrived ${response.body}");
+        throw Exception('Failed to mark arrival success ${response.statusCode}');
       }
     } catch (e) {
       print("e $e");

@@ -1,19 +1,24 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-import '../../model/歷史訂單/reservation_list_model.dart';
-import '../../respository/歷史訂單/reservation_ticket_api.dart';
-import '../../util/dialog_util.dart';
-import '../歷史訂單/immediate_detail_page.dart';
+import '../../../model/預約單/reservation_model.dart';
+import '../../../util/dialog_util.dart';
+import '../../../respository/預約單/reservation_api.dart';
+import 'detail_pages/finished_reservation_detail_page.dart';
 
-class FinishedReservation extends StatefulWidget {
+class FinishedReservationView extends StatefulWidget {
+  const FinishedReservationView({super.key});
+
   @override
-  _FinishedReservationState createState() => _FinishedReservationState();
+  State<FinishedReservationView> createState() => _FinishedReservationViewState();
 }
 
-class _FinishedReservationState extends State<FinishedReservation> {
-  List<ReservationInfo> billList = [];
+class _FinishedReservationViewState extends State<FinishedReservationView> {
+  List<BillList> billList = [];
+  List<int> colorCodes = [];
+  int year = 2023;
+  int month = 12;
   bool isLoading = false;
   bool isEmpty = false;
 
@@ -21,10 +26,10 @@ class _FinishedReservationState extends State<FinishedReservation> {
     setState(() {
       isLoading = true;
     });
-    print("hey fetchData");
+
     try {
-      final response = await ReservationTicketApi.getOngoingReservationTickets(true);
-      print("hey response ${response.data}");
+      final response = await ReservationApi.getReservationTickets(year, month, 'grabbed');
+
       if (response.statusCode == 200) {
         if (response.data.isEmpty) {
           setState(() {
@@ -32,26 +37,25 @@ class _FinishedReservationState extends State<FinishedReservation> {
             isEmpty = true;
           });
         } else {
+          isEmpty = false;
           setState(() {
-            isLoading = false;
-            isEmpty = false;
             billList = response.data;
           });
         }
       } else {
         setState(() {
-          isEmpty = true;
           isLoading = false;
         });
-        DialogUtils.showErrorDialog("錯誤","網路異常",context);
         throw Exception('Failed to fetch data');
       }
-    } catch (error) {
+
       setState(() {
-        isEmpty = true;
         isLoading = false;
       });
-      DialogUtils.showErrorDialog("錯誤","網路異常",context);
+    } catch (error) {
+      setState(() {
+        isLoading = false;
+      });
       throw Exception('Error: $error');
     }
   }
@@ -64,90 +68,112 @@ class _FinishedReservationState extends State<FinishedReservation> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading ? const Center(
-      child: SpinKitFadingCircle(
-        color: Colors.black,
-        size: 80.0,
-      ),
-    ) : isEmpty ? const Center(child: Text(
-        "沒有已接預約單",
-        style: TextStyle(
-        fontSize: 18
-      ),
-    ),)
-        : ListView.builder(
-      padding: const EdgeInsets.all(8),
-      itemCount: billList.length,
-      itemBuilder: (BuildContext context, int index) {
-        String originalTime = billList[index].billInfo.reservationTime ?? '';
-        DateTime parsedTime = DateTime.parse(originalTime).add(Duration(hours: 8));
-        String formattedDate = DateFormat('M-d HH:mm(週E)', 'zh').format(parsedTime);
-        return GestureDetector(
-            onTap: () {
-              print('Item at index $index tapped!');
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ImmediateDetailPage(
-                      orderNumber: billList[index].billInfo.reservationId ?? 0,
-                      orderStatus: 3,
-                    )
-                ),
-              );
-            },
-            child: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Image.asset(
-                    'assets/images/distribute.png',
-                    width: 30,
-                    height: 30,
+    return isLoading // Check if isLoading is true
+        ? const Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: SpinKitFadingCircle(
+              color: Colors.black,
+              size: 80.0,
+            ),
+          ),
+        )
+      ],
+    ) : (isEmpty) ? const Column(
+      children: [
+        Expanded(
+            child: Center(
+                child:
+                Text(
+                  "沒有已接預約單",
+                  style: TextStyle(
+                    fontSize: 18,
                   ),
-                ),// Show a progress indicator or other UI during startup
-
-                Flexible(
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Column(
+                )
+            )
+        ),
+      ],
+    ) : Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: billList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => FinishedReservationViewDetailPage(
+                            bill: billList[index])
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child:  (billList[index].billInfo.orderStatus == 3) ? Image.asset(
+                          'assets/images/ok.png',
+                          width: 30,
+                          height: 30,
+                        ) : (billList[index].billInfo.orderStatus == 4) ?
+                        Image.asset(
+                          'assets/images/no.png',
+                          width: 30,
+                          height: 30,
+                        ) :
+                        Image.asset(
+                          'assets/images/grab.png',
+                          width: 30,
+                          height: 30,
+                        ),
+                      ),
+                      Expanded(
+                          child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            formattedDate,
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontSize: 16,
-                            ),// Handle long text
-                          ),
-                          Text(
-                            '從: ${billList[index].billInfo.onLocation}',
+                            '${DateUtil().getDate(billList[index].billInfo.reservationTime)}',
                             overflow: TextOverflow.clip,
                             style: const TextStyle(
                               fontSize: 16,
                             ),
                           ),
                           Text(
-                            '備註: ${billList[index].billInfo.passengerNote}',
+                            '從：${billList[index].billInfo.onLocation}',
                             overflow: TextOverflow.clip,
                             style: const TextStyle(
                               fontSize: 16,
                             ),
                           ),
-                          Divider(
-                            color: Colors.grey.shade400,
+                          // Text(
+                          //   '服務備註: ${billList[index].billInfo.passengerNote}',
+                          //   overflow: TextOverflow.clip,
+                          //   style: const TextStyle(
+                          //     fontSize: 16,
+                          //   ),
+                          // ),
+                          const Divider(
+                            color: Colors.grey,
                             thickness: 1,
                             height: 1,
                           ),
                         ],
-                      ),
-                    )
+                      )
+                      )
+                    ],
+                  ),
                 ),
-              ],
-            )
-        );
-      },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
-
-

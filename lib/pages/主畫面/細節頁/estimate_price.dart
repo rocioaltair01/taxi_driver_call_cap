@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../constants/constants.dart';
+import '../../../model/主畫面/estimate_price_model.dart';
 import '../../../respository/主畫面/directions_api_request.dart';
 import '../../../util/dialog_util.dart';
 import 'count_price.dart';
@@ -89,7 +90,7 @@ class _EstimatePriceState extends State<EstimatePrice> {
                       ),
                       (places.isEmpty || places[index].isEmpty) ? Container() :
                       SizedBox(
-                        height: 130, // Set the height you desire
+                        height: (places[index].length == 1) ? 65 : 130,
                         child: CustomScrollView(
                           slivers: <Widget>[
                             SliverList(
@@ -200,7 +201,7 @@ class _EstimatePriceState extends State<EstimatePrice> {
                       ),
                       (places.isEmpty || places[index].isEmpty) ? Container() :
                       SizedBox(
-                        height: 130, // Set the height you desire
+                        height: (places[index].length == 1) ? 65 : 130,
                         child: CustomScrollView(
                           slivers: <Widget>[
                             SliverList(
@@ -298,7 +299,7 @@ class _EstimatePriceState extends State<EstimatePrice> {
                       ),
                       (places.isEmpty || places[index].isEmpty) ? Container() :
                       SizedBox(
-                        height: 130, // Set the height you desire
+                        height: (places[index].length == 1) ? 65 : 130,
                         child: CustomScrollView(
                           slivers: <Widget>[
                             SliverList(
@@ -492,9 +493,9 @@ class _EstimatePriceState extends State<EstimatePrice> {
         setState(() {
           print("index: $index");
           places[index] = fetchedPlaces;
-          print("oo ${ places[index]}");
+          //print("oo ${ places[index]}");
         });
-        print("Fetched ${fetchedPlaces.length} places");
+        //print("Fetched ${fetchedPlaces.length} places");
       } else {
         print("Error: ${data['status']}");
       }
@@ -510,129 +511,5 @@ class _EstimatePriceState extends State<EstimatePrice> {
     } else if (newStopNum < addressFieldControllers.length) {
       addressFieldControllers.removeLast();
     }
-  }
-}
-
-
-class Place {
-  final String formattedAddress;
-  final PlaceGeometry geometry;
-  final String icon;
-  final String iconBackgroundColor;
-  final String iconMaskBaseUri;
-  final String name;
-  final List<PlacePhoto> photos;
-  final String placeId;
-  final String reference;
-  final List<String> types;
-  //final double? rating; // Optional field
-  //final int? userRatingsTotal; // Optional field
-
-  Place({
-    required this.formattedAddress,
-    required this.geometry,
-    required this.icon,
-    required this.iconBackgroundColor,
-    required this.iconMaskBaseUri,
-    required this.name,
-    required this.photos,
-    required this.placeId,
-    required this.reference,
-    required this.types,
-    //this.rating,
-    // this.userRatingsTotal,
-  });
-
-  factory Place.fromJson(Map<String, dynamic> json) {
-    return Place(
-      formattedAddress: json['formatted_address'],
-      geometry: PlaceGeometry.fromJson(json['geometry']),
-      icon: json['icon'],
-      iconBackgroundColor: json['icon_background_color'],
-      iconMaskBaseUri: json['icon_mask_base_uri'],
-      name: json['name'],
-      photos: (json['photos'] as List)
-          .map((photoJson) => PlacePhoto.fromJson(photoJson))
-          .toList(),
-      placeId: json['place_id'],
-      reference: json['reference'],
-      types: List<String>.from(json['types']),
-      // rating: json['rating']?.toDouble(),
-      //userRatingsTotal: json['user_ratings_total'],
-    );
-  }
-}
-
-class PlaceGeometry {
-  final PlaceLocation location;
-  final PlaceViewport viewport;
-
-  PlaceGeometry({
-    required this.location,
-    required this.viewport,
-  });
-
-  factory PlaceGeometry.fromJson(Map<String, dynamic> json) {
-    return PlaceGeometry(
-      location: PlaceLocation.fromJson(json['location']),
-      viewport: PlaceViewport.fromJson(json['viewport']),
-    );
-  }
-}
-
-class PlaceLocation {
-  final double lat;
-  final double lng;
-
-  PlaceLocation({
-    required this.lat,
-    required this.lng,
-  });
-
-  factory PlaceLocation.fromJson(Map<String, dynamic> json) {
-    return PlaceLocation(
-      lat: json['lat'],
-      lng: json['lng'],
-    );
-  }
-}
-
-class PlaceViewport {
-  final PlaceLocation northeast;
-  final PlaceLocation southwest;
-
-  PlaceViewport({
-    required this.northeast,
-    required this.southwest,
-  });
-
-  factory PlaceViewport.fromJson(Map<String, dynamic> json) {
-    return PlaceViewport(
-      northeast: PlaceLocation.fromJson(json['northeast']),
-      southwest: PlaceLocation.fromJson(json['southwest']),
-    );
-  }
-}
-
-class PlacePhoto {
-  final int height;
-  final List<String> htmlAttributions;
-  final String photoReference;
-  final int width;
-
-  PlacePhoto({
-    required this.height,
-    required this.htmlAttributions,
-    required this.photoReference,
-    required this.width,
-  });
-
-  factory PlacePhoto.fromJson(Map<String, dynamic> json) {
-    return PlacePhoto(
-      height: json['height'],
-      htmlAttributions: List<String>.from(json['html_attributions']),
-      photoReference: json['photo_reference'],
-      width: json['width'],
-    );
   }
 }

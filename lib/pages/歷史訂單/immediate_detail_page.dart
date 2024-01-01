@@ -43,6 +43,7 @@ class _ImmediateDetailPageState extends State<ImmediateDetailPage> {
     });
 
     try {
+      print("ROCIO");
       final response = await ImmediateTicketDetailApi.getImmediateTicketDetail(widget.orderNumber);
 
       if (response.statusCode == 200) {
@@ -61,6 +62,7 @@ class _ImmediateDetailPageState extends State<ImmediateDetailPage> {
           isLoading = false;
         });
       } else {
+        print("response.statusCode${response.statusCode}");
         throw Exception('Failed to fetch data');
       }
     } catch (error) {

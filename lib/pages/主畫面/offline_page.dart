@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:untitled1/pages/%E4%B8%BB%E7%95%AB%E9%9D%A2/offline_count_price_page.dart';
 
 import 'main_page.dart';
 import '細節頁/estimate_price.dart';
@@ -129,8 +130,12 @@ class _OfflinePageState extends State<OfflinePage> {
                                 minimumSize: Size(double.infinity, 50),
                               ),
                               onPressed: () {
-                                // Handle the first button tap
-                                // ...
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => OfflineCountPricePage()
+                                  ),
+                                );
                               },
                               child: const Text(
                                 '離線計費',
