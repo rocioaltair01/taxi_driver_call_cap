@@ -9,6 +9,8 @@ import 'immediate_detail_page.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ImmediateTicket extends StatefulWidget {
+  const ImmediateTicket({super.key});
+
   @override
   _ImmediateTicketState createState() => _ImmediateTicketState();
 }
@@ -47,7 +49,6 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
       final response = await ImmediateTicketApi.getImmediateTickets(year, month);
 
       if (response.statusCode == 200) {
-        print("hey hey : ${response.data}");
         if (response.data.isEmpty) {
           setState(() {
             isEmpty = true;
@@ -67,6 +68,7 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
         });
         //?????
         //DialogUtils.showErrorDialog("錯誤","網路異常",context);
+        print("Failed to fetch data fetchReservationTicketsData");
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
@@ -74,7 +76,8 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
         isLoading = false;
         isEmpty = true;
       });
-      DialogUtils.showErrorDialog("錯誤","網路異常",context);
+      print("error6 $error");
+      DialogUtils.showErrorDialog("錯誤","網路異常6",context);
       throw Exception('Error: $error');
     }
   }
@@ -86,7 +89,7 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
     final picked = await showModalBottomSheet(
       context: context,
       builder: (BuildContext builder) {
-        return Container(
+        return SizedBox(
           height: 280.0,
           child: Column(
             children: [
@@ -112,7 +115,7 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
                         children: List<Widget>.generate(24, (int index) {
                           return Text(
                             yearNamesInChinese[index], // Replace with your list of Chinese month names
-                            style: TextStyle(fontSize: 22.0),
+                            style: const TextStyle(fontSize: 22.0),
                           );
                         }),
                       ),
@@ -130,7 +133,7 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
                           children: List<Widget>.generate(12, (int index) {
                             return Text(
                               monthNamesInChinese[index], // Replace with your list of Chinese month names
-                              style: TextStyle(fontSize: 22.0),
+                              style: const TextStyle(fontSize: 22.0),
                             );
                           }),
                       ),
@@ -151,7 +154,7 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent, // 透明背景色
                     foregroundColor: Colors.black, // 文字颜色
-                    minimumSize: Size(double.infinity, 48), // 宽度填充并设置高度
+                    minimumSize: const Size(double.infinity, 48), // 宽度填充并设置高度
                   ),
                   child: const Text('完成'),
                 ),
@@ -242,7 +245,8 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
               itemBuilder: (BuildContext context, int index) {
                 String originalTime = billList[index].orderTime;
                 DateTime parsedTime = DateTime.parse(originalTime).add(Duration(hours: 8));
-                String formattedDate = DateFormat('M-d HH:mm(週E)', 'zh').format(parsedTime);
+                String formattedDate = DateFormat('M-d HH:mm(E)', 'zh').format(parsedTime);
+                formattedDate = formattedDate.replaceAll("周", "週");
                 return GestureDetector(
                   onTap: () {
                     print('Item at index $index tapped!');
@@ -256,55 +260,58 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
                       ),
                     );
                   },
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Image.asset(
-                          (billList[index].orderStatus == 2) ? 'assets/images/status2and3_icon.png'
-                              : (billList[index].orderStatus == 3) ? 'assets/images/ok.png' : 'assets/images/no.png',
-                          width: 30,
-                          height: 30,
-                        ),
-                      ),// Show a progress indicator or other UI during startup
+                  child: Container(
+                    color: Colors.white,
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Image.asset(
+                            (billList[index].orderStatus == 2) ? 'assets/images/status2and3_icon.png'
+                                : (billList[index].orderStatus == 3) ? 'assets/images/ok.png' : 'assets/images/no.png',
+                            width: 30,
+                            height: 30,
+                          ),
+                        ),// Show a progress indicator or other UI during startup
 
-                      Flexible(
-                          child: Padding(
-                            padding: const EdgeInsets.all(6),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  formattedDate,
-                                  overflow: TextOverflow.clip,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),// Handle long text
-                                ),
-                                Text(
-                                  '從: ${billList[index].onLocation}',
-                                  overflow: TextOverflow.clip,
-                                  style: const TextStyle(
-                                    fontSize: 16,
+                        Flexible(
+                            child: Padding(
+                              padding: const EdgeInsets.all(6),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    formattedDate,
+                                    overflow: TextOverflow.clip,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                    ),// Handle long text
                                   ),
-                                ),
-                                Text(
-                                  '到: ${billList[index].offLocation}',
-                                  overflow: TextOverflow.clip,
-                                  style: const TextStyle(
-                                    fontSize: 16,
+                                  Text(
+                                    '從: ${billList[index].onLocation}',
+                                    overflow: TextOverflow.clip,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                    ),
                                   ),
-                                ),
-                                Divider(
-                                  color: Colors.grey.shade400,
-                                  thickness: 1,
-                                  height: 1,
-                                ),
-                              ],
-                            ),
-                          )
-                      ),
-                    ],
+                                  Text(
+                                    '到: ${billList[index].offLocation}',
+                                    overflow: TextOverflow.clip,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Divider(
+                                    color: Colors.grey.shade400,
+                                    thickness: 1,
+                                    height: 1,
+                                  ),
+                                ],
+                              ),
+                            )
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

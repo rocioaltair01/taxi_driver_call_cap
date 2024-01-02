@@ -28,7 +28,8 @@ class HistoryNextListItem extends StatelessWidget {
       },
       child: Column(
         children: [
-          SizedBox(
+          Container(
+            color: Colors.white,
             height: 60,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,

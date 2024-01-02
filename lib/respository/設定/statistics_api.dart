@@ -34,7 +34,7 @@ class StatisticsApi {
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         final statistics = StatisticsResult.fromJson(jsonData);
-        print("hey response ${jsonData.toString()}");
+        print("hey response2 ${jsonData.toString()}");
         return StatisticsResponse(statusCode: response.statusCode, data: statistics);
       } else {
         throw Exception('Failed to fetch statistics');

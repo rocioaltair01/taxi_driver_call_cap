@@ -422,17 +422,20 @@ class _EstimatePriceState extends State<EstimatePrice> {
                               ),
                               onPressed: () {
                                 setState(() {
-                                  bool _contain = false;
-                                  addressFieldControllers.forEach((element) {
-                                    if (element.text == '')
-                                      _contain = true;
-                                  });
-                                  if (_contain || _addressEndFieldController.text == '') {
-                                    DialogUtils.showErrorDialog("查詢失敗", "請先確定所有地址或地點名稱皆有填寫後，再重新查詢", context);
-                                  } else {
-                                    openGoogleMap();
-                                  }
+                                  openGoogleMap();
                                 });
+                                // setState(() {
+                                //   bool _contain = false;
+                                //   addressFieldControllers.forEach((element) {
+                                //     if (element.text == '')
+                                //       _contain = true;
+                                //   });
+                                //   if (_contain || _addressEndFieldController.text == '') {
+                                //     DialogUtils.showErrorDialog("查詢失敗", "請先確定所有地址或地點名稱皆有填寫後，再重新查詢", context);
+                                //   } else {
+                                //     openGoogleMap();
+                                //   }
+                                // });
                               },
                               child: const Row(
                                 children: [
@@ -464,13 +467,14 @@ class _EstimatePriceState extends State<EstimatePrice> {
   }
 
   void openGoogleMap() async {
+    print("openGoogleMap");
     String startAddress = _addressStartFieldController.text;
     String endAddress = _addressEndFieldController.text;
 
     if (startAddress.isNotEmpty && endAddress.isNotEmpty) {
       String url = 'https://www.google.com/maps/dir/?api=1&origin=$startAddress&destination=$endAddress';
-      final Uri uri = Uri.file(url);
-      launchUrl(uri);
+      final Uri uri = Uri.parse(url);
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       print('Please enter start and end addresses');
     }

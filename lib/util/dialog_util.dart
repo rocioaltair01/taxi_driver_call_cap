@@ -95,19 +95,94 @@ class GlobalDialog {
     );
   }
 
-
+  static void showGiveupDialog({
+    required BuildContext context,
+    required String message,
+    required Function() onOkPressed,
+    required Function() onCancelPressed,
+  }) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.zero,
+          content: Container(
+            height: 350,
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24.0), // Set border radius
+              border: Border.all(color: Colors.black), // Add border
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                    child: Center(
+                        child: Text(
+                            message,
+                          style: TextStyle(
+                              fontSize: 20
+                          ),
+                        )
+                    )
+                ),
+                Row(
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            minimumSize: Size(double.infinity, 50),
+                            backgroundColor: Colors.grey
+                        ),
+                        onPressed: () {
+                          onCancelPressed(); // Call the function when '確定' button is pressed
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                            '取消',
+                          style: TextStyle(
+                            fontSize: 18
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 20,),
+                    Flexible(
+                      flex: 1,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: Size(double.infinity, 50),
+                          ),
+                          onPressed: () {
+                            onOkPressed();
+                            Navigator.of(context).pop();
+                          },
+                          child: Text(
+                              '確定',
+                            style: TextStyle(
+                                fontSize: 18
+                            ),
+                          ),
+                        ),
+                    )
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
-
-
-
 
 class DateUtil {
   String getDate(String dateString)
   {
     DateTime dateTime = DateTime.parse(dateString);
-
-    String formattedDate = DateFormat('MM-dd HH:mm (E)').format(dateTime.toLocal());
-    print(formattedDate); // Output: 12-11 13:33 (Mon)
+    String formattedDate = DateFormat('M-d HH:mm(E)', 'zh').format(dateTime.toLocal());
+    formattedDate = formattedDate.replaceAll("周", "週");
     return formattedDate;
   }
 
@@ -203,7 +278,7 @@ class CustomImageDialog extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.0),
         border: Border.all(
           color: Colors.black,
-          width: 2,
+          width: 1,
         ),
       ),
       child: Column(
@@ -252,53 +327,6 @@ class CustomImageDialog extends StatelessWidget {
         ],
       ),
     );
-    //   Container(
-    //   padding: const EdgeInsets.all(16.0),
-    //   height: 250,
-    //   decoration: BoxDecoration(
-    //     shape: BoxShape.rectangle,
-    //     color: Colors.white,
-    //     borderRadius: BorderRadius.circular(16.0),
-    //   ),
-    //   child: Column(
-    //     mainAxisSize: MainAxisSize.min,
-    //     children: <Widget>[
-    //       Text(
-    //         title,
-    //         style: const TextStyle(
-    //           fontSize: 20,
-    //           fontWeight: FontWeight.bold,
-    //         ),
-    //       ),
-    //       const SizedBox(height: 10),
-    //       Center(
-    //         child: Image.asset(
-    //           'assets/images/$imagePath.png',
-    //           width: 30,
-    //           height: 30,
-    //         ),
-    //       ),
-    //       const SizedBox(height: 20),
-    //       ElevatedButton(
-    //         onPressed: onPressed,
-    //         child: const Padding(
-    //           padding: EdgeInsets.all(8.0),
-    //           child: Text(
-    //             '確定',
-    //             style: TextStyle(
-    //               fontSize: 18,
-    //             ),
-    //           ),
-    //         ),
-    //         style: ElevatedButton.styleFrom(
-    //           shape: RoundedRectangleBorder(
-    //             borderRadius: BorderRadius.circular(8.0),
-    //           ),
-    //         ),
-    //       ),
-    //     ],
-    //   ),
-    // );
   }
 }
 
@@ -341,7 +369,7 @@ class GrabTicketDialog extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.0),
         border: Border.all(
           color: Colors.black,
-          width: 2,
+          width: 1,
         ),
       ),
       child: Column(
@@ -510,7 +538,7 @@ class CustomDialog extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.0),
         border: Border.all(
           color: Colors.black,
-          width: 2,
+          width: 1,
         ),
       ),
       child: Column(

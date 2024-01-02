@@ -57,6 +57,7 @@ dependencies:
   photo_gallery:
   socket_io_client:
   flutter_dotenv:
+  firebase_messaging:
 
 dev_dependencies:
   flutter_test:

@@ -38,7 +38,7 @@ class _OfflinePageState extends State<OfflinePage> {
                                 shape: BoxShape.circle,
                                 color: Colors.lightGreenAccent,
                               ),
-                              child: Container(
+                              child: const SizedBox(
                                 width: 10,
                                 height: 10,
                               ),
@@ -95,7 +95,7 @@ class _OfflinePageState extends State<OfflinePage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(5), // Adjust the value as needed
                               ),
-                              minimumSize: Size(double.infinity, 50),
+                              minimumSize: const Size(double.infinity, 50),
                             ),
                             onPressed: () {
                               Navigator.push(

@@ -8,8 +8,8 @@ class ImmediateTicketDetailModel {
   final dynamic passengerCancel;
   final String? passengerNote;
   final int? payMethod;
-  final List<double>? onGps;
-  final List<double>? offGps;
+  final List<num>? onGps;
+  final List<num>? offGps;
   final dynamic signingId;
   final int? milage;
   final DateTime? orderTime;
@@ -50,8 +50,8 @@ class ImmediateTicketDetailModel {
       passengerCancel: json['passengerCancel'],
       passengerNote: json['passengerNote'],
       payMethod: json['payMethod'],
-      onGps: json['onGps'] != null ? List<double>.from(json['onGps']) : null,
-      offGps: json['offGps'] != null ? List<double>.from(json['offGps']) : null,
+      onGps: json['onGps'] != null ? List<num>.from(json['onGps']) : null,
+      offGps: json['offGps'] != null ? List<num>.from(json['offGps']) : null,
       milage: json['milage'] != null ? json['milage'] : 0,
       signingId: json['signingId'],
       orderTime: json['orderTime'] != null ? DateTime.parse(json['orderTime']) : null,

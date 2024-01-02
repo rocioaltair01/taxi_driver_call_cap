@@ -6,10 +6,10 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:untitled1/util/dialog_util.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import '../../model/user_data_singleton.dart';
+import '../../model/主畫面/instant_item_model.dart';
 import '../../respository/主畫面/grab_ticket_api.dart';
 import '../../respository/主畫面/order_request_api.dart';
 import 'main_page.dart';
@@ -184,7 +184,6 @@ class _OnlinePageState extends State<OnlinePage> {
                                     fontSize: 16, // Set font size as needed
                                   ),
                                 ),
-                                Text("message $message"),
                               ],
                             )
                         ),

@@ -35,6 +35,7 @@ class _NotYetReservationDetailPageState extends State<NotYetReservationDetailPag
     reservationTime = widget.billData.billInfo.reservationTime.toString();
     parsedOrderTime = DateTime.parse(reservationTime).add(Duration(hours: 8));
     formattedDateOrderTime = DateFormat('M-d HH:mm(E)', 'zh').format(parsedOrderTime!);
+    formattedDateOrderTime = formattedDateOrderTime.replaceAll("周", "週");
   }
 
 

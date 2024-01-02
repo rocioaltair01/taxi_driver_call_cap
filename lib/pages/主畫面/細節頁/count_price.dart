@@ -280,6 +280,7 @@ class _CountPricePageState extends State<CountPricePage> {
                                           minimumSize: Size(double.infinity, 50),
                                         ),
                                         onPressed: () {
+                                          print("hey");
                                           setState(() {
                                             openGoogleMap();
                                           });
@@ -333,12 +334,13 @@ class _CountPricePageState extends State<CountPricePage> {
   }
 
   void openGoogleMap() async {
+    print("openGoogleMap");
     String startAddress = widget.addressFieldControllers[0].text;
     String endAddress = widget.addressFieldControllers[widget.addressFieldControllers.length-1].text;
     if (startAddress.isNotEmpty && endAddress.isNotEmpty) {
       String url = 'https://www.google.com/maps/dir/?api=1&origin=$startAddress&destination=$endAddress';
-      final Uri uri = Uri.file(url);
-      launchUrl(uri);
+      final Uri uri = Uri.parse(url);
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       print('Please enter start and end addresses');
     }

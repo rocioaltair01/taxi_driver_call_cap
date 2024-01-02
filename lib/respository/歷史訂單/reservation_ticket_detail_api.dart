@@ -38,6 +38,4 @@ class ReservationTicketDetailApi {
       throw Exception('Failed to fetch data: $error');
     }
   }
-
-
 }

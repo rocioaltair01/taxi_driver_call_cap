@@ -54,10 +54,11 @@ class _ImmediateDetailPageState extends State<ImmediateDetailPage> {
             orderTime = ticketDetail!.orderTime.toString();
             parsedOrderTime = DateTime.parse(orderTime).add(Duration(hours: 8));
             formattedDateOrderTime = DateFormat('M-d HH:mm(E)', 'zh').format(parsedOrderTime!);
-
+            formattedDateOrderTime = formattedDateOrderTime.replaceAll("周", "週");
             finishTime = ticketDetail!.finishTime.toString();
             finishTimeTime = DateTime.parse(finishTime).add(Duration(hours: 8));
             formattedFinishTime = DateFormat('M-d HH:mm(E)', 'zh').format(finishTimeTime!);
+            formattedFinishTime = formattedFinishTime.replaceAll("周", "週");
           }
           isLoading = false;
         });

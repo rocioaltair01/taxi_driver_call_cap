@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/util/dialog_util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../model/預約單/reservation_model.dart';
 import '../../../respository/主畫面/arrived_destination_api.dart';
@@ -115,7 +116,7 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                               "訂單編號:",
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 16,
+                                fontSize: 18,
                               ),
                             ),
                             Expanded(child: SizedBox()),
@@ -124,91 +125,94 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                               widget.bill!.billInfo.reservationId.toString(),
                               style: TextStyle(
                                 color: Colors.black, // Set text color to black
-                                fontSize: 16, // Set font size as needed
+                                fontSize: 20, // Set font size as needed
                               ),
                             ) : Container()
                           ],
                         ),
-                        const Expanded(child: SizedBox()),
+                        const SizedBox(height: 10,),
                         Row(
                           children: [
-                            Column(
+                            Expanded(child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   "上車定點：",
                                   style: TextStyle(
                                     color: Colors.black, // Set text color to black
-                                    fontSize: 16, // Set font size as needed
+                                    fontSize: 18, // Set font size as needed
                                   ),
                                 ),
                                 (widget.bill != null) ?
                                 Text(
                                   widget.bill!.billInfo.onLocation.toString(),
                                   style: TextStyle(
-                                    color: Colors.black, // Set text color to black
-                                    fontSize: 20, // Set font size as needed
+                                      color: Colors.black,
+                                      fontSize: 20,
+                                      overflow: TextOverflow.clip
                                   ),
                                 ) : Container()
                               ],
-                            ),
-                            Expanded(child: Container()),
+                            )),
                             InkWell(
                               onTap: () {
-                                // Add your onTap functionality here
+                                print("openGoogleMap ${widget.bill!.billInfo.onLocation}");
+                                openGoogleMap(widget.bill!.billInfo.onLocation);
                               },
                               child: Container(
-                                padding: EdgeInsets.all(12), // Set padding as needed
+                                padding: EdgeInsets.all(12),
                                 child: Image.asset(
-                                  'assets/images/location.png', // Replace with your image path
-                                  width: 20, // Set width as needed
-                                  height: 20, // Set height as needed
-                                  fit: BoxFit.cover, // Adjust the fit as needed
+                                  'assets/images/location.png',
+                                  width: 30,
+                                  height: 30,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
                             )
                           ],
                         ),
+                        const SizedBox(height: 10,),
                         Row(
                           children: [
-                            Container(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("下車定點：",
-                                    style: TextStyle(
-                                      color: Colors.black, // Set text color to black
-                                      fontSize: 16, // Set font size as needed
-                                    ),
+                            Expanded(child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("下車定點：",
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
                                   ),
-                                  (widget.bill != null) ?
-                                  Text(
-                                    widget.bill!.billInfo.offLocation.toString(),
-                                    style: TextStyle(
-                                      color: Colors.black, // Set text color to black
-                                      fontSize: 20, // Set font size as needed
-                                    ),
-                                  ) : Container()
-                                ],
-                              ),
-                            ),
+                                ),
+                                (widget.bill != null) ?
+                                Text(
+                                  widget.bill!.billInfo.offLocation.toString(),
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 20,
+                                      overflow: TextOverflow.clip
+                                  ),
+                                ) : Container()
+                              ],
+                            ),),
                             //Expanded(child: Container()),
                             InkWell(
                               onTap: () {
-                                // Add your onTap functionality here
+                                print("openGoogleMap ${widget.bill!.billInfo.offLocation}");
+                                openGoogleMap(widget.bill!.billInfo.offLocation);
                               },
                               child: Container(
                                 padding: EdgeInsets.all(12), // Set padding as needed
                                 child: Image.asset(
                                   'assets/images/location.png', // Replace with your image path
-                                  width: 20, // Set width as needed
-                                  height: 20, // Set height as needed
+                                  width: 30, // Set width as needed
+                                  height: 30, // Set height as needed
                                   fit: BoxFit.cover, // Adjust the fit as needed
                                 ),
                               ),
                             )
                           ],
                         ),
+                        const SizedBox(height: 10,),
                         Text("備註：",
                           style: TextStyle(
                             color: Colors.black, // Set text color to black
@@ -331,5 +335,21 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
         ],
       ),
     );
+  }
+
+  void openGoogleMap(String endAddress) async {
+    print("openGoogleMap");
+    // String startAddress = widget.addressFieldControllers[0].text;
+    // String endAddress = widget.addressFieldControllers[widget.addressFieldControllers.length-1].text;
+    double currentLat = _currentPosition?.latitude ?? 0;
+    double currentLng = _currentPosition?.longitude ?? 0;
+
+    if (endAddress.isNotEmpty) {
+      String url = 'https://www.google.com/maps/dir/?api=1&origin=$currentLat,$currentLng&destination=$endAddress';
+      final Uri uri = Uri.parse(url);
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      print('Please enter start and end addresses');
+    }
   }
 }

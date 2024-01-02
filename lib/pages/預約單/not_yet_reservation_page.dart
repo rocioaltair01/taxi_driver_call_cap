@@ -21,10 +21,10 @@ class _NotYetReservationState extends State<NotYetReservation> {
     setState(() {
       isLoading = true;
     });
-  print("hey fetchData");
+    print("hey fetchData");
     try {
       final response = await ReservationTicketApi.getOngoingReservationTickets(false);
-      print("hey response ${response.data}");
+      print("hey responsei ${response.data}");
       if (response.statusCode == 200) {
         if (response.data.isEmpty) {
           setState(() {
@@ -43,7 +43,7 @@ class _NotYetReservationState extends State<NotYetReservation> {
           isEmpty = true;
           isLoading = false;
         });
-        DialogUtils.showErrorDialog("錯誤","網路異常",context);
+        DialogUtils.showErrorDialog("錯誤","網路異常2",context);
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
@@ -51,7 +51,7 @@ class _NotYetReservationState extends State<NotYetReservation> {
         isEmpty = true;
         isLoading = false;
       });
-      DialogUtils.showErrorDialog("錯誤","網路異常",context);
+      DialogUtils.showErrorDialog("錯誤","網路異常3",context);
       throw Exception('Error: $error');
     }
   }
@@ -82,7 +82,8 @@ class _NotYetReservationState extends State<NotYetReservation> {
       itemBuilder: (BuildContext context, int index) {
         String originalTime = billList[index].billInfo.reservationTime ?? '';
         DateTime parsedTime = DateTime.parse(originalTime).add(const Duration(hours: 8));
-        String formattedDate = DateFormat('M-d HH:mm(週E)', 'zh').format(parsedTime);
+        String formattedDate = DateFormat('M-d HH:mm(E)', 'zh').format(parsedTime);
+        formattedDate = formattedDate.replaceAll("周", "週");
         return GestureDetector(
             onTap: () {
               Navigator.push(
@@ -96,59 +97,62 @@ class _NotYetReservationState extends State<NotYetReservation> {
                 fetchData(); // Call when the detail page is popped
               });
             },
-            child: Row(
-              children: [
-                Flexible(
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            formattedDate,
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontSize: 16,
-                            ),// Handle long text
-                          ),
-                          Text(
-                            '從: ${billList[index].billInfo.onLocation}',
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontSize: 16,
+            child: Container(
+              color: Colors.white,
+              child: Row(
+                children: [
+                  Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              formattedDate,
+                              overflow: TextOverflow.clip,
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),// Handle long text
                             ),
-                          ),
-                          Text(
-                            '到: ${billList[index].billInfo.offLocation}',
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontSize: 16,
+                            Text(
+                              '從: ${billList[index].billInfo.onLocation}',
+                              overflow: TextOverflow.clip,
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '服務備註: ${billList[index].billInfo.passengerNote}',
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontSize: 16,
+                            Text(
+                              '到: ${billList[index].billInfo.offLocation}',
+                              overflow: TextOverflow.clip,
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '乘客人數: ${billList[index].billInfo.userNumber}人',
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontSize: 16,
+                            Text(
+                              '服務備註: ${billList[index].billInfo.passengerNote}',
+                              overflow: TextOverflow.clip,
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                          Divider(
-                            color: Colors.grey.shade400,
-                            thickness: 1,
-                            height: 1,
-                          ),
-                        ],
-                      ),
-                    )
-                ),
-              ],
+                            Text(
+                              '乘客人數: ${billList[index].billInfo.userNumber}人',
+                              overflow: TextOverflow.clip,
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            Divider(
+                              color: Colors.grey.shade400,
+                              thickness: 1,
+                              height: 1,
+                            ),
+                          ],
+                        ),
+                      )
+                  ),
+                ],
+              ),
             )
         );
       },

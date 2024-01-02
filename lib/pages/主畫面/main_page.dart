@@ -47,6 +47,7 @@ class MainPageState extends State<MainPage> {
   // GuestStatus current_status = GuestStatus.IS_NOT_OPEN;
   BillList? bill;
   LatLng? _currentPosition;
+  late Timer _timer;
 
   @override
   void initState() {
@@ -64,7 +65,6 @@ class MainPageState extends State<MainPage> {
 
     double lat = position.latitude;
     double long = position.longitude;
-    late Timer _timer;
 
     LatLng location = LatLng(lat, long);
     _currentPosition = location;

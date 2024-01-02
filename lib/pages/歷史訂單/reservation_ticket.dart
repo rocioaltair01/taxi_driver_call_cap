@@ -76,7 +76,7 @@ class _ReservationTicketState extends State<ReservationTicket> {
         isEmpty = true;
         isLoading = false;
       });
-      DialogUtils.showErrorDialog("錯誤","網路異常",context);
+      DialogUtils.showErrorDialog("錯誤","網路異常7",context);
       throw Exception('Error: $error');
     }
   }
@@ -236,6 +236,7 @@ class _ReservationTicketState extends State<ReservationTicket> {
                 reservationTime = billList[index].billInfo.reservationTime!.toString();
                 parsedOrderTime = DateTime.parse(reservationTime).add(Duration(hours: 8));
                 formattedDateOrderTime = DateFormat('M-d HH:mm(E)', 'zh').format(parsedOrderTime!);
+                formattedDateOrderTime = formattedDateOrderTime.replaceAll("周", "週");
                 return GestureDetector(
                     onTap: () {
                       print('Item at index $index ${billList[index].billInfo.reservationId}:: ${billList[index].billInfo.orderStatus}');
@@ -245,49 +246,52 @@ class _ReservationTicketState extends State<ReservationTicket> {
                         ),
                       );
                     },
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Image.asset(
-                          (billList[index].billInfo.orderStatus == 2) ? 'assets/images/status2and3_icon.png'
-                              : (billList[index].billInfo.orderStatus == 3) ? 'assets/images/ok.png' : 'assets/images/no.png',
-                          width: 30,
-                          height: 30,
+                  child: Container(
+                    color: Colors.white,
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Image.asset(
+                            (billList[index].billInfo.orderStatus == 2) ? 'assets/images/status2and3_icon.png'
+                                : (billList[index].billInfo.orderStatus == 3) ? 'assets/images/ok.png' : 'assets/images/no.png',
+                            width: 30,
+                            height: 30,
+                          ),
                         ),
-                      ),
-                      Flexible(
-                          child: Padding(
-                            padding: EdgeInsets.all(6),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  formattedDateOrderTime,
-                                  overflow: TextOverflow.clip, // Handle long text
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    // You can add more styles like fontWeight, color, etc. as needed
+                        Flexible(
+                            child: Padding(
+                              padding: EdgeInsets.all(6),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    formattedDateOrderTime,
+                                    overflow: TextOverflow.clip, // Handle long text
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      // You can add more styles like fontWeight, color, etc. as needed
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  '從: ${billList[index].billInfo.onLocation}',
-                                  overflow: TextOverflow.clip, // Handle long text
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    // You can add more styles like fontWeight, color, etc. as needed
+                                  Text(
+                                    '從: ${billList[index].billInfo.onLocation}',
+                                    overflow: TextOverflow.clip, // Handle long text
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      // You can add more styles like fontWeight, color, etc. as needed
+                                    ),
                                   ),
-                                ),
-                                Divider(
-                                  color: Colors.grey.shade400,
-                                  thickness: 1,
-                                  height: 1,
-                                ),
-                              ],
-                            ),
-                          )
-                      ),
-                    ],
+                                  Divider(
+                                    color: Colors.grey.shade400,
+                                    thickness: 1,
+                                    height: 1,
+                                  ),
+                                ],
+                              ),
+                            )
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

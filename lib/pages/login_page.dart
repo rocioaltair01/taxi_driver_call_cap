@@ -141,7 +141,7 @@ class LoginForm extends StatelessWidget {
           ],
         ),
         Positioned(
-          bottom: 10,
+          bottom: 50,
           left: 0,
           right: 0,
           child: ElevatedButton(

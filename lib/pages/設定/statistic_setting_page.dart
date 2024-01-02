@@ -53,14 +53,14 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
         setState(() {
           isLoading = false;
         });
-        DialogUtils.showErrorDialog("錯誤","網路異常",context);
+        DialogUtils.showErrorDialog("錯誤","網路異常8",context);
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
       setState(() {
         isLoading = false;
       });
-      DialogUtils.showErrorDialog("錯誤","網路異常",context);
+      DialogUtils.showErrorDialog("錯誤","網路異常9",context);
       throw Exception('Error: $error');
     }
   }

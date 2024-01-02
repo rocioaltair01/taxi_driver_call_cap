@@ -1,12 +1,10 @@
-import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
-import 'package:untitled1/respository/api_service.dart';
-
 import '../model/user_data_singleton.dart';
 import '主畫面/main_page.dart';
+import '主畫面/tabbar/persistent_bottom_bar_scaffold.dart';
 import '客服/chat_page.dart';
 import '歷史訂單/history_page.dart';
 import '設定/setting_page.dart';
@@ -22,14 +20,13 @@ class TabbarPage extends StatefulWidget {
   _TabbarPageState createState() => _TabbarPageState();
 }
 
-class _TabbarPageState extends State<TabbarPage> {
-  // late Timer _timer;
+class _TabbarPageState extends State<TabbarPage> with WidgetsBindingObserver {
   late List<Widget> pages;
-
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance?.addObserver(this);
     pages = [
       const HistoryPage(),
       const ReservationPage(),
@@ -45,41 +42,31 @@ class _TabbarPageState extends State<TabbarPage> {
     // });
   }
 
-//   void callAPI() async {
-//
-//     UserData loginResult = UserDataSingleton.instance;
-//
-//     print('Token: ${loginResult.token}');
-//
-//     ApiService apiService = ApiService();
-//
-//     double latitude = 1.0;
-//     double longitude = 1.0;
-//     int plan = 1;
-//     int status = 1;
-//     int taxiSort = 1;
-// // Trigger driver's GPS update
-//     try {
-//       await apiService.triggerDriverGps(
-//           latitude,
-//           longitude,
-//           plan,
-//           status,
-//           taxiSort,
-//           loginResult.token
-//       );
-//     } catch (error) {
-//       // Handle error accordingly (show message, retry logic, etc.)
-//     }
-//     // // 这里是调用API的逻辑
-//     // try {
-//     //   var response = await http.get(Uri.parse('https://your-api-endpoint.com'));
-//     //   // 处理响应...
-//     //   print('API called at ${DateTime.now()}');
-//     // } catch (e) {
-//     //   print('Error calling API: $e');
-//     // }
-//   }
+  @override
+  void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        break;
+      case AppLifecycleState.inactive:
+        break;
+      case AppLifecycleState.paused:
+        break;
+      case AppLifecycleState.detached:
+        UserDataSingleton.reset();
+        print("AppLifecycleState detached");
+        break;
+      case AppLifecycleState.hidden:
+        break;
+    }
+  }
 
   final _tab1navigatorKey = GlobalKey<NavigatorState>();
   final _tab2navigatorKey = GlobalKey<NavigatorState>();
@@ -148,144 +135,5 @@ class _TabbarPageState extends State<TabbarPage> {
           ],
         )
     );
-
   }
 }
-
-class PersistentBottomBarScaffold extends StatefulWidget {
-  final List<PersistentTabItem> items;
-
-
-  const PersistentBottomBarScaffold({Key? key, required this.items})
-      : super(key: key);
-
-
-  @override
-  PersistentBottomBarScaffoldState createState() =>
-      PersistentBottomBarScaffoldState();
-}
-
-
-class PersistentBottomBarScaffoldState
-    extends State<PersistentBottomBarScaffold> {
-  int selectedTab = 2;
-
-
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (widget.items[selectedTab].navigatorkey?.currentState?.canPop() ??
-            false) {
-          widget.items[selectedTab].navigatorkey?.currentState?.pop();
-          return false;
-        } else {
-          return true;
-        }
-      },
-      child: Scaffold(
-        body: IndexedStack(
-          index: selectedTab,
-          children: widget.items
-              .map((page) => Navigator(
-            key: page.navigatorkey,
-            onGenerateInitialRoutes: (navigator, initialRoute) {
-              return [
-                MaterialPageRoute(builder: (context) => page.tab)
-              ];
-            },
-          ))
-              .toList(),
-        ),
-        bottomNavigationBar: buildMyNavBar(context),
-      ),
-    );
-  }
-
-  Widget buildMyNavBar(BuildContext context) {
-    return Container(
-      height: 80,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          buildNavItem(0, 'assets/images/tabs/history.png', 'assets/images/tabs/history_s.png', '歷史訂單'),
-          buildNavItem(1, 'assets/images/tabs/reservation.png', 'assets/images/tabs/reservation_s.png', '正在進行的預約單'),
-          buildNavItem(2, 'assets/images/tabs/main.png', 'assets/images/tabs/main_s.png', '主畫面'),
-          buildNavItem(3, 'assets/images/tabs/setting.png', 'assets/images/tabs/setting_s.png', '設定'),
-          buildNavItem(4, 'assets/images/tabs/message.png', 'assets/images/tabs/message_s.png', '客服'),
-        ],
-      ),
-    );
-  }
-
-  Widget buildNavItem(int index, String filledIcon, String outlinedIcon, String label, {bool isWide = false}) {
-    double itemWidth = MediaQuery.of(context).size.width / 5;
-    return InkWell(
-      onTap: () {
-        //     /// Check if the tab that the user is pressing is currently selected
-        if (index == selectedTab) {
-          /// if you want to pop the current tab to its root then use
-          widget.items[index].navigatorkey?.currentState
-              ?.popUntil((route) => route.isFirst);
-
-
-          /// if you want to pop the current tab to its last page
-          /// then use
-          // widget.items[index].navigatorkey?.currentState?.pop();
-        } else {
-          setState(() {
-            selectedTab = index;
-          });
-        }
-      },
-      child: Container(
-        width: itemWidth, // Adjust the width as needed
-        child: Column(
-          children: [
-            selectedTab == index
-                ? Image.asset(
-              outlinedIcon,
-                width: 30,
-                height: 30,
-              )
-                : Image.asset(
-              filledIcon,
-              width: 30,
-              height: 30,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 9, color: Colors.black),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class PersistentTabItem {
-  final Widget tab;
-  final GlobalKey<NavigatorState>? navigatorkey;
-  final String title;
-  final Image icon;
-
-  PersistentTabItem(
-  {
-    required this.tab,
-    this.navigatorkey,
-    required this.title,
-    required this.icon
-  });
-
-}
-
-//https://www.linkedin.com/pulse/persistent-bottom-navigation-bar-flutter-lakshydeep-vikram-sah/
-

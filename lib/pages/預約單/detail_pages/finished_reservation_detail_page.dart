@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../../../model/預約單/reservation_model.dart';
 import '../../../util/dialog_util.dart';
 import '../../tabbar_page.dart';
 import '../../主畫面/main_page.dart';
+import '../../歷史訂單/components/history_list_item.dart';
+import '../../歷史訂單/components/history_next_list_item.dart';
+import '../../歷史訂單/history_detail_map.dart';
 
 class FinishedReservationViewDetailPage extends StatefulWidget {
   final BillList bill;
@@ -27,84 +31,6 @@ class _FinishedReservationViewDetailPageState extends State<FinishedReservationV
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: rows,
-      ),
-    );
-  }
-
-  Widget _buildRow(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                label,
-                style: const TextStyle(fontSize: 18),
-              ),
-            ),
-            Expanded(child: Container()),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                value,
-                overflow: TextOverflow.clip,
-                style: const TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
-        ),
-        const Divider(
-          color: Colors.grey,
-          height: 1,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRowNextPage(String label, String value) {
-    return GestureDetector(
-      onTap: () {
-
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  label,
-                  overflow: TextOverflow.clip,
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-              //Expanded(child: Container()),
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    value,
-                    overflow: TextOverflow.clip,
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-              ),
-              Image.asset(
-                'assets/images/arrow_right.png',
-                width: 30,
-                height: 30,
-              ),
-            ],
-          ),
-          const Divider(
-            color: Colors.grey,
-            thickness: 1,
-            height: 1,
-          ),
-        ],
       ),
     );
   }
@@ -134,19 +60,24 @@ class _FinishedReservationViewDetailPageState extends State<FinishedReservationV
             _buildTable(
               context,
               [
-                _buildRow('預約時間', DateUtil().getDate(widget.bill.billInfo.reservationTime)),
-                _buildRow('單號', widget.bill.billInfo.reservationId.toString()),
-                _buildRow('付款方式', '現金付款'),
+                // _buildRow('預約時間', DateUtil().getDate(widget.bill.billInfo.reservationTime)),
+                // _buildRow('單號', widget.bill.billInfo.reservationId.toString()),
+                // _buildRow('付款方式', '現金付款'),
+                HistoryListItem(label:'預約時間', value: DateUtil().getDate(widget.bill.billInfo.reservationTime)),
+                HistoryListItem(label:'付款方式', value: widget.bill.billInfo.reservationId.toString()),
+                HistoryListItem(label:'付款方式', value: '現金付款'),
               ],
             ),
             const SizedBox(height: 20,),
             _buildTable(
               context,
               [
-                _buildRowNextPage('從:',  widget.bill.billInfo.onLocation ?? ''),
-                _buildRowNextPage('到:', widget.bill.billInfo.offLocation ?? ''),
-                _buildRow('乘客備註:', widget.bill.billInfo.passengerNote ?? ''),
-                _buildRow('乘客人數', '${widget.bill.billInfo.userNumber.toString()}位' ?? ''),
+                HistoryNextListItem(label:'從:', value:widget.bill.billInfo.onLocation ?? '',currentPosition: widget.bill.billInfo.onGps),
+                HistoryNextListItem(label:'到:', value:widget.bill.billInfo.offLocation ?? '',currentPosition: widget.bill.billInfo.offGps),
+                HistoryListItem(label:'乘客備註', value:widget.bill.billInfo.passengerNote ?? ''),
+                HistoryListItem(label:'乘客人數', value:'${widget.bill.billInfo.userNumber.toString()}位' ?? ''),
+                // _buildRow('乘客備註:', widget.bill.billInfo.passengerNote ?? ''),
+                // _buildRow('乘客人數', '${widget.bill.billInfo.userNumber.toString()}位' ?? ''),
               ],
             ),
             const SizedBox(height: 40,),
@@ -177,11 +108,11 @@ class _FinishedReservationViewDetailPageState extends State<FinishedReservationV
                       pertabbarPageKey.currentState?.setState(() {
                         pertabbarPageKey.currentState?.selectedTab = 2;
                       });
-                      print("ROICO widget.bill ${widget.bill}");
-                      print("ROCIO ${mainPageKey.currentState}");
-                      print("ROCIOmainPageKey.currentState?.bill ${mainPageKey.currentState?.bill}");
+                      //print("ROICO widget.bill ${widget.bill}");
+                      //print("ROCIO ${mainPageKey.currentState}");
+                      //print("ROCIOmainPageKey.currentState?.bill ${mainPageKey.currentState?.bill}");
                       mainPageKey.currentState?.bill = widget.bill;
-                      print("ROCIOmainPageKey.currentState?.bill ${mainPageKey.currentState?.bill}");
+                      //print("ROCIOmainPageKey.currentState?.bill ${mainPageKey.currentState?.bill}");
                       StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
                       statusProvider.updateStatus(GuestStatus.PREPARED);
                     },

@@ -54,8 +54,7 @@ class _HistoryPageState extends State<HistoryPage> {
         ),
         body: TabBarView(
           children: [
-            ImmediateTicket(),
-            // Content for Tab 2
+            const ImmediateTicket(),
             ReservationTicket()
           ],
         ),

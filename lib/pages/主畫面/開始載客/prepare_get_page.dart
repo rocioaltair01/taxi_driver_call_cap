@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/pages/%E4%B8%BB%E7%95%AB%E9%9D%A2/%E7%B4%B0%E7%AF%80%E9%A0%81/customer_message_page.dart';
 import 'package:untitled1/util/dialog_util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../model/預約單/reservation_model.dart';
 import '../../../respository/主畫面/arrived_success_api.dart';
@@ -148,7 +149,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                             )),
                             InkWell(
                               onTap: () {
-                                // Add your onTap functionality here
+                                openGoogleMap(widget.bill!.billInfo.onLocation);
                               },
                               child: Container(
                                 padding: EdgeInsets.all(12), // Set padding as needed
@@ -187,7 +188,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                             ),
                             InkWell(
                               onTap: () {
-                                // Add your onTap functionality here
+                                openGoogleMap(widget.bill!.billInfo.offLocation);
                               },
                               child: Container(
                                 padding: EdgeInsets.all(12), // Set padding as needed
@@ -275,11 +276,11 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                           {
                                             StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
                                             statusProvider.updateStatus(GuestStatus.ARRIVED);
-                                            GlobalDialog.showAlertDialog(context, "回報到達成功", "message");
-                                            //GlobalDialog.showAlertDialog(context, "success", "message");
+                                            //GlobalDialog.showAlertDialog(context, "回報到達成功", "message");
                                           } else {
                                             GlobalDialog.showAlertDialog(context, "not success", "message");
                                           }
+                                          print("kjl;");
                                         } else {
                                           GlobalDialog.showAlertDialog(context, "no", "message");
                                         }
@@ -338,5 +339,21 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
         ],
       ),
     );
+  }
+
+  void openGoogleMap(String endAddress) async {
+    print("openGoogleMap");
+    // String startAddress = widget.addressFieldControllers[0].text;
+    // String endAddress = widget.addressFieldControllers[widget.addressFieldControllers.length-1].text;
+    double currentLat = _currentPosition?.latitude ?? 0;
+    double currentLng = _currentPosition?.longitude ?? 0;
+
+    if (endAddress.isNotEmpty) {
+      String url = 'https://www.google.com/maps/dir/?api=1&origin=$currentLat,$currentLng&destination=$endAddress';
+      final Uri uri = Uri.parse(url);
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      print('Please enter start and end addresses');
+    }
   }
 }

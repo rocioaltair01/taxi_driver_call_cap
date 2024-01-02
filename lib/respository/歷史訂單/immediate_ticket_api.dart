@@ -12,7 +12,6 @@ class ImmediateTicketResponse {
   ImmediateTicketResponse({required this.statusCode, required this.data});
 }
 
-
 class ImmediateTicketApi {
   static Future<ImmediateTicketResponse> getImmediateTickets(int year, int month) async {
     UserData loginResult = UserDataSingleton.instance;
@@ -28,12 +27,9 @@ class ImmediateTicketApi {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        print("hey E : ${response.body}");
         final ImmediateListModel reservationData = ImmediateListModel.fromJson(jsonData['result']);
-
         return ImmediateTicketResponse(statusCode: response.statusCode, data: reservationData.billList);
       } else {
-        print("hey E : Failed to fetch data");
         throw Exception('Failed to fetch data');
       }
     } catch (error) {

@@ -21,7 +21,7 @@ class Bill {
   final int id;
   final String onLocation;
   final String offLocation;
-  final int actualPrice;
+  final num actualPrice;
   final String orderTime;
   final String finishTime;
   final int orderStatus;
@@ -29,9 +29,9 @@ class Bill {
   final String passengerNote;
   final String getInTime;
   final String getPassengerTime;
-  final List<double>? onGps;
-  final List<double>? offGps;
-  final dynamic record; // Replace 'dynamic' with the appropriate type
+  final List<num>? onGps;
+  final List<num>? offGps;
+  final dynamic record;
 
   Bill({
     required this.id,
@@ -63,8 +63,8 @@ class Bill {
       passengerNote: json['passengerNote'] ?? '',
       getInTime: json['getInTime'] ?? '',
       getPassengerTime: json['getPassengerTime'] ?? '',
-      onGps: (json['onGps'] != null) ? List<double>.from(json['onGps'] as List<dynamic>) : null,
-      offGps: (json['offGps'] != null) ? List<double>.from(json['offGps'] as List<dynamic>) : null,
+      onGps: (json['onGps'] != null) ? List<num>.from(json['onGps'] as List<dynamic>) : null,
+      offGps: (json['offGps'] != null) ? List<num>.from(json['offGps'] as List<dynamic>) : null,
       record: json['record'], // Replace 'dynamic' with the appropriate type
     );
   }
