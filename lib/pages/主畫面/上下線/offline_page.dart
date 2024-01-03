@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:untitled1/pages/%E4%B8%BB%E7%95%AB%E9%9D%A2/offline_count_price_page.dart';
+import 'package:untitled1/pages/%E4%B8%BB%E7%95%AB%E9%9D%A2/%E4%B8%8A%E4%B8%8B%E7%B7%9A/offline_count_price_page.dart';
 
-import 'main_page.dart';
-import '細節頁/estimate_price.dart';
-import '細節頁/hotspot_page.dart';
+import '../main_page.dart';
+import '../細節頁/estimate_price.dart';
+import '../細節頁/hotspot_page.dart';
 
 
 class OfflinePage extends StatefulWidget {

@@ -37,7 +37,7 @@ class ApiService {
         throw Exception('更新司機Gps發生錯誤，狀態碼:${response.statusCode}，錯誤訊息:${response.data}');
         // You can implement your logic for checking token expiration here
       } else {
-        print('更新司機GpsResponse code: ${response.statusCode}');
+        //print('更新司機GpsResponse code: ${response.statusCode}');
       }
     } catch (error) {
       throw Exception('更新司機Gps失敗，$error');

@@ -48,6 +48,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
 
 
     setState(() {
+
       _currentPosition = location;
       //_isOpen = false;
     });
@@ -85,14 +86,14 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
             ],
           ) : Container(
             height: 250,
-            child: GoogleMap(
-              onMapCreated: _onMapCreated,
-              initialCameraPosition: CameraPosition(
-                target: LatLng(0,0),
-                zoom: 16.0,
-              ),
-              myLocationEnabled: true,
-            ),
+            // child: GoogleMap(
+            //   onMapCreated: _onMapCreated,
+            //   initialCameraPosition: CameraPosition(
+            //     target: LatLng(0,0),
+            //     zoom: 16.0,
+            //   ),
+            //   myLocationEnabled: true,
+            // ),
           ),
           //Expanded(child: Container()),
           Expanded(
@@ -202,6 +203,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                             ),
                           ],
                         ),
+
                         SizedBox(height: 10,),
                         const Text("備註：",
                           style: TextStyle(

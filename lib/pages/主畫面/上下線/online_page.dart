@@ -7,15 +7,17 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:untitled1/pages/%E4%B8%BB%E7%95%AB%E9%9D%A2/%E4%B8%8A%E4%B8%8B%E7%B7%9A/grab_success_page.dart';
+import 'package:untitled1/util/dialog_util.dart';
 
-import '../../model/user_data_singleton.dart';
-import '../../model/主畫面/instant_item_model.dart';
-import '../../respository/主畫面/grab_ticket_api.dart';
-import '../../respository/主畫面/order_request_api.dart';
-import 'main_page.dart';
-import '細節頁/driver_map.dart';
-import '細節頁/estimate_price.dart';
-import '細節頁/hotspot_page.dart';
+import '../../../model/user_data_singleton.dart';
+import '../../../model/主畫面/instant_item_model.dart';
+import '../../../respository/主畫面/grab_ticket_api.dart';
+import '../../../respository/主畫面/order_request_api.dart';
+import '../main_page.dart';
+import '../細節頁/driver_map.dart';
+import '../細節頁/estimate_price.dart';
+import '../細節頁/hotspot_page.dart';
 
 
 class OnlinePage extends StatefulWidget {
@@ -124,8 +126,21 @@ class _OnlinePageState extends State<OnlinePage> {
       if (response.statusCode == 200) {
         if (mounted)
         {
+          Set<int> uniqueOrderIds = Set();
+          List<InstantItemModel> filteredTicketDetail = [];
+
+          for (var item in response.data!) {
+            // Check if the orderId is already in the set
+            if (!uniqueOrderIds.contains(item.orderId)) {
+              // Add the item to the filtered list and set
+              filteredTicketDetail.add(item);
+              uniqueOrderIds.add(item.orderId);
+            }
+          }
+
           setState(() {
-            ticketDetail = response.data!;
+            //ticketDetail = response.data!;
+            ticketDetail = filteredTicketDetail;
             isLoading = false;
           });
         }
@@ -139,6 +154,9 @@ class _OnlinePageState extends State<OnlinePage> {
       throw Exception('Error: $error');
     }
   }
+
+  int indexdialog = 0;
+  bool isShowDialog = false;
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +189,7 @@ class _OnlinePageState extends State<OnlinePage> {
                                       shape: BoxShape.circle,
                                       color: Colors.lightGreenAccent,
                                     ),
-                                    child: SizedBox(
+                                    child: const SizedBox(
                                       width: 10,
                                       height: 10,
                                     ),
@@ -243,25 +261,52 @@ class _OnlinePageState extends State<OnlinePage> {
                                         ticketDetail.removeWhere((item) => item.orderId == ticketDetail[index].orderId);
                                       });
                                     }
-
                                 },
                               ),
                               SlidableAction(
                                 backgroundColor: Colors.red,
                                 label: "搶單",
                                 onPressed: (context) async {
-                                  GrabTicketResponse response = await GrabTicketApi.grabTicket(orderId: ticketDetail[index].orderId.toString(), time: 1, status: 0);
-                                  if (response.success)
-                                    {
-                                      if (mounted)
-                                        {
-                                          setState(() {
-                                            ticketDetail.removeWhere((item) => item.orderId == ticketDetail[index].orderId);
-                                          });
-                                        }
-                                    }
-                                  //DialogUtils.showGrabTicketDialog("12345", "上車地點: 台南市中西區成功路1號", "", context);
-                                  print('object $index');
+                                  setState(() {
+                                    indexdialog = index;
+                                    isShowDialog = true;
+                                  });
+                                  // DialogUtils.showGrabTicketDialog(
+                                  //     id: ticketDetail[index].orderId.toString(),
+                                  //   title: "搶單",
+                                  //   content: "上車地點: 台南市中西區成功路1號",
+                                  //   time: (ticketDetail[index].time == 0) ? 1 : ticketDetail[index].time,
+                                  //   context: context,
+                                  //   onOkPressed: (double selectedTime) async{
+                                  //       print("selectedTime $selectedTime");
+                                  //     GrabTicketResponse response = await GrabTicketApi.grabTicket(
+                                  //         orderId: ticketDetail[index].orderId.toString(),
+                                  //         time: 1,
+                                  //         status: 0
+                                  //     );
+                                  //
+                                  //     if (response.success)
+                                  //     {
+                                  //       if (mounted)
+                                  //       {
+                                  //         setState(() {
+                                  //          // ticketDetail.removeWhere((item) => item.orderId == ticketDetail[index].orderId);
+                                  //         });
+                                  //         Navigator.of(context).push(
+                                  //           MaterialPageRoute(
+                                  //             builder: (context) => GrabSuccessPage(),
+                                  //           ),
+                                  //         );
+                                  //       }
+                                  //     } else {
+                                  //       DialogUtils.showErrorDialog("", "搶單失敗", context);
+                                  //     }
+                                  //     //DialogUtils.showGrabTicketDialog("12345", "上車地點: 台南市中西區成功路1號", "", context);
+                                  //   },
+                                  //   onCancelPressed: () {
+                                  //
+                                  //   },
+                                  // );
                                 },
                               ),
                             ],
@@ -271,7 +316,7 @@ class _OnlinePageState extends State<OnlinePage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("${ticketDetail[index].distance.toString()}公里"),
+                                Text("${(ticketDetail[index].distance / 1000).toStringAsFixed(1)}公里"),
                                 Text(ticketDetail[index].onLocation),
                                 Text(ticketDetail[index].offLocation ?? ""),
                                 Text(ticketDetail[index].note ?? ""),
@@ -390,6 +435,49 @@ class _OnlinePageState extends State<OnlinePage> {
             )
           ],
         ),
+        (isShowDialog) ?
+        GrabTicketDialog(
+          id: ticketDetail[indexdialog].orderId.toString(),
+          title: "搶單",
+          content: "上車地點: 台南市中西區成功路1號",
+          time: (ticketDetail[indexdialog].time == 0) ? 1 : ticketDetail[indexdialog].time,
+          //context: context,
+          onOkPressed: (double selectedTime) async{
+              print("selectedTime $selectedTime");
+            GrabTicketResponse response = await GrabTicketApi.grabTicket(
+                orderId: ticketDetail[indexdialog].orderId.toString(),
+                time: 1,
+                status: 0
+            );
+
+            if (response.success)
+            {
+              if (mounted)
+              {
+                setState(() {
+                 // ticketDetail.removeWhere((item) => item.orderId == ticketDetail[index].orderId);
+                });
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => GrabSuccessPage(),
+                  ),
+                );
+              }
+            } else {
+              DialogUtils.showErrorDialog("", "搶單失敗", context);
+            }
+            setState(() {
+              isShowDialog = false;
+            });
+
+            //DialogUtils.showGrabTicketDialog("12345", "上車地點: 台南市中西區成功路1號", "", context);
+          },
+          onCancelPressed: () {
+            setState(() {
+              isShowDialog = false;
+            });
+          },
+    ) : Container()
       ],
     );
   }

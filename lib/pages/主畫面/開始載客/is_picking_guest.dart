@@ -84,14 +84,14 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                 ],
               ) : Container(
                 height: 250,
-                child: GoogleMap(
-                  onMapCreated: _onMapCreated,
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(0,0),
-                    zoom: 16.0,
-                  ),
-                  myLocationEnabled: true,
-                ),
+                // child: GoogleMap(
+                //   onMapCreated: _onMapCreated,
+                //   initialCameraPosition: CameraPosition(
+                //     target: LatLng(0,0),
+                //     zoom: 16.0,
+                //   ),
+                //   myLocationEnabled: true,
+                // ),
               ),
               Positioned(
                 top: 50,
@@ -279,7 +279,9 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                                               mainPageKey.currentState?.bill?.billInfo.reservationId ?? 0, 1);
                                           if (result.success == true)
                                           {
+                                            print("yo yo ${mainPageKey.currentState?.bill?.billInfo.toString()}");
                                             GlobalDialog.showAlertDialog(context, "結帳金額成功", result.message);
+                                            //GlobalDialog.showPaymentDialog(context, "結帳金額成功", mainPageKey.currentState?.bill?.billInfo.);
                                             StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
                                             statusProvider.updateStatus(GuestStatus.IS_OPEN);
                                           } else {

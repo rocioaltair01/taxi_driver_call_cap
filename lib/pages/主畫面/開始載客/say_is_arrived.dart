@@ -108,6 +108,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
 
     setState(() {
       _currentPosition = location;
+      print("say_is_arrived $_currentPosition ");
       //_isOpen = false;
     });
   }
@@ -119,7 +120,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
 
     return (showCamera) ? Scaffold(
       appBar: AppBar(
-        title: Text('Your App Title'),
+        title: Text('相機'),
         actions: [
           IconButton(
             icon: Icon(Icons.cancel),
@@ -152,13 +153,16 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                       minimumSize: const Size(50, 50),
                     ),
                     onPressed: () {
-                      controller.takePicture().then((XFile? file) {
-                        if(mounted) {
-                          if(file != null) {
-                            print("Picture saved to ${file.path}");
+                      if (controller != null)
+                      {
+                        controller.takePicture().then((XFile? file) {
+                          if(mounted) {
+                            if(file != null) {
+                              print("Picture saved to ${file.path}");
+                            }
                           }
-                        }
-                      });
+                        });
+                      }
                       setState(() {
                         showCamera = false;
                       });
@@ -190,14 +194,14 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                 ),
               ) : Container(
                 height: 250,
-                child: GoogleMap(
-                  onMapCreated: _onMapCreated,
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(0,0),
-                    zoom: 16.0,
-                  ),
-                  myLocationEnabled: true,
-                ),
+                // child: GoogleMap(
+                //   onMapCreated: _onMapCreated,
+                //   initialCameraPosition: CameraPosition(
+                //     target: LatLng(0,0),
+                //     zoom: 16.0,
+                //   ),
+                //   myLocationEnabled: true,
+                // ),
               ),
               Positioned(
                 top: 50,
@@ -1024,52 +1028,5 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
     } else {
       print('Please enter start and end addresses');
     }
-  }
-}
-
-// A screen that allows users to take a picture using a given camera.
-class TakePictureScreen extends StatefulWidget {
-  const TakePictureScreen({
-    super.key,
-    required this.camera,
-  });
-
-  final CameraDescription camera;
-
-  @override
-  TakePictureScreenState createState() => TakePictureScreenState();
-}
-
-class TakePictureScreenState extends State<TakePictureScreen> {
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    // To display the current output from the Camera,
-    // create a CameraController.
-    _controller = CameraController(
-      // Get a specific camera from the list of available cameras.
-      widget.camera,
-      // Define the resolution to use.
-      ResolutionPreset.medium,
-    );
-
-    // Next, initialize the controller. This returns a Future.
-    _initializeControllerFuture = _controller.initialize();
-  }
-
-  @override
-  void dispose() {
-    // Dispose of the controller when the widget is disposed.
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Fill this out in the next steps.
-    return Container();
   }
 }

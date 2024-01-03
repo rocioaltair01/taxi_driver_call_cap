@@ -51,6 +51,7 @@ class BillList {
   });
 
   factory BillList.fromJson(Map<String, dynamic> json) {
+    print("yo yo $json");
     return BillList(
       passengerServerInfo: PassengerServerInfo.fromJson(json['passengerServerInfo'] ?? {}),
       billInfo: BillInfo.fromJson(json['billInfo']),

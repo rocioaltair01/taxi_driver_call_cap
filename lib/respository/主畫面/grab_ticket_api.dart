@@ -7,11 +7,13 @@ class GrabTicketResponse {
   final String event;
   final bool success;
   final GrabTicketError? error;
+  final String? message;
 
   GrabTicketResponse({
     required this.event,
     required this.success,
     this.error,
+    this.message,
   });
 
   factory GrabTicketResponse.fromJson(Map<String, dynamic> json) {
@@ -19,6 +21,7 @@ class GrabTicketResponse {
       event: json['event'],
       success: json['success'],
       error: json['error'] != null ? GrabTicketError.fromJson(json['error']) : null,
+      message: json['message']
     );
   }
 }
@@ -46,7 +49,7 @@ class GrabTicketApi {
 
     final Map<String, dynamic> requestBody = {
       "orderId": orderId,
-      "time": 10,
+      "time": time,
       "status": 0,
     };
 

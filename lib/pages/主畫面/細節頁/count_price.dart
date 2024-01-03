@@ -162,7 +162,7 @@ class _CountPricePageState extends State<CountPricePage> {
                 GoogleMap(
                   onMapCreated: _onMapCreated,
                   initialCameraPosition: CameraPosition(
-                    target: (routesResponseList[0] != null) ? _calculateBoundsCenter(_polylines) : LatLng(0, 0),
+                    target: (routesResponseList.isNotEmpty) ? _calculateBoundsCenter(_polylines) : LatLng(0, 0),
                     zoom: 16.0,
                   ),
                   polylines: _polylines,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:untitled1/respository/%E4%B8%BB%E7%95%AB%E9%9D%A2/grab_ticket_api.dart';
+
+import '../respository/主畫面/grab_ticket_api.dart';
+// import 'package:untitled1/respository/%E4%B8%BB%E7%95%AB%E9%9D%A2/grab_ticket_api.dart';
 
 class GlobalDialog {
   static void showAlertDialog(BuildContext context, String title, String message) {
@@ -66,6 +68,78 @@ class GlobalDialog {
     );
   }
 
+  static void showPaymentDialog(BuildContext context, String title, String price, String distance) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.zero, // Remove default padding
+          content: Container(
+            height: 350,
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24.0), // Set border radius
+              border: Border.all(color: Colors.black), // Add border
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 26
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    "金額: $price 元",
+                    style: TextStyle(
+                        fontSize: 22
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    "里程數: $distance 公里",
+                    style: TextStyle(
+                        fontSize: 18
+                    ),
+                  ),
+                ),
+                Expanded(child: Container()),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    minimumSize: Size(double.infinity, 50),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    '確定',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   static void showCustomDialog({
     required BuildContext context,
     required String title,
@@ -84,7 +158,7 @@ class GlobalDialog {
                 minimumSize: Size(double.infinity, 50),
               ),
               onPressed: () {
-                onOkPressed(); // Call the function when '確定' button is pressed
+                onOkPressed();
                 Navigator.of(context).pop();
               },
               child: Text('確定'),
@@ -212,21 +286,390 @@ class DialogUtils {
     );
   }
 
-    static void showGrabTicketDialog(String id, String title, String content, BuildContext context) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return GrabTicketDialog(
-            id: id,
-            title: title,
-            content: content,
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          );
-        },
-      );
-    }
+  static void showGrabTicketDialog({
+    required String id,
+    required String title,
+    required String content,
+    required int time,
+    required BuildContext context,
+    required Function(double selectedTime) onOkPressed,
+    required Function() onCancelPressed,
+  }) {
+    double selectedTime = 1;
+    bool isSelected = false;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        List<double> numbers = [time.toDouble(), (time * 1.5), (time * 2)];
+        List<double> numbers2 = [(time * 2.5), (time * 3), (time * 3.5)];
+
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            height: 380,
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              shape: BoxShape.rectangle,
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.0),
+              border: Border.all(
+                color: Colors.black,
+                width: 1,
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      content,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+                Column(
+                  children: [
+                    SizedBox(height: 20,),
+                    Container(
+                      height: 80,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: numbers.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: GestureDetector(
+                              onTap: () {
+                                  selectedTime = numbers[index];
+                              },
+                              child: Container(
+                                width: 60,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: selectedTime == numbers[index]
+                                        ? Colors.black
+                                        : Colors.black,
+                                    width: 1,
+                                  ),
+                                  color: selectedTime == numbers[index]
+                                      ? Colors.black
+                                      : Colors.transparent,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    numbers[index].toString(),
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 20,),
+                    Container(
+                      height: 80,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: numbers2.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: GestureDetector(
+                              onTap: () {
+                                selectedTime = numbers2[index];
+                                isSelected = true;
+                              },
+                              child: Container(
+                                width: 60,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected ? Colors.black : Colors.black,
+                                    width: 1,
+                                  ),
+                                  color: isSelected ? Colors.black : Colors.transparent,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    numbers2[index].toString(),
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size(double.infinity, 50),
+                          backgroundColor: Colors.grey,
+                        ),
+                        onPressed: () {
+                          onCancelPressed();
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                          '取消',
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 20,),
+                    Flexible(
+                      flex: 1,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size(double.infinity, 50),
+                        ),
+                        onPressed: () {
+                          onOkPressed(selectedTime);
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                          '確定',
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
+// static void showGrabTicketDialog({
+//     required String id,
+//     required String title,
+//     required String content,
+//     required int time,
+//     required BuildContext context,
+//     required Function(double selectedTime) onOkPressed,
+//     required Function() onCancelPressed,
+//   }) {
+//     double selectedTime = 1;
+//     showDialog(
+//       context: context,
+//       builder: (BuildContext context) {
+//         List<double> numbers = [time.toDouble(), (time*1.5), (time*2)];
+//         List<double> numbers2 = [(time*2.5), (time*3),(time*3.5)];
+//         return Dialog(
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(16.0),
+//           ),
+//           elevation: 0,
+//           backgroundColor: Colors.transparent,
+//           child: Container(
+//             height: 380,
+//             width: double.infinity,
+//             padding: const EdgeInsets.all(16.0),
+//             decoration: BoxDecoration(
+//               shape: BoxShape.rectangle,
+//               color: Colors.white,
+//               borderRadius: BorderRadius.circular(16.0),
+//               border: Border.all(
+//                 color: Colors.black,
+//                 width: 1,
+//               ),
+//             ),
+//             child: Column(
+//               mainAxisSize: MainAxisSize.min,
+//               children: <Widget>[
+//                 Text(
+//                   title,
+//                   style: const TextStyle(
+//                     fontSize: 20,
+//                     fontWeight: FontWeight.bold,
+//                   ),
+//                 ),
+//                 Expanded(
+//                     child: Center(
+//                       child: Text(
+//                         content,
+//                         textAlign: TextAlign.center,
+//                         style: const TextStyle(
+//                           fontSize: 16,
+//                         ),
+//                       ),
+//                     )
+//                 ),
+//                 Column(
+//                   children: [
+//                     SizedBox(height: 20,),
+//                     Container(
+//                       height: 80, // 給一個固定的高度，可以根據需求調整
+//                       child: ListView.builder(
+//                         scrollDirection: Axis.horizontal,
+//                         itemCount: numbers.length,
+//                         itemBuilder: (BuildContext context, int index) {
+//                           return Padding(
+//                             padding: EdgeInsets.symmetric(horizontal: 10),
+//                             child: GestureDetector(
+//                               onTap: () {
+//                                 selectedTime = numbers2[index];
+//                               },
+//                               child: Container(
+//                                 width: 60,
+//                                 height: 60,
+//                                 decoration: BoxDecoration(
+//                                   shape: BoxShape.circle,
+//                                   border: Border.all(
+//                                     color: Colors.black,
+//                                     width: 1,
+//                                   ),
+//                                 ),
+//                                 child: Center(
+//                                   child: Text(
+//                                     numbers[index].toString(),
+//                                     style: TextStyle(
+//                                       fontSize: 24,
+//                                       fontWeight: FontWeight.bold,
+//                                     ),
+//                                   ),
+//                                 ),
+//                               ),
+//                             ),
+//                           );
+//                         },
+//                       ),
+//                     ),
+//                     SizedBox(height: 20,),
+//                     Container(
+//                       height: 80, // 給一個固定的高度，可以根據需求調整
+//                       child: ListView.builder(
+//                         scrollDirection: Axis.horizontal,
+//                         itemCount: numbers2.length,
+//                         itemBuilder: (BuildContext context, int index) {
+//                           return Padding(
+//                             padding: EdgeInsets.symmetric(horizontal: 10),
+//                             child: GestureDetector(
+//                               onTap: () {
+//                                 print("grabTicket ${numbers2[index]}");
+//                                 selectedTime = numbers2[index];
+//                               },
+//                               child: Container(
+//                                 width: 60,
+//                                 height: 60,
+//                                 decoration: BoxDecoration(
+//                                   shape: BoxShape.circle,
+//                                   border: Border.all(
+//                                     color: Colors.black,
+//                                     width: 1,
+//                                   ),
+//                                 ),
+//                                 child: Center(
+//                                   child: Text(
+//                                     numbers2[index].toString(),
+//                                     style: TextStyle(
+//                                       fontSize: 24,
+//                                       fontWeight: FontWeight.bold,
+//                                     ),
+//                                   ),
+//                                 ),
+//                               ),
+//                             ),
+//                           );
+//                         },
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//                 const SizedBox(height: 20),
+//                 //Expanded(child: Container()),
+//                 Row(
+//                   children: [
+//                     Flexible(
+//                       flex: 1,
+//                       child: ElevatedButton(
+//                         style: ElevatedButton.styleFrom(
+//                             minimumSize: Size(double.infinity, 50),
+//                             backgroundColor: Colors.grey
+//                         ),
+//                         onPressed: () {
+//                           onCancelPressed(); // Call the function when '確定' button is pressed
+//                           Navigator.of(context).pop();
+//                         },
+//                         child: Text(
+//                           '取消',
+//                           style: TextStyle(
+//                               fontSize: 18
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+//                     SizedBox(width: 20,),
+//                     Flexible(
+//                       flex: 1,
+//                       child: ElevatedButton(
+//                         style: ElevatedButton.styleFrom(
+//                           minimumSize: Size(double.infinity, 50),
+//                         ),
+//                         onPressed: () {
+//                           onOkPressed(selectedTime);
+//                           Navigator.of(context).pop();
+//                         },
+//                         child: Text(
+//                           '確定',
+//                           style: TextStyle(
+//                               fontSize: 18
+//                           ),
+//                         ),
+//                       ),
+//                     )
+//                   ],
+//                 )
+//               ],
+//             ),
+//           ),
+//         );
+//       },
+//     );
+//   }
 
   static void showImageDialog(String title, String image, BuildContext context) {
     showDialog(
@@ -330,179 +773,7 @@ class CustomImageDialog extends StatelessWidget {
   }
 }
 
-class GrabTicketDialog extends StatelessWidget {
-  final String id;
-  final String title;
-  final String content;
-  final VoidCallback onPressed;
 
-  const GrabTicketDialog({
-    required this.id,
-    required this.title,
-    required this.content,
-    required this.onPressed,
-  });
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      child: contentBox(context),
-    );
-  }
-
-  Widget contentBox(BuildContext context) {
-    List<int> numbers = [6, 9, 12];
-    List<int> numbers2 = [14, 16, 20];
-    return Container(
-      height: 380,
-      width: double.infinity,
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        shape: BoxShape.rectangle,
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(
-          color: Colors.black,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Column(
-            children: [
-              SizedBox(height: 20,),
-              Container(
-                height: 80, // 給一個固定的高度，可以根據需求調整
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: numbers.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: GestureDetector(
-                        onTap: () {
-                          print("grabTicket ${numbers[index].toString()}");
-                          GrabTicketApi.grabTicket(orderId: id, time: numbers2[index], status: 0);
-                        },
-                        child: Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.black,
-                              width: 1,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              numbers[index].toString(),
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              SizedBox(height: 20,),
-              Container(
-                height: 80, // 給一個固定的高度，可以根據需求調整
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: numbers2.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: GestureDetector(
-                        onTap: () {
-                          print("grabTicket ${numbers2[index]}");
-                          GrabTicketApi.grabTicket(orderId: id, time: numbers2[index], status: 0);
-                        },
-                        child: Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.black,
-                              width: 1,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              numbers2[index].toString(),
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          Expanded(
-              child: Center(
-                child: Text(
-                  content,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
-              )
-          ),
-          const SizedBox(height: 20),
-          //Expanded(child: Container()),
-          ElevatedButton(
-            onPressed: onPressed,
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-            ),
-            child: const SizedBox(
-              width: double.infinity,
-              child: Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Center(child: Text(
-                  '關閉',
-                  style: TextStyle(
-                    fontSize: 18,
-                  ),
-                )
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class CustomDialog extends StatelessWidget {
   final String title;
@@ -586,6 +857,220 @@ class CustomDialog extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+class GrabTicketDialog extends StatefulWidget {
+  final String id;
+  final String title;
+  final String content;
+  final int time;
+  final Function(double selectedTime) onOkPressed;
+  final Function() onCancelPressed;
+
+  GrabTicketDialog({
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.time,
+    required this.onOkPressed,
+    required this.onCancelPressed,
+  });
+
+  @override
+  _GrabTicketDialogState createState() => _GrabTicketDialogState();
+}
+
+class _GrabTicketDialogState extends State<GrabTicketDialog> {
+  double selectedTime = 1;
+  int isSelectedIndex = 7;
+
+  @override
+  Widget build(BuildContext context) {
+    List<double> numbers = [widget.time.toDouble(), (widget.time * 1.5), (widget.time * 2)];
+    List<double> numbers2 = [(widget.time * 2.5), (widget.time * 3), (widget.time * 3.5)];
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      child: Container(
+        height: 380,
+        width: double.infinity,
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(
+            color: Colors.black,
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              widget.title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Text(
+                  widget.content,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+            Column(
+              children: [
+                SizedBox(height: 20,),
+                Container(
+                  height: 80,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: numbers.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: GestureDetector(
+                          onTap: () {
+                            selectedTime = numbers[index];
+                            setState(() {
+                              isSelectedIndex = index;
+                            });
+                          },
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelectedIndex == index
+                                    ? Colors.black
+                                    : Colors.black,
+                                width: 1,
+                              ),
+                              color: isSelectedIndex == index
+                                  ? Colors.black
+                                  : Colors.transparent,
+                            ),
+                            child: Center(
+                              child: Text(
+                                numbers[index].toString(),
+                                style: TextStyle(
+                                  color: (isSelectedIndex == index) ? Colors.white : Colors.black,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(height: 20,),
+                Container(
+                  height: 80,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: numbers2.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: GestureDetector(
+                          onTap: () {
+                            selectedTime = numbers2[index];
+                            print("press selectedTime $selectedTime");
+                            setState(() {
+                              isSelectedIndex = index + 3;
+                            });
+                          },
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: (isSelectedIndex == index + 3) ? Colors.black : Colors.black,
+                                width: 1,
+                              ),
+                              color: (isSelectedIndex == index +3) ? Colors.black : Colors.transparent,
+                            ),
+                            child: Center(
+                              child: Text(
+                                numbers2[index].toString(),
+                                style: TextStyle(
+                                  color: (isSelectedIndex == index +3) ? Colors.white : Colors.black,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Flexible(
+                  flex: 1,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(double.infinity, 50),
+                      backgroundColor: Colors.grey,
+                    ),
+                    onPressed: () {
+                      widget.onCancelPressed();
+                    },
+                    child: Text(
+                      '取消',
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 20,),
+                Flexible(
+                  flex: 1,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(double.infinity, 50),
+                    ),
+                    onPressed: () {
+                      widget.onOkPressed(selectedTime);
+                    },
+                    child: Text(
+                      '確定',
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
