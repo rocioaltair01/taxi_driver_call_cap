@@ -19,17 +19,18 @@ class StatisticsResponse {
 }
 
 class StatisticsApi {
-  static Future<StatisticsResponse> getStatistics(int year, int month) async {
-    final Uri uri = Uri.parse('$baseUrl/app/api/statistics?year=${year.toString()}&month=${month.toString()}');
-
+  static Future<StatisticsResponse> getStatistics(String year, String month) async {
+    String url = "$baseUrl/app/api/statistics?year=$year&month=$month";
     UserData userData = UserDataSingleton.instance;
     try {
       final response = await http.get(
-        uri,
+        Uri.parse(url),
         headers: {
           'x-access-token': userData.token,
         },
       );
+
+      print("response # ${response.body}");
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);

@@ -1,10 +1,10 @@
 class InstantItemModel {
-  final int orderId;
+  final num orderId;
   final String onLocation;
   final String? note;
   final String? offLocation;
-  final double distance;
-  final int time;
+  final num distance;
+  final num time;
 
   InstantItemModel({
     required this.orderId,

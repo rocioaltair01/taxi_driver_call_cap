@@ -6,6 +6,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:route_panel/route_panel.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:untitled1/pages/%E4%B8%BB%E7%95%AB%E9%9D%A2/%E4%B8%8A%E4%B8%8B%E7%B7%9A/grab_success_page.dart';
 import 'package:untitled1/util/dialog_util.dart';
@@ -134,7 +135,7 @@ class _OnlinePageState extends State<OnlinePage> {
             if (!uniqueOrderIds.contains(item.orderId)) {
               // Add the item to the filtered list and set
               filteredTicketDetail.add(item);
-              uniqueOrderIds.add(item.orderId);
+              uniqueOrderIds.add(item.orderId.toInt());
             }
           }
 
@@ -440,7 +441,7 @@ class _OnlinePageState extends State<OnlinePage> {
           id: ticketDetail[indexdialog].orderId.toString(),
           title: "搶單",
           content: "上車地點: 台南市中西區成功路1號",
-          time: (ticketDetail[indexdialog].time == 0) ? 1 : ticketDetail[indexdialog].time,
+          time: (ticketDetail[indexdialog].time.toInt() == 0) ? 1 : ticketDetail[indexdialog].time.toInt(),
           //context: context,
           onOkPressed: (double selectedTime) async{
               print("selectedTime $selectedTime");
@@ -449,7 +450,6 @@ class _OnlinePageState extends State<OnlinePage> {
                 time: 1,
                 status: 0
             );
-
             if (response.success)
             {
               if (mounted)
@@ -457,11 +457,8 @@ class _OnlinePageState extends State<OnlinePage> {
                 setState(() {
                  // ticketDetail.removeWhere((item) => item.orderId == ticketDetail[index].orderId);
                 });
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => GrabSuccessPage(),
-                  ),
-                );
+                print("object");
+                Navigator.push(context, BottomToTopPageRoute(page: GrabSuccessPage(orderId: ticketDetail[indexdialog].orderId.toInt(), selectedTime : selectedTime)));
               }
             } else {
               DialogUtils.showErrorDialog("", "搶單失敗", context);

@@ -12,7 +12,7 @@ import '../細節頁/estimate_price.dart';
 import '../main_page.dart';
 
 class PrepareGetPage extends StatefulWidget {
-  final BillList? bill;
+  final BillInfo? bill;
   const PrepareGetPage({super.key, this.bill});
 
   @override
@@ -116,7 +116,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                             const Expanded(child: SizedBox()),
                             (widget.bill != null) ?
                             Text(
-                              widget.bill!.billInfo.reservationId.toString(),
+                              widget.bill!.reservationId.toString(),
                               style: const TextStyle(
                                 color: Colors.black, // Set text color to black
                                 fontSize: 20, // Set font size as needed
@@ -139,7 +139,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                 ),
                                 (widget.bill != null) ?
                                 Text(
-                                  widget.bill!.billInfo.onLocation.toString(),
+                                  widget.bill!.onLocation.toString(),
                                   style: const TextStyle(
                                       color: Colors.black,
                                       fontSize: 20,
@@ -150,7 +150,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                             )),
                             InkWell(
                               onTap: () {
-                                openGoogleMap(widget.bill!.billInfo.onLocation);
+                                openGoogleMap(widget.bill!.onLocation);
                               },
                               child: Container(
                                 padding: EdgeInsets.all(12), // Set padding as needed
@@ -178,7 +178,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                 ),
                                 (widget.bill != null) ?
                                 Text(
-                                  widget.bill!.billInfo.offLocation.toString(),
+                                  widget.bill!.offLocation.toString(),
                                   style: const TextStyle(
                                       color: Colors.black,
                                       fontSize: 18, overflow: TextOverflow.clip
@@ -189,7 +189,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                             ),
                             InkWell(
                               onTap: () {
-                                openGoogleMap(widget.bill!.billInfo.offLocation);
+                                openGoogleMap(widget.bill!.offLocation);
                               },
                               child: Container(
                                 padding: EdgeInsets.all(12), // Set padding as needed
@@ -213,7 +213,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                         ),
                         (widget.bill != null) ?
                         Text(
-                          widget.bill!.billInfo.passengerNote,
+                          widget.bill!.passengerNote,
                           style: const TextStyle(
                             color: Colors.black, // Set text color to black
                             fontSize: 20, // Set font size as needed
@@ -266,13 +266,13 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                         minimumSize: const Size(double.infinity, 50), // Set the button height
                                       ),
                                       onPressed: () async{
-                                        if (mainPageKey.currentState?.bill?.billInfo.reservationId != null)
+                                        if (mainPageKey.currentState?.bill?.reservationId != null)
                                         {
-                                          print("markArrivalSuccess ${mainPageKey.currentState?.bill?.billInfo.orderStatus}");
+                                          print("markArrivalSuccess ${mainPageKey.currentState?.bill?.orderStatus}");
                                           ArrivedSuccessApiResponse res = await ArrivedSuccessApi().markArrivalSuccess(
-                                              mainPageKey.currentState?.bill?.billInfo.reservationId ?? 0,
-                                              1
-                                              //mainPageKey.currentState?.bill?.billInfo.orderStatus ?? 0
+                                              mainPageKey.currentState?.bill?.reservationId ?? 0,
+                                              mainPageKey.currentState?.order_type ?? 1
+                                              // 0
                                           );
                                           if (res.success == true)
                                           {

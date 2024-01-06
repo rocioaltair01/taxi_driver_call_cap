@@ -33,10 +33,12 @@ class _ReservationViewState extends State<ReservationView> {
 
       if (response.statusCode == 200) {
         if (response.data.isEmpty) {
-          setState(() {
-            isLoading = false;
-            isEmpty = true;
-          });
+          if (mounted) {
+            setState(() {
+              isLoading = false;
+              isEmpty = true;
+            });
+          }
         } else {
           isEmpty = false;
           setState(() {

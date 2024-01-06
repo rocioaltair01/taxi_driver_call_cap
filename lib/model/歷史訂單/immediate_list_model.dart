@@ -63,8 +63,8 @@ class Bill {
       passengerNote: json['passengerNote'] ?? '',
       getInTime: json['getInTime'] ?? '',
       getPassengerTime: json['getPassengerTime'] ?? '',
-      onGps: (json['onGps'] != null) ? List<num>.from(json['onGps'] as List<dynamic>) : null,
-      offGps: (json['offGps'] != null) ? List<num>.from(json['offGps'] as List<dynamic>) : null,
+      onGps: (json['onGps'] != null) ? List<num>.from(json['onGps']) : null,
+      offGps: (json['offGps'] != null) ? List<num>.from(json['offGps']) : null,
       record: json['record'], // Replace 'dynamic' with the appropriate type
     );
   }

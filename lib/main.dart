@@ -2,7 +2,9 @@ import 'package:camera/camera.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -16,14 +18,14 @@ List<CameraDescription> cameras = <CameraDescription>[];
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  cameras = await availableCameras();
-  print("ca $cameras");
-  // setupLocator();
+
   await dotenv.load(fileName: ".env");
+
+  cameras = await availableCameras();
   await Firebase.initializeApp();
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  // Get the token
+  //Get the token
   String? token = await messaging.getAPNSToken();
   print('FCM Token: $token');
   initializeDateFormatting('zh', null).then((_) {
@@ -42,6 +44,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale('en', 'US'), // English
+        const Locale('zh', 'TW'), // Traditional Chinese
+      ],
       onGenerateRoute: RouteGenerator.generateRoutes,
       initialRoute: '/',
       navigatorKey: navigationService.navigatorKey,

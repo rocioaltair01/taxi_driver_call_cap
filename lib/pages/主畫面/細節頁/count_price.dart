@@ -6,12 +6,12 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../constants/constants.dart';
+import '../../../model/user_data_singleton.dart';
 import '../../../model/主畫面/estimate_price_model.dart';
 import '../../../respository/主畫面/directions_api_request.dart';
+import '../../../util/shared_util.dart';
 
 class CountPricePage extends StatefulWidget {
-  //final String start;
-  // final String end;
   final List<TextEditingController> addressFieldControllers;
   const CountPricePage({super.key,  required this.addressFieldControllers});
 
@@ -145,7 +145,6 @@ class _CountPricePageState extends State<CountPricePage> {
     WidgetsBinding.instance?.addPostFrameCallback((_) {
       getDirections();
     });
-
   }
 
   @override
@@ -228,39 +227,51 @@ class _CountPricePageState extends State<CountPricePage> {
                                 width: 150,
                                 child: Column(
                                   children: [
-                                    Expanded(child: Text("金額:"),),
-                                    Expanded(child: Text("公里數:${routesResponseList.fold<double>(0.0, (prev, response) {
+                                    Expanded(child: Text("金額:${routesResponseList.fold<String>("0.0", (prev, response) {
+                                      if (response.routes.isNotEmpty &&
+                                          response.routes[0].legs.isNotEmpty &&
+                                          response.routes[0].legs[0].distance != null) {
+                                        String distanceText = response.routes[0].legs[0].distance.text.replaceFirst(' 公里', '');
+                                        //distanceText = response.routes[0].legs[0].distance.text.replaceFirst(' 公尺', '');
+                                        double distanceValue = double.parse(distanceText);
+                                        CalculatedInfo calculateInfo = UserDataSingleton.instance.setting.calculatedInfo;
+                                        double price = calculateTotalCost(
+                                            calculateInfo.perKmOfFare,
+                                            calculateInfo.perMinOfFare,
+                                            calculateInfo.initialFare,
+                                            calculateInfo.upPerKmOfFare,
+                                            calculateInfo.extraFare,calculateInfo.lowestFare,
+                                            distanceValue,
+                                            response.routes[0].legs[0].duration.value);
+                                        return price.toInt().toString();
+                                      }
+                                      return "0"; // If the property is not available, return the accumulated value
+                                    }).toString()} 元"),),
+                                    Expanded(child: Text("公里數:${routesResponseList.fold<String>("0 km", (prev, response) {
                                       if (response.routes.isNotEmpty &&
                                           response.routes[0].legs.isNotEmpty &&
                                           response.routes[0].legs[0].distance != null) {
                                         try {
-                                          print("object:${response.routes[0].legs[0].distance.text}");
                                           String distanceText = response.routes[0].legs[0].distance.text.replaceFirst(' 公里', '');
-                                          double distanceValue = double.parse(distanceText);
-
-                                          return prev + distanceValue;
+                                          return response.routes[0].legs[0].distance.text ?? "0 km";
                                         } catch (e) {
                                           print('Error parsing distance: $e');
                                         }
                                       }
-                                      return prev; // If the property is not available, return the accumulated value
-                                    })} km"),),
-                                    Expanded(child: Text("行車時間:${routesResponseList.fold<double>(0.0, (prev, response) {
+                                      return prev;
+                                    })}"),),
+                                    Expanded(child: Text("行車時間:${routesResponseList.fold<String>("0", (prev, response) {
                                       if (response!.routes.isNotEmpty &&
                                           response!.routes[0].legs.isNotEmpty &&
                                           response!.routes[0].legs[0].duration != null) {
                                         try {
-                                          print("object:${response?.routes[0].legs[0].duration.text}");
-                                          String? distanceText = response?.routes[0].legs[0].duration.text.replaceFirst(' 分鐘', '');
-                                          double distanceValue = double.parse(distanceText!);
-
-                                          return prev + distanceValue;
+                                          return response?.routes[0].legs[0].duration.text ?? "0 分鐘";
                                         } catch (e) {
                                           print('Error parsing distance: $e');
                                         }
                                       }
-                                      return prev; // If the property is not available, return the accumulated value
-                                    })} 分鐘"),)
+                                      return "0 分鐘"; // If the property is not available, return the accumulated value
+                                    })}"),)
                                   ],
                                 ),
                               ),
@@ -280,7 +291,6 @@ class _CountPricePageState extends State<CountPricePage> {
                                           minimumSize: Size(double.infinity, 50),
                                         ),
                                         onPressed: () {
-                                          print("hey");
                                           setState(() {
                                             openGoogleMap();
                                           });
@@ -334,7 +344,6 @@ class _CountPricePageState extends State<CountPricePage> {
   }
 
   void openGoogleMap() async {
-    print("openGoogleMap");
     String startAddress = widget.addressFieldControllers[0].text;
     String endAddress = widget.addressFieldControllers[widget.addressFieldControllers.length-1].text;
     if (startAddress.isNotEmpty && endAddress.isNotEmpty) {

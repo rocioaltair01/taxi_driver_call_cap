@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -5,13 +7,15 @@ import 'package:provider/provider.dart';
 import 'package:untitled1/util/dialog_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../model/user_data_singleton.dart';
 import '../../../model/預約單/reservation_model.dart';
 import '../../../respository/主畫面/arrived_destination_api.dart';
+import '../../../util/shared_util.dart';
 import '../細節頁/estimate_price.dart';
 import '../main_page.dart';
 
 class IsPickingQuestPage extends StatefulWidget {
-  final BillList? bill;
+  final BillInfo? bill;
   const IsPickingQuestPage({super.key, this.bill});
 
   @override
@@ -20,16 +24,62 @@ class IsPickingQuestPage extends StatefulWidget {
 
 class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
   late GoogleMapController mapController;
+  double price = 100;
+  double duration = 0;
+  double distance = 0;
+  Timer? distanceTimer;
+  Timer? timeTimer;
+  String pick_status = "前往載客中";
+  LatLng? _currentPosition;
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
-  LatLng? _currentPosition;
 
   @override
   void initState() {
     super.initState();
     getLocation();
+    startTimer();
+  }
+
+  @override
+  void dispose() {
+    distanceTimer?.cancel();
+    timeTimer?.cancel();
+    super.dispose();
+  }
+
+  void startTimer() {
+    distanceTimer = Timer.periodic(Duration(seconds: 10), (timer) {
+      calculateDistance();
+    });
+    timeTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      duration = duration + 1;
+    });
+  }
+
+  void calculateDistance() async {
+    if (_currentPosition != null) {
+      // Fetch the user's current location
+      Position newPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // Calculate the distance between the current and new positions
+      double newDistance = Geolocator.distanceBetween(
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+        newPosition.latitude,
+        newPosition.longitude,
+      );
+
+      // Update the distance and current position
+      setState(() {
+        distance += newDistance/1000;
+        _currentPosition = LatLng(newPosition.latitude, newPosition.longitude);
+      });
+    }
   }
 
   getLocation() async {
@@ -48,7 +98,6 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
       //_isOpen = false;
     });
   }
-  String pick_status = "前往載客中";
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +162,66 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                         Row(
                           children: [
                             Text(
+                              "跳表金額: $price 元",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                              ),
+                            ),
+                            // (widget.bill != null) ?
+                            // Text(
+                            //   "跳表金額:0 元",
+                            //   style: TextStyle(
+                            //     color: Colors.black, // Set text color to black
+                            //     fontSize: 20, // Set font size as needed
+                            //   ),
+                            // ) : Container()
+                          ],
+                        ),
+                        const SizedBox(height: 10,),
+                        Row(
+                          children: [
+                            Text(
+                              "分鐘數: ${double.parse((duration/60).toStringAsFixed(1))} 分",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                              ),
+                            ),
+                            // (widget.bill != null) ?
+                            // Text(
+                            //   "分鐘數: 0 分",
+                            //   style: TextStyle(
+                            //     color: Colors.black, // Set text color to black
+                            //     fontSize: 20, // Set font size as needed
+                            //   ),
+                            // ) : Container()
+                          ],
+                        ),
+                        const SizedBox(height: 10,),
+                        Row(
+                          children: [
+                            Text(
+                              "里程數: $distance 公里",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                              ),
+                            ),
+                            // (widget.bill != null) ?
+                            // Text(
+                            //   "里程數: 0 公里",
+                            //   style: TextStyle(
+                            //     color: Colors.black, // Set text color to black
+                            //     fontSize: 18, // Set font size as needed
+                            //   ),
+                            // ) : Container()
+                          ],
+                        ),
+                        const SizedBox(height: 10,),
+                        Row(
+                          children: [
+                            Text(
                               "訂單編號:",
                               style: TextStyle(
                                 color: Colors.black,
@@ -122,7 +231,7 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                             Expanded(child: SizedBox()),
                             (widget.bill != null) ?
                             Text(
-                              widget.bill!.billInfo.reservationId.toString(),
+                              widget.bill!.reservationId.toString(),
                               style: TextStyle(
                                 color: Colors.black, // Set text color to black
                                 fontSize: 20, // Set font size as needed
@@ -145,7 +254,7 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                                 ),
                                 (widget.bill != null) ?
                                 Text(
-                                  widget.bill!.billInfo.onLocation.toString(),
+                                  widget.bill!.onLocation.toString(),
                                   style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 20,
@@ -156,8 +265,8 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                             )),
                             InkWell(
                               onTap: () {
-                                print("openGoogleMap ${widget.bill!.billInfo.onLocation}");
-                                openGoogleMap(widget.bill!.billInfo.onLocation);
+                                print("openGoogleMap ${widget.bill!.onLocation}");
+                                openGoogleMap(widget.bill!.onLocation);
                               },
                               child: Container(
                                 padding: EdgeInsets.all(12),
@@ -185,7 +294,7 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                                 ),
                                 (widget.bill != null) ?
                                 Text(
-                                  widget.bill!.billInfo.offLocation.toString(),
+                                  widget.bill!.offLocation.toString(),
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 20,
@@ -197,8 +306,8 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                             //Expanded(child: Container()),
                             InkWell(
                               onTap: () {
-                                print("openGoogleMap ${widget.bill!.billInfo.offLocation}");
-                                openGoogleMap(widget.bill!.billInfo.offLocation);
+                                print("openGoogleMap ${widget.bill!.offLocation}");
+                                openGoogleMap(widget.bill!.offLocation);
                               },
                               child: Container(
                                 padding: EdgeInsets.all(12), // Set padding as needed
@@ -221,7 +330,7 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                         ),
                         (widget.bill != null) ?
                         Text(
-                          widget.bill!.billInfo.passengerNote,
+                          widget.bill!.passengerNote,
                           style: TextStyle(
                             color: Colors.black, // Set text color to black
                             fontSize: 20, // Set font size as needed
@@ -274,16 +383,34 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                                         minimumSize: const Size(double.infinity, 50), // Set the button height
                                       ),
                                       onPressed: () async{
-                                        if (mainPageKey.currentState?.bill?.billInfo.reservationId != null) {
+                                        if (mainPageKey.currentState?.bill?.reservationId != null) {
                                           ArrivedDestinationApiResponse result = await ArrivedDestinationApi().markArrivedDestination(
-                                              mainPageKey.currentState?.bill?.billInfo.reservationId ?? 0, 1);
+                                              mainPageKey.currentState?.bill?.reservationId ?? 0,
+                                              mainPageKey.currentState?.order_type ?? 1
+                                          );
                                           if (result.success == true)
                                           {
-                                            print("yo yo ${mainPageKey.currentState?.bill?.billInfo.toString()}");
-                                            GlobalDialog.showAlertDialog(context, "結帳金額成功", result.message);
-                                            //GlobalDialog.showPaymentDialog(context, "結帳金額成功", mainPageKey.currentState?.bill?.billInfo.);
-                                            StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
-                                            statusProvider.updateStatus(GuestStatus.IS_OPEN);
+                                            CalculatedInfo calculateInfo = UserDataSingleton.instance.setting.calculatedInfo;
+                                            double totalPrice = calculateTotalCost(
+                                                calculateInfo.perKmOfFare,
+                                                calculateInfo.perMinOfFare,
+                                                calculateInfo.initialFare,
+                                                calculateInfo.upPerKmOfFare,
+                                                calculateInfo.extraFare,
+                                                calculateInfo.lowestFare,
+                                                distance,
+                                                (duration/60).toInt());
+                                           GlobalDialog.showPaymentDialog(
+                                               context,
+                                               "結帳金額",
+                                               "$totalPrice",
+                                               '$distance',
+                                               () {
+                                                 StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
+                                                 statusProvider.updateStatus(GuestStatus.IS_OPEN);
+                                               },
+                                               () {
+                                               });
                                           } else {
                                             GlobalDialog.showAlertDialog(context, "結束載客失敗", result.message);
                                           }

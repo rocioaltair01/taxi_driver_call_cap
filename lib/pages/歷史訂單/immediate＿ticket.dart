@@ -48,6 +48,7 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
     try {
       final response = await ImmediateTicketApi.getImmediateTickets(year, month);
 
+      print("immediate response $response");
       if (response.statusCode == 200) {
         if (response.data.isEmpty) {
           setState(() {

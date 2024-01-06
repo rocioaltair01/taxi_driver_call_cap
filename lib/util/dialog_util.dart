@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../respository/主畫面/grab_ticket_api.dart';
-// import 'package:untitled1/respository/%E4%B8%BB%E7%95%AB%E9%9D%A2/grab_ticket_api.dart';
-
 class GlobalDialog {
   static void showAlertDialog(BuildContext context, String title, String message) {
     showDialog(
@@ -68,7 +65,14 @@ class GlobalDialog {
     );
   }
 
-  static void showPaymentDialog(BuildContext context, String title, String price, String distance) {
+  static void showPaymentDialog(
+      BuildContext context,
+      String title,
+      String price,
+      String distance,
+      Function() onOkPressed,
+      Function() onCancelPressed,
+      ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -114,24 +118,49 @@ class GlobalDialog {
                   ),
                 ),
                 Expanded(child: Container()),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0),
+                Row(
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            minimumSize: Size(double.infinity, 50),
+                            backgroundColor: Colors.grey
+                        ),
+                        onPressed: () {
+                          onCancelPressed();
+                          Navigator.of(context).pop();// Call the function when '確定' button is pressed
+                          // Navigator.of(context).pop();
+                        },
+                        child: Text(
+                          '取消',
+                          style: TextStyle(
+                              fontSize: 18
+                          ),
+                        ),
+                      ),
                     ),
-                    minimumSize: Size(double.infinity, 50),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    '確定',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18
-                    ),
-                  ),
-                ),
+                    SizedBox(width: 20,),
+                    Flexible(
+                      flex: 1,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size(double.infinity, 50),
+                        ),
+                        onPressed: () {
+                          onOkPressed();
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                          '結帳回空車畫面',
+                          style: TextStyle(
+                              fontSize: 18
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                )
               ],
             ),
           ),

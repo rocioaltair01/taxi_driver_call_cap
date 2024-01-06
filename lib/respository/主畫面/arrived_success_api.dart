@@ -29,6 +29,7 @@ class ArrivedSuccessApiResponse {
 
 // 更新到達時間
 class ArrivedSuccessApi {
+  //orderType
   Future<ArrivedSuccessApiResponse> markArrivalSuccess(int orderId, int orderType) async {
     UserData loginResult = UserDataSingleton.instance;
     print("orderId$orderType");

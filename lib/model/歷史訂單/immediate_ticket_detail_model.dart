@@ -40,6 +40,7 @@ class ImmediateTicketDetailModel {
   });
 
   factory ImmediateTicketDetailModel.fromJson(Map<String, dynamic> json) {
+    print("hey $json");
     return ImmediateTicketDetailModel(
       id: json['id'],
       onLocation: json['onLocation'],

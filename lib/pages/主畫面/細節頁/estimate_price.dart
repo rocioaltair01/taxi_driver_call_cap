@@ -66,6 +66,8 @@ class _EstimatePriceState extends State<EstimatePrice> {
                                     decoration: const InputDecoration(
                                       labelText: '請輸入查詢地址',
                                       border: OutlineInputBorder(),
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.all(12),
                                     ),
                                     onChanged: (value) async {
                                       if (value == "")
@@ -98,7 +100,7 @@ class _EstimatePriceState extends State<EstimatePrice> {
                                     (context, idx) {
                                   return GestureDetector(
                                       onTap: () {
-                                        addressFieldControllers[index].text = places[index][idx].name;
+                                        addressFieldControllers[index].text = places[index][idx].formattedAddress;
                                         setState(() {
                                           places[index] = [];
                                         });
@@ -162,7 +164,15 @@ class _EstimatePriceState extends State<EstimatePrice> {
                                     decoration: const InputDecoration(
                                       labelText: '請輸入查詢地址',
                                       border: OutlineInputBorder(),
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.all(12),
                                     ),
+                                    // decoration: const InputDecoration(
+                                    //   labelText: '請輸入查詢地址',
+                                    //   border: OutlineInputBorder(),
+                                    //   isDense: true,
+                                    //   contentPadding: EdgeInsets.all(12),
+                                    // ),
                                     onChanged: (value) async {
                                       if (value == "")
                                       {
@@ -209,7 +219,7 @@ class _EstimatePriceState extends State<EstimatePrice> {
                                     (context, idx) {
                                   return GestureDetector(
                                       onTap: () {
-                                        addressFieldControllers[index].text = places[index][idx].name;
+                                        addressFieldControllers[index].text = places[index][idx].formattedAddress;
                                         setState(() {
                                           places[index] = [];
                                         });
@@ -307,7 +317,7 @@ class _EstimatePriceState extends State<EstimatePrice> {
                                     (context, idx) {
                                   return GestureDetector(
                                       onTap: () {
-                                        addressFieldControllers[index].text = places[index][idx].name;
+                                        addressFieldControllers[index].text = places[index][idx].formattedAddress;
                                         setState(() {
                                           places[index] = [];
                                         });
@@ -382,7 +392,7 @@ class _EstimatePriceState extends State<EstimatePrice> {
                                 // getDirections();
                                 //   if (!addressFieldControllers.contains(_addressEndFieldController))
                                 //     addressFieldControllers.add(_addressEndFieldController);
-                                print("推 `${addressFieldControllers.length}");
+                                // print("推 `${addressFieldControllers.length}");
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(

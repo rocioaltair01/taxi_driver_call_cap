@@ -111,62 +111,65 @@ class _FinishedReservationViewState extends State<FinishedReservationView> {
                     ),
                   );
                 },
-                child: Padding(
-                  padding: EdgeInsets.all(6),
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child:  (billList[index].billInfo.orderStatus == 3) ? Image.asset(
-                          'assets/images/ok.png',
-                          width: 30,
-                          height: 30,
-                        ) : (billList[index].billInfo.orderStatus == 4) ?
-                        Image.asset(
-                          'assets/images/no.png',
-                          width: 30,
-                          height: 30,
-                        ) :
-                        Image.asset(
-                          'assets/images/grab.png',
-                          width: 30,
-                          height: 30,
+                child: Container(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: EdgeInsets.all(6),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child:  (billList[index].billInfo.orderStatus == 3) ? Image.asset(
+                            'assets/images/ok.png',
+                            width: 30,
+                            height: 30,
+                          ) : (billList[index].billInfo.orderStatus == 4) ?
+                          Image.asset(
+                            'assets/images/no.png',
+                            width: 30,
+                            height: 30,
+                          ) :
+                          Image.asset(
+                            'assets/images/grab.png',
+                            width: 30,
+                            height: 30,
+                          ),
                         ),
-                      ),
-                      Expanded(
-                          child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${DateUtil().getDate(billList[index].billInfo.reservationTime)}',
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                          Text(
-                            '從：${billList[index].billInfo.onLocation}',
-                            overflow: TextOverflow.clip,
-                            style: const TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                          // Text(
-                          //   '服務備註: ${billList[index].billInfo.passengerNote}',
-                          //   overflow: TextOverflow.clip,
-                          //   style: const TextStyle(
-                          //     fontSize: 16,
-                          //   ),
-                          // ),
-                          const Divider(
-                            color: Colors.grey,
-                            thickness: 1,
-                            height: 1,
-                          ),
-                        ],
-                      )
-                      )
-                    ],
+                        Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${DateUtil().getDate(billList[index].billInfo.reservationTime)}',
+                                  overflow: TextOverflow.clip,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                Text(
+                                  '從：${billList[index].billInfo.onLocation}',
+                                  overflow: TextOverflow.clip,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                // Text(
+                                //   '服務備註: ${billList[index].billInfo.passengerNote}',
+                                //   overflow: TextOverflow.clip,
+                                //   style: const TextStyle(
+                                //     fontSize: 16,
+                                //   ),
+                                // ),
+                                const Divider(
+                                  color: Colors.grey,
+                                  thickness: 1,
+                                  height: 1,
+                                ),
+                              ],
+                            )
+                        )
+                      ],
+                    ),
                   ),
                 ),
               );

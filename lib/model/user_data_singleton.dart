@@ -7,7 +7,6 @@ class UserDataSingleton {
   static UserData? _instance;
 
   static UserData get instance {
-    // 如果 _instance 为空，初始化它
     if (_instance == null) {
       throw Exception("LoginResult has not been initialized");
     }
@@ -212,6 +211,7 @@ class CalculatedInfo {
   });
 
   factory CalculatedInfo.fromJson(Map<String, dynamic> json) {
+    print("CalculatedInfo $json");
     return CalculatedInfo(
       perKmOfFare: json['perKmOfFare'],
       perMinOfFare: json['perMinOfFare'],

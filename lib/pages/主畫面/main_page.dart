@@ -45,8 +45,9 @@ class MainPage extends StatefulWidget {
 class MainPageState extends State<MainPage> {
   String pick_status = "前往載客中";
   // GuestStatus current_status = GuestStatus.IS_NOT_OPEN;
-  BillList? bill;
+  BillInfo? bill;
   LatLng? _currentPosition;
+  int order_type = 1;
   late Timer _timer;
 
   @override
@@ -62,7 +63,7 @@ class MainPageState extends State<MainPage> {
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
-
+//
     double lat = position.latitude;
     double long = position.longitude;
 

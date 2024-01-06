@@ -56,7 +56,6 @@ class _FinishedReservationViewDetailPageState extends State<FinishedReservationV
             : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             _buildTable(
               context,
               [
@@ -108,12 +107,9 @@ class _FinishedReservationViewDetailPageState extends State<FinishedReservationV
                       pertabbarPageKey.currentState?.setState(() {
                         pertabbarPageKey.currentState?.selectedTab = 2;
                       });
-                      //print("ROICO widget.bill ${widget.bill}");
-                      //print("ROCIO ${mainPageKey.currentState}");
-                      //print("ROCIOmainPageKey.currentState?.bill ${mainPageKey.currentState?.bill}");
-                      mainPageKey.currentState?.bill = widget.bill;
-                      //print("ROCIOmainPageKey.currentState?.bill ${mainPageKey.currentState?.bill}");
+                      mainPageKey.currentState?.bill = widget.bill.billInfo;
                       StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
+                      mainPageKey.currentState?.order_type = 1;
                       statusProvider.updateStatus(GuestStatus.PREPARED);
                     },
                     style: ElevatedButton.styleFrom(

@@ -43,7 +43,6 @@ class _ImmediateDetailPageState extends State<ImmediateDetailPage> {
     });
 
     try {
-      print("ROCIO");
       final response = await ImmediateTicketDetailApi.getImmediateTicketDetail(widget.orderNumber);
 
       if (response.statusCode == 200) {

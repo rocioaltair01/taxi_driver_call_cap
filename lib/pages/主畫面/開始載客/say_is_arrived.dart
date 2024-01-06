@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import '../../../main.dart';
 import '../../../model/預約單/reservation_model.dart';
 import '../../../respository/主畫面/giveup_api.dart';
 import '../../../respository/主畫面/start_picking_passenger_api.dart';
+import '../../../respository/主畫面/update_arrive_photo.dart';
 import '../細節頁/customer_message_page.dart';
 import '../細節頁/estimate_price.dart';
 import '../main_page.dart';
@@ -25,7 +27,7 @@ enum PickingStatus {
 
 
 class SayIsArrivedPage extends StatefulWidget {
-  final BillList? bill;
+  final BillInfo? bill;
   const SayIsArrivedPage({super.key, this.bill});
 
   @override
@@ -39,37 +41,25 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
+
   LatLng? _currentPosition;
-  late CameraController controller;
   bool showCamera = false;
-  // late List<CameraDescription> _cameras;
+  late CameraController _controller;
+  late Future<void> _initializeControllerFuture;
+
 
   @override
   void initState() {
     super.initState();
     getLocation();
     startTimer();
-    if (cameras.isNotEmpty)
-    {
-      controller = CameraController(cameras[0], ResolutionPreset.max);
-      controller.initialize().then((_) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {});
-      }).catchError((Object e) {
-        if (e is CameraException) {
-          switch (e.code) {
-            case 'CameraAccessDenied':
-            // Handle access errors here.
-              break;
-            default:
-            // Handle other errors here.
-              break;
-          }
-        }
-      });
-    }
+    print("ccc $cameras");
+    _controller = CameraController(
+      cameras.first,
+      ResolutionPreset.medium,
+    );
+
+    _initializeControllerFuture = _controller.initialize();
   }
 
   void startTimer() {
@@ -126,18 +116,34 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
             icon: Icon(Icons.cancel),
             onPressed: () {
               // Navigate back (pop) when cancel button is pressed
-             setState(() {
+
+              setState(() {
                showCamera = false;
              });
             },
           ),
         ],
       ),
-      body: Column(
+      body: //
+      Column(
         children: [
-          AspectRatio(
-            aspectRatio: 1.0,
-            child: CameraPreview(controller),
+          Container(
+            color: Colors.black,
+            child: AspectRatio(
+              aspectRatio: 1.0,
+              child: FutureBuilder<void>(
+                future: _initializeControllerFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    // If the Future is complete, display the preview.
+                    return CameraPreview(_controller);
+                  } else {
+                    // Otherwise, display a loading indicator.
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                },
+              ),
+            ),
           ),
           Expanded(
               child: Center(
@@ -145,37 +151,41 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                   height: 50,
                   width: 50,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightGreenAccent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50.0), // Make it circular
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightGreenAccent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50.0), // Make it circular
+                        ),
+                        minimumSize: const Size(50, 50),
                       ),
-                      minimumSize: const Size(50, 50),
-                    ),
-                    onPressed: () {
-                      if (controller != null)
-                      {
-                        controller.takePicture().then((XFile? file) {
-                          if(mounted) {
-                            if(file != null) {
-                              print("Picture saved to ${file.path}");
+                      onPressed: () {
+                        if (_controller != null)
+                        {
+                          _controller.takePicture().then((XFile? file) {
+                            if(mounted) {
+                              if(file != null) {
+                                print("Picture saved to ${file.path}");
+                                UpdateArrivePhotoApi.updateArrivePhoto(
+                                    filePath: file.path,
+                                    orderId: widget.bill!.reservationId,
+                                    orderType: mainPageKey.currentState!.order_type
+                                );
+                              }
                             }
-                          }
+                          });
+                        }
+                        setState(() {
+                          showCamera = false;
                         });
-                      }
-                      setState(() {
-                        showCamera = false;
-                      });
-                    },
-                    child: Container()
+                      },
+                      child: Container()
                   ),
                 ),
 
               )
           )
-
         ],
-      ),
+      )
     ) : Scaffold(
       body: Column(
         children: [
@@ -230,7 +240,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                             ),
                             const Expanded(child: SizedBox()),
                             Text(
-                              widget.bill != null ? widget.bill!.billInfo.reservationId.toString() : '',
+                              widget.bill != null ? widget.bill!.reservationId.toString() : '',
                               style: const TextStyle(
                                 color: Colors.black, // Set text color to black
                                 fontSize: 20, // Set font size as needed
@@ -252,7 +262,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                   ),
                                 ),
                                 Text(
-                                  widget.bill != null ? widget.bill!.billInfo.onLocation.toString() : '',
+                                  widget.bill != null ? widget.bill!.onLocation.toString() : '',
                                   style: const TextStyle(
                                     color: Colors.black,
                                     fontSize: 20,
@@ -263,7 +273,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                             ),),
                             InkWell(
                               onTap: () {
-                                openGoogleMap(widget.bill!.billInfo.onLocation);
+                                openGoogleMap(widget.bill!.onLocation);
                               },
                               child: Container(
                                 padding: EdgeInsets.all(12), // Set padding as needed
@@ -291,7 +301,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                     ),
                                   ),
                                   Text(
-                                    widget.bill != null ? widget.bill!.billInfo.offLocation.toString() : '',
+                                    widget.bill != null ? widget.bill!.offLocation.toString() : '',
                                     style: const TextStyle(
                                         color: Colors.black,
                                         fontSize: 20,
@@ -304,7 +314,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                             //Expanded(child: Container()),
                             InkWell(
                               onTap: () {
-                                openGoogleMap(widget.bill!.billInfo.offLocation);
+                                openGoogleMap(widget.bill!.offLocation);
                               },
                               child: Container(
                                 padding: EdgeInsets.all(12), // Set padding as needed
@@ -326,7 +336,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                           ),
                         ),
                         Text(
-                          widget.bill != null ? widget.bill!.billInfo.passengerNote.toString() : '',
+                          widget.bill != null ? widget.bill!.passengerNote.toString() : '',
                           style: const TextStyle(
                             color: Colors.black, // Set text color to black
                             fontSize: 20, // Set font size as needed
@@ -438,20 +448,9 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         minimumSize: const Size(double.infinity, 50), // Set the button height
                                       ),
                                       onPressed: () async{
-                                        if (mainPageKey.currentState?.bill?.billInfo.reservationId != null)
+                                        if (mainPageKey.currentState?.bill?.reservationId != null)
                                         {
-                                          StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(mainPageKey.currentState?.bill?.billInfo.reservationId ?? 0);
-                                          if (res.success)
-                                          {
-                                            StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
-                                            statusProvider.updateStatus(GuestStatus.PICKING_GUEST);
-                                            setState(() {
-                                              pick_status = "前往目的地";
-                                            });
-                                            //GlobalDialog.showAlertDialog(context, "開始載客成功", res.message);
-                                          } else {
-                                            GlobalDialog.showAlertDialog(context, "開始載客失敗", res.message);
-                                          }
+
                                         }
                                       },
                                       child: const Text(
@@ -472,9 +471,12 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         minimumSize: Size(double.infinity, 50), // Set the button height
                                       ),
                                       onPressed: () async{
-                                        if (mainPageKey.currentState?.bill?.billInfo.reservationId != null)
+                                        if (mainPageKey.currentState?.bill?.reservationId != null)
                                         {
-                                          StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(mainPageKey.currentState?.bill?.billInfo.reservationId ?? 0);
+                                          StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(
+                                              mainPageKey.currentState?.bill?.reservationId ?? 0,
+                                              mainPageKey.currentState?.order_type ?? 1
+                                          );
                                           if (res.success)
                                           {
                                             StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
@@ -602,20 +604,8 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         minimumSize: const Size(double.infinity, 50), // Set the button height
                                       ),
                                       onPressed: () async{
-                                        if (mainPageKey.currentState?.bill?.billInfo.reservationId != null)
+                                        if (mainPageKey.currentState?.bill?.reservationId != null)
                                         {
-                                          StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(mainPageKey.currentState?.bill?.billInfo.reservationId ?? 0);
-                                          if (res.success)
-                                          {
-                                            StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
-                                            statusProvider.updateStatus(GuestStatus.PICKING_GUEST);
-                                            setState(() {
-                                              pick_status = "前往目的地";
-                                            });
-                                            //GlobalDialog.showAlertDialog(context, "開始載客成功", res.message);
-                                          } else {
-                                            GlobalDialog.showAlertDialog(context, "開始載客失敗", res.message);
-                                          }
                                         }
                                       },
                                       child: const Text(
@@ -635,16 +625,28 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         ),
                                         minimumSize: Size(double.infinity, 50), // Set the button height
                                       ),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => CustomerMessagePage()
-                                          ),
-                                        );
+                                      onPressed: () async{
+                                        if (mainPageKey.currentState?.bill?.reservationId != null)
+                                        {
+                                          StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(
+                                              mainPageKey.currentState?.bill?.reservationId ?? 0,
+                                              mainPageKey.currentState?.order_type ?? 1
+                                          );
+                                          if (res.success)
+                                          {
+                                            StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
+                                            statusProvider.updateStatus(GuestStatus.PICKING_GUEST);
+                                            // setState(() {
+                                            //   pick_status = "前往目的地";
+                                            // });
+                                            //GlobalDialog.showAlertDialog(context, "開始載客成功", res.message);
+                                          } else {
+                                            GlobalDialog.showAlertDialog(context, "開始載客失敗", res.message);
+                                          }
+                                        }
                                       },
                                       child: const Text(
-                                        '已載客',
+                                        '已載客1',
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -708,9 +710,9 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                             context: context,
                                             message: "確定要申請放棄訂單嗎？",
                                             onOkPressed: () async{
-                                              if (mainPageKey.currentState?.bill?.billInfo.reservationId != null) {
-                                                GiveupErrorResponse result = await GiveupApi().cancelOrderApply(mainPageKey.currentState?.bill?.billInfo.reservationId ?? 0,
-                                                    mainPageKey.currentState?.bill?.billInfo.orderStatus ?? 1);
+                                              if (mainPageKey.currentState?.bill?.reservationId != null) {
+                                                GiveupErrorResponse result = await GiveupApi().cancelOrderApply(mainPageKey.currentState?.bill?.reservationId ?? 0,
+                                                    mainPageKey.currentState?.bill?.orderStatus ?? 1);
                                                 print("result.success ${result.success}");
                                                 if (result.success == true)
                                                 {
@@ -804,9 +806,12 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         minimumSize: Size(double.infinity, 50), // Set the button height
                                       ),
                                       onPressed: () async{
-                                        if (mainPageKey.currentState?.bill?.billInfo.reservationId != null)
+                                        if (mainPageKey.currentState?.bill?.reservationId != null)
                                         {
-                                          StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(mainPageKey.currentState?.bill?.billInfo.reservationId ?? 0);
+                                          StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(
+                                              mainPageKey.currentState?.bill?.reservationId ?? 0,
+                                              mainPageKey.currentState?.order_type ?? 1
+                                          );
                                           if (res.success)
                                           {
                                             StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
@@ -934,20 +939,8 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         minimumSize: const Size(double.infinity, 50), // Set the button height
                                       ),
                                       onPressed: () async{
-                                        if (mainPageKey.currentState?.bill?.billInfo.reservationId != null)
+                                        if (mainPageKey.currentState?.bill?.reservationId != null)
                                         {
-                                          StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(mainPageKey.currentState?.bill?.billInfo.reservationId ?? 0);
-                                          if (res.success)
-                                          {
-                                            StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
-                                            statusProvider.updateStatus(GuestStatus.PICKING_GUEST);
-                                            setState(() {
-                                              pick_status = "前往目的地";
-                                            });
-                                            //GlobalDialog.showAlertDialog(context, "開始載客成功", res.message);
-                                          } else {
-                                            GlobalDialog.showAlertDialog(context, "開始載客失敗", res.message);
-                                          }
                                         }
                                       },
                                       child: const Text(
@@ -968,9 +961,12 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         minimumSize: Size(double.infinity, 50), // Set the button height
                                       ),
                                       onPressed: () async{
-                                        if (mainPageKey.currentState?.bill?.billInfo.reservationId != null)
+                                        if (mainPageKey.currentState?.bill?.reservationId != null)
                                         {
-                                          StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(mainPageKey.currentState?.bill?.billInfo.reservationId ?? 0);
+                                          StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(
+                                              mainPageKey.currentState?.bill?.reservationId ?? 0,
+                                              mainPageKey.currentState?.order_type ?? 1
+                                          );
                                           if (res.success)
                                           {
                                             StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
@@ -983,12 +979,6 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                             GlobalDialog.showAlertDialog(context, "開始載客失敗", res.message);
                                           }
                                         }
-                                        // Navigator.push(
-                                        //   context,
-                                        //   MaterialPageRoute(
-                                        //       builder: (context) => CustomerMessagePage()
-                                        //   ),
-                                        // );
                                       },
                                       child: const Text(
                                         '已載客',
@@ -1030,3 +1020,77 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
     }
   }
 }
+
+
+// // A screen that allows users to take a picture using a given camera.
+// class TakePictureScreen extends StatefulWidget {
+//   const TakePictureScreen({
+//     super.key,
+//   });
+//   @override
+//   TakePictureScreenState createState() => TakePictureScreenState();
+// }
+//
+// class TakePictureScreenState extends State<TakePictureScreen> {
+//   late CameraController _controller;
+//   late Future<void> _initializeControllerFuture;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     // To display the current output from the Camera,
+//     // create a CameraController.
+//     _controller = CameraController(
+//       // Get a specific camera from the list of available cameras.
+//       cameras.first,
+//       // Define the resolution to use.
+//       ResolutionPreset.medium,
+//     );
+//
+//     // Next, initialize the controller. This returns a Future.
+//     _initializeControllerFuture = _controller.initialize();
+//   }
+//
+//   @override
+//   void dispose() {
+//     // Dispose of the controller when the widget is disposed.
+//     _controller.dispose();
+//     super.dispose();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: const Text('Take a picture')),
+//       body: FutureBuilder<void>(
+//         future: _initializeControllerFuture,
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState == ConnectionState.done) {
+//             // If the Future is complete, display the preview.
+//             return CameraPreview(_controller);
+//           } else {
+//             // Otherwise, display a loading indicator.
+//             return const Center(child: CircularProgressIndicator());
+//           }
+//         },
+//       ),
+//     );
+//   }
+// }
+//
+// // A widget that displays the picture taken by the user.
+// class DisplayPictureScreen extends StatelessWidget {
+//   final String imagePath;
+//
+//   const DisplayPictureScreen({super.key, required this.imagePath});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: const Text('Display the Picture')),
+//       // The image is stored as a file on the device. Use the `Image.file`
+//       // constructor with the given path to display the image.
+//       body: Image.file(File(imagePath)),
+//     );
+//   }
+// }

@@ -38,28 +38,36 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
   ];
 
   Future<void> fetchData() async {
-    setState(() {
-      isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
     try {
-      final response = await StatisticsApi.getStatistics(year, month);
+      final response = await StatisticsApi.getStatistics(year.toString(), month.toString());
 
       if (response.statusCode == 200) {
+          if (mounted) {
+            setState(() {
+              isLoading = false;
+              statisticsData = response.data?.result;
+            });
+          }
+      } else {
+        if (mounted) {
           setState(() {
             isLoading = false;
-            statisticsData = response.data?.result;
           });
-      } else {
-        setState(() {
-          isLoading = false;
-        });
+        }
         DialogUtils.showErrorDialog("錯誤","網路異常8",context);
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
       DialogUtils.showErrorDialog("錯誤","網路異常9",context);
       throw Exception('Error: $error');
     }
@@ -91,9 +99,11 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
                           scrollController: _dateYearController,
                           itemExtent: 38,
                           onSelectedItemChanged: (int index) {
-                            setState(() {
-                              selectedYear = index + 2000; // Increment index by 1 as months are usually 1-based
-                            });
+                            if (mounted) {
+                              setState(() {
+                                selectedYear = index + 2000; // Increment index by 1 as months are usually 1-based
+                              });
+                            }
                           },
                           children: List<Widget>.generate(24, (int index) {
                             return Text(
@@ -109,9 +119,11 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
                           itemExtent: 38,
                           scrollController: _dateMonthController,
                           onSelectedItemChanged: (int index) {
-                            setState(() {
-                              selectedMonth = index + 1; // Increment index by 1 as months are usually 1-based
-                            });
+                            if (mounted) {
+                              setState(() {
+                                selectedMonth = index + 1; // Increment index by 1 as months are usually 1-based
+                              });
+                            }
                           },
                           children: List<Widget>.generate(12, (int index) {
                             return Text(
@@ -128,10 +140,12 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      year = selectedYear;
-                      month = selectedMonth;
-                    });
+                    if (mounted) {
+                      setState(() {
+                        year = selectedYear;
+                        month = selectedMonth;
+                      });
+                    }
                     Navigator.pop(context, 'Complete');
                   },
                   style: ElevatedButton.styleFrom(

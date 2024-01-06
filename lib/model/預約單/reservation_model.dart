@@ -85,8 +85,8 @@ class BillInfo {
   final String reservationType;
   final String reservationTime;
   final String passengerNote;
-  final List<int> onGps;
-  final List<int> offGps;
+  final List<num> onGps;
+  final List<num> offGps;
   final int userNumber;
   final int acknowledgingOrderMethods;
   final String serviceList;
@@ -133,8 +133,8 @@ class BillInfo {
       reservationType: json['reservationType'] ?? '',
       reservationTime: json['reservationTime'] ?? '',
       passengerNote: json['passengerNote'] ?? '',
-      onGps: List<int>.from(json['onGps'] ?? []),
-      offGps: List<int>.from(json['offGps'] ?? []),
+      onGps: List<num>.from(json['onGps'] ?? []),
+      offGps: List<num>.from(json['offGps'] ?? []),
       userNumber: json['userNumber'],
       acknowledgingOrderMethods: json['acknowledgingOrderMethods'],
       serviceList: json['serviceList'] ?? '',

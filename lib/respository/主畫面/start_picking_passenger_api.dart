@@ -28,10 +28,10 @@ class StartPickingPassengerApiResponse {
 }
 // 已載乘客
 class StartPickingPassengerApi {
-  Future<StartPickingPassengerApiResponse> startPickingPassenger(int orderId) async {
+  Future<StartPickingPassengerApiResponse> startPickingPassenger(int orderId, int order_type) async {
     UserData loginResult = UserDataSingleton.instance;
     try {
-      String url = '$baseUrl/app/api/socket/click_take_passen/$orderId?order_type=1';
+      String url = '$baseUrl/app/api/socket/click_take_passen/$orderId?order_type=$order_type';
       final response = await http.put(
         Uri.parse(url),
         headers: {
@@ -45,7 +45,7 @@ class StartPickingPassengerApi {
         return StartPickingPassengerApiResponse.fromJson(decodedResponse);
       } else {
         final decodedResponse = json.decode(response.body);
-        print("response.body ${response.body}");
+        print("response.body2 ${response.body}");
         return StartPickingPassengerApiResponse.fromJson(decodedResponse);
       }
     } catch (e) {
