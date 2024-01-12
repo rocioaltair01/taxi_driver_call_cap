@@ -3,6 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
+
+import '../../../model/user_data_singleton.dart';
+import '../../../respository/主畫面/create_ticket_history_price_api.dart';
+import '../../../util/dialog_util.dart';
+import '../../../util/shared_util.dart';
+import '../main_page.dart';
 
 class OfflineCountPricePage extends StatefulWidget {
   const OfflineCountPricePage({super.key});
@@ -108,7 +115,7 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
               ),
               const SizedBox(height: 10,),
               Text(
-                "里程數: $distance 公里",
+                "里程數: ${distance.toStringAsFixed(1)} 公里",
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 18,
@@ -156,8 +163,46 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
                                 minimumSize: Size(double.infinity, 50),
                               ),
 
-                              onPressed: () {
+                              onPressed: () async {
+                                CalculatedInfo calculateInfo = UserDataSingleton.instance.setting.calculatedInfo;
+                                double totalPrice = calculateTotalCost(
+                                    calculateInfo.perKmOfFare,
+                                    calculateInfo.perMinOfFare,
+                                    calculateInfo.initialFare,
+                                    calculateInfo.upPerKmOfFare,
+                                    calculateInfo.extraFare,
+                                    calculateInfo.lowestFare,
+                                    distance,
+                                    (duration/60).toInt());
 
+                                Map<String, dynamic> requestBody = {
+                                  "fare": totalPrice.toInt(),
+                                  "milage": distance,
+                                  "routeSecond": duration.toInt(),
+                                  "latitude": _currentPosition?.latitude ?? 0,
+                                  "longitude": _currentPosition?.longitude ?? 0,
+                                  "orderType": mainPageKey.currentState?.order_type ?? 1
+                                };
+
+                                await CreateTicketHistoryPriceApi().createTicketHistoryPrice(
+                                    mainPageKey.currentState?.bill?.reservationId ?? 0,
+                                    requestBody
+                                );
+
+                                GlobalDialog.showPaymentDialog(
+                                  context,
+                                  "結帳金額",
+                                  "${totalPrice.toInt()}",
+                                  '${distance.toStringAsFixed(1)}',
+                                      () {
+                                    StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
+                                    statusProvider.updateStatus(GuestStatus.IS_NOT_OPEN);
+                                    Navigator.pop(context);
+                                  },
+                                      () {
+                                        // Navigator.pop(context);
+                                  }
+                                );
                               },
                               child: const Text(
                                 '結束計費',

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:untitled1/util/dialog_util.dart';
+import 'package:new_glad_driver/util/dialog_util.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../../../model/客服/announcement_model.dart';
 import '../../../respository/客服/announce_api.dart';
+import '../../../util/shared_util.dart';
 
 class PostView extends StatefulWidget {
   const PostView({super.key});

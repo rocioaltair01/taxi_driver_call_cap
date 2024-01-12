@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../model/歷史訂單/reservation_list_model.dart';
 import '../../respository/歷史訂單/reservation_ticket_api.dart';
 import '../../util/dialog_util.dart';
+import '../../util/shared_util.dart';
 import 'components/date_header.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
@@ -32,11 +33,7 @@ class _ReservationTicketState extends State<ReservationTicket> {
     "七月", "八月", "九月", "十月", "十一月", "十二月"
   ];
 
-  List<String> yearNamesInChinese = [
-    "2000年", "2001年", "2002年", "2003年", "2004年", "2005年", "2006年", "2007年",
-    "2008年", "2009年", "2010年", "2011年", "2012年", "2013年", "2014年", "2015年",
-    "2016年", "2017年", "2018年", "2019年", "2020年", "2021年", "2022年", "2023年"
-  ];
+  List<String> yearNamesInChinese = [];
 
   String reservationTime = "";
   DateTime? parsedOrderTime;
@@ -174,6 +171,7 @@ class _ReservationTicketState extends State<ReservationTicket> {
     super.initState();
     year = now.year;
     month = now.month;
+    yearNamesInChinese = DateUtil().generateYearList();
     _dateYearController = FixedExtentScrollController(initialItem: year);
     _dateMonthController = FixedExtentScrollController(initialItem: month);
     fetchData();
@@ -253,7 +251,7 @@ class _ReservationTicketState extends State<ReservationTicket> {
                         Padding(
                           padding: const EdgeInsets.all(12),
                           child: Image.asset(
-                            (billList[index].billInfo.orderStatus == 2) ? 'assets/images/status2and3_icon.png'
+                            (billList[index].billInfo.orderStatus == 1 || billList[index].billInfo.orderStatus == 2) ? 'assets/images/status2and3_icon.png'
                                 : (billList[index].billInfo.orderStatus == 3) ? 'assets/images/ok.png' : 'assets/images/no.png',
                             width: 30,
                             height: 30,

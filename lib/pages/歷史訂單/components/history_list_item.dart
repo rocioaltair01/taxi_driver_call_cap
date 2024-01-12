@@ -18,37 +18,69 @@ class HistoryListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 50,
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: SizedBox(
+            //height: 50,
+            child: Row(
+              children: [
+                Text(
                   label,
                   style: const TextStyle(fontSize: 16),
                 ),
-              ),
-              Expanded(child: Container()),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  value,
-                  style: const TextStyle(fontSize: 16),
+                (label == "乘客備註:") ? Container() :
+                Expanded(
+                  flex: 2,
+                    child: Container()
                 ),
-              ),
-              if (twoValue)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    (statusValue == 4) ? "取消訂單" : "成功訂單",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red, // Set the text color to red
+                (label == "乘客備註:") ?
+                Expanded(
+                  flex: 6,
+                  child:
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      //textAlign: TextAlign.right,
+                      value,
+                      style: const TextStyle(fontSize: 16),
+                      softWrap: true,
+                    ),
+                  ),
+                ) : twoValue ?
+                Expanded(
+                  flex: 2,
+                    child: Row(
+                      children: [
+                        Text(
+                          value,
+                          style: const TextStyle(fontSize: 16),
+                          softWrap: true,
+                        ),
+                        Text(
+                            (statusValue == 4) ? "取消訂單" : "成功訂單",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.red, // Set the text color to red
+                            )
+                        ),
+                      ],
+                    )
+                ) :
+                Expanded(
+                  flex: 3,
+                  child:
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      //textAlign: TextAlign.right,
+                      value,
+                      style: const TextStyle(fontSize: 16),
+                      softWrap: true,
                     ),
                   ),
                 ),
-            ],
+              ],
+            ),
           ),
         ),
         Divider(

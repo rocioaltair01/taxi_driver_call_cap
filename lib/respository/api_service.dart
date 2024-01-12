@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:untitled1/model/user_data_singleton.dart';
+import 'package:new_glad_driver/model/user_data_singleton.dart';
 
 class ApiService {
   final Dio _dio = Dio();

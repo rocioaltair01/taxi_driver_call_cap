@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../../respository/設定/statistics_api.dart';
 import '../../util/dialog_util.dart';
+import '../../util/shared_util.dart';
 import '../歷史訂單/components/date_header.dart';
 import 'components/statistic_item.dart';
 
@@ -172,6 +173,7 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
     super.initState();
     year = now.year;
     month = now.month;
+    yearNamesInChinese = DateUtil().generateYearList();
     fetchData();
   }
 

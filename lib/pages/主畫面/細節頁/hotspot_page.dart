@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:untitled1/model/user_data_singleton.dart';
+import 'package:new_glad_driver/model/user_data_singleton.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 

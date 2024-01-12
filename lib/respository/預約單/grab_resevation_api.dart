@@ -22,7 +22,6 @@ class GrabReservationApi {
       );
 
       if (response.statusCode == 200) {
-        print("aaa ${response.body}");
         final jsonData = json.decode(response.body);
         final UpdateDriverGrabReservationResponse reservationData = UpdateDriverGrabReservationResponse.fromJson(jsonData);
 

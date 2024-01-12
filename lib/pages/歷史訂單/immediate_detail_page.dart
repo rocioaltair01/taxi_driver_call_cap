@@ -95,48 +95,49 @@ class _ImmediateDetailPageState extends State<ImmediateDetailPage> {
           style: TextStyle(color: Colors.black),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: isLoading
-            ?
-        const Center(child: SpinKitFadingCircle(
-          color: Colors.black,
-          size: 80.0,
-        ),) // Show a loader while data is fetched
-            :
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (ticketDetail != null)
-              _buildTable(
-                context,
-                [
-                  HistoryListItem(label:'接單時間', value:formattedDateOrderTime),
-                  HistoryListItem(label:'完成時間', value:formattedFinishTime),
-                  HistoryListItem(label:'單號',
-                    value:(widget.orderStatus == 0) ? '${ticketDetail!.id.toString()} ' : '${ticketDetail!.id.toString()}',
-                    twoValue:true,statusValue: widget.orderStatus,),
-                  HistoryListItem(label:'付款方式', value:'現金付款'),
-                ],
-              ),
-            const SizedBox(height: 20,),
-            if (ticketDetail != null)
-              _buildTable(
-                context,
-                [
-                  HistoryNextListItem(label:'從:', value:ticketDetail!.onLocation ?? '',currentPosition: ticketDetail!.onGps!),
-                  HistoryNextListItem(label:'到:',value:(ticketDetail!.offLocation == null || ticketDetail!.offLocation == '') ? '此乘客無提供下車地點' : ticketDetail!.offLocation.toString(), currentPosition: ticketDetail!.onGps!),
-                  HistoryListItem(label:'乘客人數', value:'1位'),
-                  HistoryListItem(label:'乘客備註:', value:ticketDetail!.passengerNote ?? ''),
-                  HistoryListItem(label:'里程數:', value:'${ticketDetail!.milage.toString()}(公里)'),
-                  HistoryListItem(label:'分鐘:', value:'  ${((ticketDetail!.routeSecond ?? 0)/60).toStringAsFixed(1)}(分鐘)'),
-                  HistoryListItem(label:'金額:', value:'＄${ticketDetail!.actualPrice.toString()}' ?? ''),
-                  // ... Add more fields from the ticket detail model
-                ],
-              ),
-          ],
+      body: isLoading ?
+      const Center(child: SpinKitFadingCircle(
+        color: Colors.black,
+        size: 80.0,
+      ),) // Show a loader while data is fetched
+       : SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child:
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (ticketDetail != null)
+                _buildTable(
+                  context,
+                  [
+                    HistoryListItem(label:'接單時間', value:formattedDateOrderTime),
+                    HistoryListItem(label:'完成時間', value:formattedFinishTime),
+                    HistoryListItem(label:'單號',
+                      value:(widget.orderStatus == 0) ? '${ticketDetail!.id.toString()} ' : '${ticketDetail!.id.toString()}',
+                      twoValue:true,statusValue: widget.orderStatus,),
+                    HistoryListItem(label:'付款方式', value:'現金付款'),
+                  ],
+                ),
+              const SizedBox(height: 20,),
+              if (ticketDetail != null)
+                _buildTable(
+                  context,
+                  [
+                    HistoryNextListItem(label:'從:', value:ticketDetail!.onLocation ?? '',currentPosition: ticketDetail!.onGps!),
+                    HistoryNextListItem(label:'到:',value:(ticketDetail!.offLocation == null || ticketDetail!.offLocation == '') ? '此乘客無提供下車地點' : ticketDetail!.offLocation.toString(), currentPosition: ticketDetail!.onGps!),
+                    HistoryListItem(label:'乘客人數', value:'1位'),
+                    HistoryListItem(label:'乘客備註:', value:ticketDetail!.passengerNote ?? ''),
+                    HistoryListItem(label:'里程數:', value:'${ticketDetail!.milage}(公里)'),
+                    HistoryListItem(label:'分鐘:', value:'  ${((ticketDetail!.routeSecond ?? 0)/60).toStringAsFixed(1)}(分鐘)'),
+                    HistoryListItem(label:'金額:', value:'＄${ticketDetail!.actualPrice.toString()}' ?? ''),
+                    // ... Add more fields from the ticket detail model
+                  ],
+                ),
+            ],
+          ),
         ),
-      ),
+      )
     );
   }
 }

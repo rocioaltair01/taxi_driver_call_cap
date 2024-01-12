@@ -13,7 +13,8 @@ import '../../../util/shared_util.dart';
 
 class CountPricePage extends StatefulWidget {
   final List<TextEditingController> addressFieldControllers;
-  const CountPricePage({super.key,  required this.addressFieldControllers});
+  const CountPricePage({
+    super.key, required this.addressFieldControllers});
 
   @override
   State<CountPricePage> createState() => _CountPricePageState();
@@ -38,11 +39,14 @@ class _CountPricePageState extends State<CountPricePage> {
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
 
-    List<LatLng> polylineCoordinatesCenter = [
-      LatLng(routesResponseList[0].routes[0].bounds.northeast.lat, routesResponseList[0].routes[0].bounds.northeast.lng), // San Francisco
-      LatLng(routesResponseList[0].routes[0].bounds.southwest.lat, routesResponseList[0].routes[0].bounds.southwest.lng),
-    ];
+    List<LatLng> polylineCoordinatesCenter = [];
 
+    routesResponseList.forEach((routeRes) {
+      LatLng northeast = LatLng(routeRes.routes[0].bounds.northeast.lat, routeRes.routes[0].bounds.northeast.lng);
+      LatLng southwest = LatLng(routeRes.routes[0].bounds.southwest.lat,routeRes.routes[0].bounds.southwest.lng);
+      polylineCoordinatesCenter.add(northeast);
+      polylineCoordinatesCenter.add(southwest);
+    });
     LatLngBounds bounds = _calculateBounds(polylineCoordinatesCenter);
     if (mapController != null)
     {
@@ -75,18 +79,17 @@ class _CountPricePageState extends State<CountPricePage> {
         print("hey error ${directionsData["error"]}");
       } else {
         try {
-          print("directionsData 1 $directionsData");
           RoutesResponse re = RoutesResponse.fromJson(directionsData);
           routesResponseList.add(re);
         } catch (e) {
           print("eeee $e");
         }
       }
-      setState(() {
-        isLoading = false;
-      });
       count++;
     }
+    setState(() {
+      isLoading = false;
+    });
     _drawPoly();
   }
 
@@ -265,11 +268,13 @@ class _CountPricePageState extends State<CountPricePage> {
                                           response!.routes[0].legs.isNotEmpty &&
                                           response!.routes[0].legs[0].duration != null) {
                                         try {
+                                          print("ROCIOii ${response?.routes[0].legs[0].duration.text}");
                                           return response?.routes[0].legs[0].duration.text ?? "0 分鐘";
                                         } catch (e) {
                                           print('Error parsing distance: $e');
                                         }
                                       }
+                                      print("ROCIOii");
                                       return "0 分鐘"; // If the property is not available, return the accumulated value
                                     })}"),)
                                   ],

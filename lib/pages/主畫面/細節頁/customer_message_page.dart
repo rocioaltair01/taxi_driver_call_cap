@@ -4,7 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:untitled1/model/user_data_singleton.dart';
+import 'package:new_glad_driver/model/user_data_singleton.dart';
 
 
 

@@ -107,7 +107,7 @@ class _GrabSuccessPageState extends State<GrabSuccessPage> {
                 //await fetchData();
                 print("fetchData $ticketDetail");
                 mainPageKey.currentState?.order_type = 0;
-                mainPageKey.currentState?.bill = BillInfo(
+                mainPageKey.currentState?.bill = BillInfoResevation(
                   driverId: null,
                   orderStatus: ticketDetail?.orderStatus ?? 0,
                   reservationId: widget.orderId,

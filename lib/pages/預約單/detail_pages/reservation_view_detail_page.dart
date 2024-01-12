@@ -56,6 +56,7 @@ class _ReservationViewDetailPageState extends State<ReservationViewDetailPage> {
               child: Text(
                 value,
                 style: TextStyle(fontSize: 16),
+                softWrap: true,
               ),
             ),
           ],

@@ -24,7 +24,8 @@ class _EstimatePriceState extends State<EstimatePrice> {
   List<TextEditingController> addressFieldControllers = [];
   final DirectionsAPIRequest apiRequest = DirectionsAPIRequest();
   int stop_num = 2;
-  List<List<Place>> places = [[],[],[],[],[]];
+  List<List<Place>> places = [[],[],[],[],[],[]];
+  List<RoutesResponse> routesResponseList = [];
 
   @override
   void initState() {
@@ -142,7 +143,7 @@ class _EstimatePriceState extends State<EstimatePrice> {
                     ],
                   );
                 }
-                else if (index == stop_num - 1) { // 最後
+                else if (index == stop_num - 1 && index < 4) { // 最後
                   return Column(
                     children: [
                       Container(
@@ -167,12 +168,6 @@ class _EstimatePriceState extends State<EstimatePrice> {
                                       isDense: true,
                                       contentPadding: EdgeInsets.all(12),
                                     ),
-                                    // decoration: const InputDecoration(
-                                    //   labelText: '請輸入查詢地址',
-                                    //   border: OutlineInputBorder(),
-                                    //   isDense: true,
-                                    //   contentPadding: EdgeInsets.all(12),
-                                    // ),
                                     onChanged: (value) async {
                                       if (value == "")
                                       {
@@ -190,13 +185,16 @@ class _EstimatePriceState extends State<EstimatePrice> {
                                 onTap: () {
                                   bool _empty = false;
                                   addressFieldControllers.forEach((element) {
-                                    print("object $element");
                                     if (element.text == '')
                                       _empty = true;
                                   });
                                   setState(() {
-                                    if (stop_num <= 5 && !_empty)
-                                      stop_num += 1;
+                                    if (stop_num <= 4 && !_empty)
+                                      {
+                                        stop_num += 1;
+                                        addressFieldControllers.add(TextEditingController());
+                                      }
+
                                   });
                                 },
                                 child: Image.asset(
@@ -266,7 +264,7 @@ class _EstimatePriceState extends State<EstimatePrice> {
                   return Column(
                     children: [
                       Container(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
                           child: Row(
                             children: [
                               Image.asset(
@@ -284,6 +282,8 @@ class _EstimatePriceState extends State<EstimatePrice> {
                                     decoration: const InputDecoration(
                                       labelText: '請輸入查詢地址',
                                       border: OutlineInputBorder(),
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.all(12),
                                     ),
                                   ),
                                 ),
@@ -330,7 +330,7 @@ class _EstimatePriceState extends State<EstimatePrice> {
                                             Text(
                                               places[index][idx].name, // Set the maximum number of lines before it truncates
                                               overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                 fontSize: 18,
                                               ),
                                             ),
@@ -380,7 +380,7 @@ class _EstimatePriceState extends State<EstimatePrice> {
                               primary: Colors.white,
                               minimumSize: const Size(double.infinity, 50),
                             ),
-                            onPressed: () {
+                            onPressed: () async{
                               bool _contain = false;
                               addressFieldControllers.forEach((element) {
                                 if (element.text == '')
@@ -389,16 +389,18 @@ class _EstimatePriceState extends State<EstimatePrice> {
                               if (_contain || _addressEndFieldController.text == '') {
                                 DialogUtils.showErrorDialog("查詢失敗", "請先確定所有地址或地點名稱皆有填寫後，再重新查詢", context);
                               } else {
-                                // getDirections();
-                                //   if (!addressFieldControllers.contains(_addressEndFieldController))
-                                //     addressFieldControllers.add(_addressEndFieldController);
-                                // print("推 `${addressFieldControllers.length}");
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => CountPricePage(addressFieldControllers:addressFieldControllers)
-                                  ),
-                                );
+
+                                bool success = await getDirections();
+                                if (success) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => CountPricePage(addressFieldControllers:addressFieldControllers)
+                                    ),
+                                  );
+                                } else {
+                                  DialogUtils.showErrorDialog("查詢失敗", "請先確定所有地址或地點名稱皆有填寫後，再重新查詢", context);
+                                }
                               }
                             },
                             child: Row(
@@ -477,7 +479,6 @@ class _EstimatePriceState extends State<EstimatePrice> {
   }
 
   void openGoogleMap() async {
-    print("openGoogleMap");
     String startAddress = _addressStartFieldController.text;
     String endAddress = _addressEndFieldController.text;
 
@@ -492,38 +493,84 @@ class _EstimatePriceState extends State<EstimatePrice> {
 
   Future<void> searchPlaces(String keyword,int index) async {
     String country = "TW"; // Country code for Taiwan
+
+    // final url =
+    //     'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$keyword&types=address&language="TW"&components=country:ch&key=$debug_google_api_key';
+    // String url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input="+keyword+"&region=$country&inputtype=textquery&fields=formatted_address,name,geometry&language=zh-TW&key="+debug_google_api_key;
     String url =
         "https://maps.googleapis.com/maps/api/place/textsearch/json?query=$keyword&key=$debug_google_api_key&region=$country";
     print("url $url");
     var response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-       print("response.body ${response.body}");
       Map<String, dynamic> data = json.decode(response.body);
       if (data['status'] == 'OK') {
         List<dynamic> results = data['results'];
         List<Place> fetchedPlaces = results.map((placeData) => Place.fromJson(placeData)).toList();
 
+        //清除其他已經搜尋地址列表
+        places.forEach((element) {
+          for (int i = 0; i < places.length; i++) {
+            if (i != index)
+              {
+                setState(() {
+                  places[i] = [];
+                });
+              }
+          }
+        });
         setState(() {
           print("index: $index");
           places[index] = fetchedPlaces;
-          //print("oo ${ places[index]}");
         });
-        //print("Fetched ${fetchedPlaces.length} places");
       } else {
         print("Error: ${data['status']}");
       }
     } else {
       print("Failed to fetch places. Error: ${response.statusCode}");
     }
-
   }
 
   void _updateAddressFieldControllers(int newStopNum) {
     if (newStopNum >= addressFieldControllers.length) {
-      addressFieldControllers.add(TextEditingController());
+      //addressFieldControllers.add(TextEditingController());
     } else if (newStopNum < addressFieldControllers.length) {
       addressFieldControllers.removeLast();
     }
   }
+
+  Future<bool> getDirections() async {
+    int count = 0;
+
+    while (count < addressFieldControllers.length - 1) {
+      String origin = addressFieldControllers[count].text;
+      String destination = addressFieldControllers[count+1].text;
+
+      String waypoints = '';
+      String token = debug_google_api_key;
+      bool avoidHighways = true;
+      try {
+        dynamic directionsData = await apiRequest.estimateDirections(
+          origin,
+          destination,
+          waypoints,
+          token,
+          avoidHighways,
+        );
+
+        if (directionsData.containsKey("error")) {
+          print("hey error ${directionsData["error"]}");
+        } else {
+        }
+        RoutesResponse re = RoutesResponse.fromJson(directionsData);
+        routesResponseList.add(re);
+      } catch (e) {
+        print("eeee $e");
+        return false;
+      }
+      count++;
+    }
+    return true;
+  }
+
 }

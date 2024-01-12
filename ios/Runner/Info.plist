@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Untitled1</string>
+	<string>邯武派遣系統</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>untitled1</string>
+	<string>new_glad_driver</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -60,5 +60,7 @@
 	<string>Using camera</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Use library for message photo</string>
+	<key>aps-environment</key>
+	<string>development</string>
 </dict>
 </plist>

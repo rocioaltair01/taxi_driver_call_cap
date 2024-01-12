@@ -113,7 +113,7 @@ class _ReservationDetailPageState extends State<ReservationDetailPage> {
                       ? '此乘客無提供下車地點' : ticketDetail!.billInfo.offLocation.toString(), currentPosition: ticketDetail!.billInfo.offGps ?? [0,0],),
                   HistoryListItem(label:'乘客人數', value: '${ticketDetail!.billInfo.userNumber.toString()}位' ?? ''),
                   HistoryListItem(label:'乘客備註:', value: ticketDetail!.billInfo.passengerNote ?? ''),
-                  HistoryListItem(label:'里程數:', value: '${ticketDetail!.billInfo.milage.toString()}(公里)' ?? ''),
+                  HistoryListItem(label:'里程數:', value: '${ticketDetail!.billInfo.milage}(公里)' ?? ''),
                   HistoryListItem(label:'分鐘:', value: '${ticketDetail!.billInfo.routeSecond.toString()}(分鐘)' ?? ''),
                   HistoryListItem(label:'金額:', value: '＄${ticketDetail!.billInfo.actualPrice}' ?? ''),
                 ],

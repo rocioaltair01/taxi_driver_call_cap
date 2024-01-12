@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-
-import 'pages/login_page.dart';
+import 'constants/route_generator.dart';
+import 'firebase_options.dart';
 import 'pages/splash_page.dart';
-import 'pages/tabbar_page.dart';
 import 'pages/主畫面/main_page.dart';
 import 'respository/navigation_service.dart';
 
@@ -22,7 +20,10 @@ void main() async{
   await dotenv.load(fileName: ".env");
 
   cameras = await availableCameras();
-  await Firebase.initializeApp();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   //Get the token
@@ -49,7 +50,6 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: [
-        const Locale('en', 'US'), // English
         const Locale('zh', 'TW'), // Traditional Chinese
       ],
       onGenerateRoute: RouteGenerator.generateRoutes,
@@ -78,24 +78,5 @@ class MyApp extends StatelessWidget {
       ),
       home: const SplashPage(),
     );
-  }
-}
-
-class RouteGenerator {
-  static Route<dynamic> generateRoutes(RouteSettings settings) {
-    switch(settings.name) {
-      case '/':
-        return MaterialPageRoute(builder: (context) => const SplashPage());
-      case '/LoginPage':
-        return MaterialPageRoute(builder: (context) => const LoginPage());
-      case '/TabbarPage':
-        return MaterialPageRoute(builder: (context) => const TabbarPage());
-      default:
-        return MaterialPageRoute(builder: (context) => Scaffold(
-          body: Center(
-            child: Text("Not found ${settings.name}"),
-          ),
-        ));
-    }
   }
 }

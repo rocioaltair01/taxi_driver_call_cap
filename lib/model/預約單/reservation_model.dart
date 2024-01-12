@@ -43,7 +43,7 @@ class ReservationListResult {
 
 class BillList {
   final PassengerServerInfo passengerServerInfo;
-  final BillInfo billInfo;
+  final BillInfoResevation billInfo;
 
   BillList({
     required this.passengerServerInfo,
@@ -54,7 +54,7 @@ class BillList {
     print("yo yo $json");
     return BillList(
       passengerServerInfo: PassengerServerInfo.fromJson(json['passengerServerInfo'] ?? {}),
-      billInfo: BillInfo.fromJson(json['billInfo']),
+      billInfo: BillInfoResevation.fromJson(json['billInfo']),
     );
   }
 }
@@ -76,7 +76,7 @@ class PassengerServerInfo {
   }
 }
 
-class BillInfo {
+class BillInfoResevation {
   final dynamic? driverId;
   final int orderStatus;
   final int reservationId;
@@ -99,7 +99,7 @@ class BillInfo {
   final String passengerOnLocationNote;
   final String isDeal;
 
-  BillInfo({
+  BillInfoResevation({
     required this.driverId,
     required this.orderStatus,
     required this.reservationId,
@@ -123,8 +123,8 @@ class BillInfo {
     required this.isDeal,
   });
 
-  factory BillInfo.fromJson(Map<String, dynamic> json) {
-    return BillInfo(
+  factory BillInfoResevation.fromJson(Map<String, dynamic> json) {
+    return BillInfoResevation(
       driverId: json['driverId'] ?? 0,
       orderStatus: json['orderStatus'] ?? 0,
       reservationId: json['reservationId'] ?? 0,

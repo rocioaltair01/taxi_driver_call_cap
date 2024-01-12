@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:untitled1/constants/constants.dart';
+import 'package:new_glad_driver/constants/constants.dart';
 
 import '../../model/user_data_singleton.dart';
 

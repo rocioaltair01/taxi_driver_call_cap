@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../model/user_data_singleton.dart';
 import '../../model/預約單/reservation_model.dart';
 import '../../respository/api_service.dart';
+import '../../respository/主畫面/get_ticket_status_api.dart';
 import '上下線/offline_page.dart';
 import '上下線/online_page.dart';
 import '開始載客/is_picking_guest.dart';
@@ -45,7 +46,7 @@ class MainPage extends StatefulWidget {
 class MainPageState extends State<MainPage> {
   String pick_status = "前往載客中";
   // GuestStatus current_status = GuestStatus.IS_NOT_OPEN;
-  BillInfo? bill;
+  BillInfoResevation? bill;
   LatLng? _currentPosition;
   int order_type = 1;
   late Timer _timer;
@@ -76,8 +77,9 @@ class MainPageState extends State<MainPage> {
     });
 
     _timer = Timer.periodic(Duration(seconds: 15), (Timer timer) {
-      // 在这里调用你的API
       callAPI();
+      if (bill != null)
+        GetTicketStatusApi().getTicketStatus(bill!.reservationId, order_type);
     });
   }
 

@@ -8,8 +8,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:route_panel/route_panel.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:untitled1/pages/%E4%B8%BB%E7%95%AB%E9%9D%A2/%E4%B8%8A%E4%B8%8B%E7%B7%9A/grab_success_page.dart';
-import 'package:untitled1/util/dialog_util.dart';
+import 'package:new_glad_driver/pages/%E4%B8%BB%E7%95%AB%E9%9D%A2/%E4%B8%8A%E4%B8%8B%E7%B7%9A/grab_success_page.dart';
+import 'package:new_glad_driver/util/dialog_util.dart';
 
 import '../../../model/user_data_singleton.dart';
 import '../../../model/主畫面/instant_item_model.dart';
@@ -466,7 +466,6 @@ class _OnlinePageState extends State<OnlinePage> {
             setState(() {
               isShowDialog = false;
             });
-
             //DialogUtils.showGrabTicketDialog("12345", "上車地點: 台南市中西區成功路1號", "", context);
           },
           onCancelPressed: () {

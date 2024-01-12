@@ -1,10 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-// import 'package:camera/camera.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:untitled1/model/user_data_singleton.dart';
+import 'package:new_glad_driver/model/user_data_singleton.dart';
 
 import '../components/message_view.dart';
 
@@ -30,9 +28,9 @@ class _MessagePageViewState extends State<MessagePageView> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-    });
+    // WidgetsBinding.instance?.addPostFrameCallback((_) {
+    //   _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    // });
     // controller = CameraController(_cameras[0], ResolutionPreset.max);
     //  controller.initialize().then((_) {
     //    if (!mounted) {
@@ -58,6 +56,8 @@ class _MessagePageViewState extends State<MessagePageView> {
   Widget build(BuildContext context) {
     messageView.startReadingTwoSideMessage('HHH-8299');
 
+    // if (!isLoading)
+    //   _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     return isLoading ?
     const Center(
       child: SpinKitFadingCircle(

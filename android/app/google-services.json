@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:770594185182:android:6e4ffb23cafe6ad982874f",
         "android_client_info": {
-          "package_name": "com.example.untitled1"
+          "package_name": "com.example.new_glad_driver"
         }
       },
       "oauth_client": [
@@ -89,7 +89,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:770594185182:android:0de4dc775a68f8d282874f",
         "android_client_info": {
-          "package_name": "com.example.untitled1"
+          "package_name": "com.example.new_glad_driver"
         }
       },
       "oauth_client": [
@@ -97,7 +97,7 @@
           "client_id": "770594185182-2068c64n3rt52oog6tl7bk4p0g2oe35o.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.untitled1",
+            "package_name": "com.example.new_glad_driver",
             "certificate_hash": "5592fa33e02adf147544f06713220b163cd4edb7"
           }
         },

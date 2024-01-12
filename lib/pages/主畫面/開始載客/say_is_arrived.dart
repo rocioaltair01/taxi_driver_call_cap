@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:untitled1/util/dialog_util.dart';
+import 'package:new_glad_driver/util/dialog_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../main.dart';
@@ -14,7 +14,8 @@ import '../../../model/預約單/reservation_model.dart';
 import '../../../respository/主畫面/giveup_api.dart';
 import '../../../respository/主畫面/start_picking_passenger_api.dart';
 import '../../../respository/主畫面/update_arrive_photo.dart';
-import '../細節頁/customer_message_page.dart';
+import '../../../respository/主畫面/update_friday_time_api.dart';
+import '../上下線/offline_count_price_page.dart';
 import '../細節頁/estimate_price.dart';
 import '../main_page.dart';
 
@@ -27,7 +28,7 @@ enum PickingStatus {
 
 
 class SayIsArrivedPage extends StatefulWidget {
-  final BillInfo? bill;
+  final BillInfoResevation? bill;
   const SayIsArrivedPage({super.key, this.bill});
 
   @override
@@ -44,8 +45,8 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
 
   LatLng? _currentPosition;
   bool showCamera = false;
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
+  // late CameraController _controller;
+  // late Future<void> _initializeControllerFuture;
 
 
   @override
@@ -54,12 +55,12 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
     getLocation();
     startTimer();
     print("ccc $cameras");
-    _controller = CameraController(
-      cameras.first,
-      ResolutionPreset.medium,
-    );
-
-    _initializeControllerFuture = _controller.initialize();
+    // _controller = CameraController(
+    //   cameras.first,
+    //   ResolutionPreset.medium,
+    // );
+    //
+    // _initializeControllerFuture = _controller.initialize();
   }
 
   void startTimer() {
@@ -107,7 +108,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size.width;
-
+    double screenHeight = MediaQuery.of(context).size.height;
     return (showCamera) ? Scaffold(
       appBar: AppBar(
         title: Text('相機'),
@@ -115,8 +116,6 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
           IconButton(
             icon: Icon(Icons.cancel),
             onPressed: () {
-              // Navigate back (pop) when cancel button is pressed
-
               setState(() {
                showCamera = false;
              });
@@ -124,68 +123,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
           ),
         ],
       ),
-      body: //
-      Column(
-        children: [
-          Container(
-            color: Colors.black,
-            child: AspectRatio(
-              aspectRatio: 1.0,
-              child: FutureBuilder<void>(
-                future: _initializeControllerFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    // If the Future is complete, display the preview.
-                    return CameraPreview(_controller);
-                  } else {
-                    // Otherwise, display a loading indicator.
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                },
-              ),
-            ),
-          ),
-          Expanded(
-              child: Center(
-                child: Container(
-                  height: 50,
-                  width: 50,
-                  child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightGreenAccent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50.0), // Make it circular
-                        ),
-                        minimumSize: const Size(50, 50),
-                      ),
-                      onPressed: () {
-                        if (_controller != null)
-                        {
-                          _controller.takePicture().then((XFile? file) {
-                            if(mounted) {
-                              if(file != null) {
-                                print("Picture saved to ${file.path}");
-                                UpdateArrivePhotoApi.updateArrivePhoto(
-                                    filePath: file.path,
-                                    orderId: widget.bill!.reservationId,
-                                    orderType: mainPageKey.currentState!.order_type
-                                );
-                              }
-                            }
-                          });
-                        }
-                        setState(() {
-                          showCamera = false;
-                        });
-                      },
-                      child: Container()
-                  ),
-                ),
-
-              )
-          )
-        ],
-      )
+      body: TakePictureScreen(bill: widget.bill)
     ) : Scaffold(
       body: Column(
         children: [
@@ -204,14 +142,6 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                 ),
               ) : Container(
                 height: 250,
-                // child: GoogleMap(
-                //   onMapCreated: _onMapCreated,
-                //   initialCameraPosition: CameraPosition(
-                //     target: LatLng(0,0),
-                //     zoom: 16.0,
-                //   ),
-                //   myLocationEnabled: true,
-                // ),
               ),
               Positioned(
                 top: 50,
@@ -224,126 +154,131 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
           Expanded(
               child: Stack(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                  SizedBox(
+                      height: screenHeight - 250 - 160 - 85,
+                    child: SingleChildScrollView(
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              "訂單編號:",
-                              style: TextStyle(
-                                color: Colors.black, // Set text color to black
-                                fontSize: 18, // Set font size as needed
-                              ),
-                            ),
-                            const Expanded(child: SizedBox()),
-                            Text(
-                              widget.bill != null ? widget.bill!.reservationId.toString() : '',
-                              style: const TextStyle(
-                                color: Colors.black, // Set text color to black
-                                fontSize: 20, // Set font size as needed
-                              ),
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 10,),
-                        Row(
-                          children: [
-                            Expanded(child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Row(
                               children: [
                                 const Text(
-                                  "上車定點：",
+                                  "訂單編號:",
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 18,
                                   ),
                                 ),
+                                const Expanded(child: SizedBox()),
                                 Text(
-                                  widget.bill != null ? widget.bill!.onLocation.toString() : '',
+                                  widget.bill != null ? widget.bill!.reservationId.toString() : '',
                                   style: const TextStyle(
                                     color: Colors.black,
                                     fontSize: 20,
-                                      overflow: TextOverflow.clip
                                   ),
-                                ),
+                                )
                               ],
-                            ),),
-                            InkWell(
-                              onTap: () {
-                                openGoogleMap(widget.bill!.onLocation);
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(12), // Set padding as needed
-                                child: Image.asset(
-                                  'assets/images/location.png', // Replace with your image path
-                                  width: 30, // Set width as needed
-                                  height: 30, // Set height as needed
-                                  fit: BoxFit.cover, // Adjust the fit as needed
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 10,),
-                        Row(
-                          children: [
-                            Expanded(child: Container(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text("下車定點：",
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                  Text(
-                                    widget.bill != null ? widget.bill!.offLocation.toString() : '',
-                                    style: const TextStyle(
+                            ),
+                            SizedBox(height: 10,),
+                            Row(
+                              children: [
+                                Expanded(child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      "上車定點：",
+                                      style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 20,
-                                        overflow: TextOverflow.clip
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    Text(
+                                      widget.bill != null ? widget.bill!.onLocation.toString() : '',
+                                      style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 20,
+                                          overflow: TextOverflow.clip
+                                      ),
+                                    ),
+                                  ],
+                                ),),
+                                InkWell(
+                                  onTap: () {
+                                    openGoogleMap(widget.bill!.onLocation);
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(12),
+                                    child: Image.asset(
+                                      'assets/images/location.png',
+                                      width: 30,
+                                      height: 30,
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
-                                ],
+                                )
+                              ],
+                            ),
+                            SizedBox(height: 10,),
+                            Row(
+                              children: [
+                                Expanded(child: Container(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text("地點：",
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                      Text(
+                                        widget.bill != null ? widget.bill!.offLocation.toString() : '',
+                                        style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 20,
+                                            overflow: TextOverflow.clip
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),),
+                                //Expanded(child: Container()),
+                                InkWell(
+                                  onTap: () {
+                                    openGoogleMap(widget.bill!.offLocation);
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(12),
+                                    child: Image.asset(
+                                      'assets/images/location.png',
+                                      width: 30,
+                                      height: 30,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                            SizedBox(height: 10,),
+                            const Text("備註：",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
                               ),
-                            ),),
-                            //Expanded(child: Container()),
-                            InkWell(
-                              onTap: () {
-                                openGoogleMap(widget.bill!.offLocation);
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(12), // Set padding as needed
-                                child: Image.asset(
-                                  'assets/images/location.png', // Replace with your image path
-                                  width: 30, // Set width as needed
-                                  height: 30, // Set height as needed
-                                  fit: BoxFit.cover, // Adjust the fit as needed
-                                ),
+                            ),
+                            Text(
+                              widget.bill != null ? widget.bill!.passengerNote.toString() : '',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
                               ),
                             )
                           ],
                         ),
-                        SizedBox(height: 10,),
-                        const Text("備註：",
-                          style: TextStyle(
-                            color: Colors.black, // Set text color to black
-                            fontSize: 18, // Set font size as needed
-                          ),
-                        ),
-                        Text(
-                          widget.bill != null ? widget.bill!.passengerNote.toString() : '',
-                          style: const TextStyle(
-                            color: Colors.black, // Set text color to black
-                            fontSize: 20, // Set font size as needed
-                          ),
-                        )
-                      ],
-                    ),
+                      ),
+                    )
                   ),
                   (current_status == PickingStatus.ARRIVED) ?
                   Positioned(
@@ -414,23 +349,6 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                   ),
                                   Container(height: 20,),
                                   Container(height: 50,),
-                                  // ElevatedButton(
-                                  //   style: ElevatedButton.styleFrom(
-                                  //     shape: RoundedRectangleBorder(
-                                  //       borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                                  //     ),
-                                  //     minimumSize: Size(double.infinity, 50), // Set the button height
-                                  //   ),
-                                  //   onPressed: () {
-                                  //   },
-                                  //   child: const Text(
-                                  //     '週五跳錶',
-                                  //     style: TextStyle(
-                                  //       fontSize: 16,
-                                  //       fontWeight: FontWeight.bold,
-                                  //     ),
-                                  //   ),
-                                  // ),
                                 ],
                               ),
                             ),
@@ -547,9 +465,19 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
                                         ),
-                                        minimumSize: Size(double.infinity, 50), // Set the button height
+                                        minimumSize: const Size(double.infinity, 50), // Set the button height
                                       ),
-                                      onPressed: () {
+                                      onPressed: () async{
+                                        await UpdateFridayTimeApi().updateFridayTime(
+                                            widget.bill!.reservationId,
+                                            mainPageKey.currentState!.order_type
+                                        );
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => OfflineCountPricePage()
+                                          ),
+                                        );
                                       },
                                       child: const Text(
                                         '週五跳錶',
@@ -646,7 +574,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         }
                                       },
                                       child: const Text(
-                                        '已載客1',
+                                        '已載客',
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -735,7 +663,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                       },
                                       child: Text(
                                         isGivingup ? '申請放棄中' : '申請放棄',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -755,7 +683,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
                                       ),
-                                      minimumSize: Size(double.infinity, 50), // Set the button height
+                                      minimumSize: const Size(double.infinity, 50), // Set the button height
                                     ),
                                     onPressed: () {
                                     },
@@ -803,7 +731,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
                                         ),
-                                        minimumSize: Size(double.infinity, 50), // Set the button height
+                                        minimumSize: const Size(double.infinity, 50), // Set the button height
                                       ),
                                       onPressed: () async{
                                         if (mainPageKey.currentState?.bill?.reservationId != null)
@@ -882,7 +810,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
                                         ),
-                                        minimumSize: Size(double.infinity, 50), // Set the button height
+                                        minimumSize: const Size(double.infinity, 50), // Set the button height
                                       ),
                                       onPressed: () {
                                       },
@@ -958,7 +886,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
                                         ),
-                                        minimumSize: Size(double.infinity, 50), // Set the button height
+                                        minimumSize: const Size(double.infinity, 50), // Set the button height
                                       ),
                                       onPressed: () async{
                                         if (mainPageKey.currentState?.bill?.reservationId != null)
@@ -1005,9 +933,6 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
   }
 
   void openGoogleMap(String endAddress) async {
-    print("openGoogleMap");
-    // String startAddress = widget.addressFieldControllers[0].text;
-    // String endAddress = widget.addressFieldControllers[widget.addressFieldControllers.length-1].text;
     double currentLat = _currentPosition?.latitude ?? 0;
     double currentLng = _currentPosition?.longitude ?? 0;
 
@@ -1023,74 +948,132 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
 
 
 // // A screen that allows users to take a picture using a given camera.
-// class TakePictureScreen extends StatefulWidget {
-//   const TakePictureScreen({
-//     super.key,
-//   });
-//   @override
-//   TakePictureScreenState createState() => TakePictureScreenState();
-// }
-//
-// class TakePictureScreenState extends State<TakePictureScreen> {
-//   late CameraController _controller;
-//   late Future<void> _initializeControllerFuture;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     // To display the current output from the Camera,
-//     // create a CameraController.
-//     _controller = CameraController(
-//       // Get a specific camera from the list of available cameras.
-//       cameras.first,
-//       // Define the resolution to use.
-//       ResolutionPreset.medium,
-//     );
-//
-//     // Next, initialize the controller. This returns a Future.
-//     _initializeControllerFuture = _controller.initialize();
-//   }
-//
-//   @override
-//   void dispose() {
-//     // Dispose of the controller when the widget is disposed.
-//     _controller.dispose();
-//     super.dispose();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text('Take a picture')),
-//       body: FutureBuilder<void>(
-//         future: _initializeControllerFuture,
-//         builder: (context, snapshot) {
-//           if (snapshot.connectionState == ConnectionState.done) {
-//             // If the Future is complete, display the preview.
-//             return CameraPreview(_controller);
-//           } else {
-//             // Otherwise, display a loading indicator.
-//             return const Center(child: CircularProgressIndicator());
-//           }
-//         },
-//       ),
-//     );
-//   }
-// }
-//
-// // A widget that displays the picture taken by the user.
-// class DisplayPictureScreen extends StatelessWidget {
-//   final String imagePath;
-//
-//   const DisplayPictureScreen({super.key, required this.imagePath});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text('Display the Picture')),
-//       // The image is stored as a file on the device. Use the `Image.file`
-//       // constructor with the given path to display the image.
-//       body: Image.file(File(imagePath)),
-//     );
-//   }
-// }
+class TakePictureScreen extends StatefulWidget {
+  final BillInfoResevation? bill;
+
+  const TakePictureScreen({
+    this.bill,
+    super.key,
+  });
+  @override
+  TakePictureScreenState createState() => TakePictureScreenState();
+}
+
+class TakePictureScreenState extends State<TakePictureScreen> {
+  late CameraController _controller;
+  late Future<void> _initializeControllerFuture;
+
+
+  @override
+  void initState() {
+    super.initState();
+    // To display the current output from the Camera,
+    // create a CameraController.
+    _controller = CameraController(
+      // Get a specific camera from the list of available cameras.
+      cameras.first,
+      // Define the resolution to use.
+      ResolutionPreset.medium,
+    );
+
+    // Next, initialize the controller. This returns a Future.
+    _initializeControllerFuture = _controller.initialize();
+  }
+
+  @override
+  void dispose() {
+    // Dispose of the controller when the widget is disposed.
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Take a picture')),
+      body: Column(
+        children: [
+          // Container(
+          //   height: 200,
+          //   child:    TakePictureScreen(),
+          // ),
+
+          Container(
+            color: Colors.black,
+            child: AspectRatio(
+              aspectRatio: 1.0,
+              child: FutureBuilder<void>(
+                future: _initializeControllerFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    // If the Future is complete, display the preview.
+                    return CameraPreview(_controller);
+                  } else {
+                    // Otherwise, display a loading indicator.
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                },
+              ),
+            ),
+          ),
+          Expanded(
+              child: Center(
+                child: Container(
+                  height: 50,
+                  width: 50,
+                  child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightGreenAccent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50.0), // Make it circular
+                        ),
+                        minimumSize: const Size(50, 50),
+                      ),
+                      onPressed: () {
+                        if (_controller != null)
+                        {
+                          print("object");
+                          _controller.takePicture().then((XFile? file) {
+                            if(mounted) {
+                              print("objectee $file ${widget.bill}");
+                              if(file != null && widget.bill != null) {
+                                print("objecteedfd");
+                                print("Picture saved to ${file.path}");
+                                UpdateArrivePhotoApi.updateArrivePhoto(
+                                    filePath: file.path,
+                                    orderId: widget.bill!.reservationId ?? 0,
+                                    orderType: mainPageKey.currentState!.order_type
+                                );
+                              }
+                            }
+                          });
+                        }
+                        setState(() {
+                         // showCamera = false;
+                        });
+                      },
+                      child: Container()
+                  ),
+                ),
+
+              )
+          )
+        ],
+      )
+    );
+  }
+}
+
+class DisplayPictureScreen extends StatelessWidget {
+  final String imagePath;
+
+  const DisplayPictureScreen({super.key, required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Display the Picture')),
+      body: Image.file(File(imagePath)),
+    );
+  }
+}

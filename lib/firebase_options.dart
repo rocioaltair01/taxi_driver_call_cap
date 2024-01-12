@@ -78,6 +78,6 @@ class DefaultFirebaseOptions {
     projectId: 'taxi-a82f8',
     storageBucket: 'taxi-a82f8.appspot.com',
     androidClientId: '770594185182-0s74bfc4f49imt6n1a483b1956a8315b.apps.googleusercontent.com',
-    iosBundleId: 'com.example.untitled1.RunnerTests',
+    iosBundleId: 'com.example.new_glad_driver.RunnerTests',
   );
 }

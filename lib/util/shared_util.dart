@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 double calculateTotalCost(
     int perKmOfFare,
     int perMinOfFare,
@@ -15,7 +17,6 @@ double calculateTotalCost(
         timeInSeconds / 60.0 * perKmOfFare +
         initialFare + extraFare;
   } else {
-    print("kdjc;");
     totalCost =
         distanceInMeters / 1000 * perKmOfFare + timeInSeconds / 60.0 * distanceInMeters + extraFare + lowestFare;
   }
@@ -25,4 +26,34 @@ double calculateTotalCost(
   }
 
   return totalCost;
+}
+
+class DateUtil {
+  List<String> generateYearList() {
+    int currentYear = DateTime.now().year;
+    List<String> years = [];
+
+    for (int i = currentYear; i >= currentYear - 23; i--) {
+      years.insert(0,'$i年');
+    }
+
+    return years;
+  }
+
+  String getDate(String dateString)
+  {
+    DateTime dateTime = DateTime.parse(dateString);
+    String formattedDate = DateFormat('M-d HH:mm(E)', 'zh').format(dateTime.toLocal());
+    formattedDate = formattedDate.replaceAll("周", "週");
+    return formattedDate;
+  }
+
+  String getDateYear(String dateString)
+  {
+    DateTime dateTime = DateTime.parse(dateString);
+
+    String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
+    print(formattedDate); // Output: 12-11 13:33 (Mon)
+    return formattedDate;
+  }
 }

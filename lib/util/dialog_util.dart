@@ -111,7 +111,7 @@ class GlobalDialog {
                 Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Text(
-                    "里程數: $distance 公里",
+                    "里程數: ${distance} 公里",
                     style: TextStyle(
                         fontSize: 18
                     ),
@@ -152,7 +152,7 @@ class GlobalDialog {
                           Navigator.of(context).pop();
                         },
                         child: Text(
-                          '結帳回空車畫面',
+                          '結帳',
                           style: TextStyle(
                               fontSize: 18
                           ),
@@ -277,25 +277,6 @@ class GlobalDialog {
         );
       },
     );
-  }
-}
-
-class DateUtil {
-  String getDate(String dateString)
-  {
-    DateTime dateTime = DateTime.parse(dateString);
-    String formattedDate = DateFormat('M-d HH:mm(E)', 'zh').format(dateTime.toLocal());
-    formattedDate = formattedDate.replaceAll("周", "週");
-    return formattedDate;
-  }
-
-  String getDateYear(String dateString)
-  {
-    DateTime dateTime = DateTime.parse(dateString);
-
-    String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
-    print(formattedDate); // Output: 12-11 13:33 (Mon)
-    return formattedDate;
   }
 }
 
