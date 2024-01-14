@@ -41,17 +41,29 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
   }
 
   void startTimer() {
-    distanceTimer = Timer.periodic(Duration(seconds: 10), (timer) {
+    distanceTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      CalculatedInfo calculateInfo = UserDataSingleton.instance.setting.calculatedInfo;
       calculateDistance();
+      print("ROCIO: price $price distance $distance duration $duration");
+      setState(() {
+        price = PriceUtil().calculateTotalCost(
+            calculateInfo.perKmOfFare,
+            calculateInfo.perMinOfFare,
+            calculateInfo.initialFare,
+            calculateInfo.upPerKmOfFare,
+            calculateInfo.extraFare,
+            calculateInfo.lowestFare,
+            distance,
+            (duration/60).toInt());
+      });
     });
-    timeTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+    timeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       duration = duration + 1;
     });
   }
 
   void calculateDistance() async {
     if (_currentPosition != null) {
-      // Fetch the user's current location
       Position newPosition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
@@ -73,19 +85,16 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
   }
 
   getLocation() async {
-
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
 
     double lat = position.latitude;
     double long = position.longitude;
-
     LatLng location = LatLng(lat, long);
 
     setState(() {
       _currentPosition = location;
-      //_isOpen = false;
     });
   }
 
@@ -99,8 +108,8 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
             children: [
               Expanded(child: Container()),
               Text(
-                "跳表金額: $price 元",
-                style: TextStyle(
+                "跳表金額: ${price.toInt()} 元",
+                style: const TextStyle(
                   color: Colors.black,
                   fontSize: 18,
                 ),
@@ -108,7 +117,7 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
               const SizedBox(height: 10,),
               Text(
                 "分鐘數: ${double.parse((duration/60).toStringAsFixed(1))} 分",
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black,
                   fontSize: 18,
                 ),
@@ -116,7 +125,7 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
               const SizedBox(height: 10,),
               Text(
                 "里程數: ${distance.toStringAsFixed(1)} 公里",
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black,
                   fontSize: 18,
                 ),
@@ -160,12 +169,12 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(5), // Adjust the value as needed
                                 ),
-                                minimumSize: Size(double.infinity, 50),
+                                minimumSize: const Size(double.infinity, 50),
                               ),
 
                               onPressed: () async {
                                 CalculatedInfo calculateInfo = UserDataSingleton.instance.setting.calculatedInfo;
-                                double totalPrice = calculateTotalCost(
+                                double totalPrice = PriceUtil().calculateTotalCost(
                                     calculateInfo.perKmOfFare,
                                     calculateInfo.perMinOfFare,
                                     calculateInfo.initialFare,

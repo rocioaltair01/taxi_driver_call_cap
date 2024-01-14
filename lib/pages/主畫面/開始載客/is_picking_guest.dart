@@ -53,6 +53,19 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
   void startTimer() {
     distanceTimer = Timer.periodic(Duration(seconds: 10), (timer) {
       calculateDistance();
+      CalculatedInfo calculateInfo = UserDataSingleton.instance.setting.calculatedInfo;
+      setState(() {
+        print("ROCIO: price $price distance $distance duration $duration");
+        price = PriceUtil().calculateTotalCost(
+            calculateInfo.perKmOfFare,
+            calculateInfo.perMinOfFare,
+            calculateInfo.initialFare,
+            calculateInfo.upPerKmOfFare,
+            calculateInfo.extraFare,
+            calculateInfo.lowestFare,
+            distance,
+            (duration/60).toInt());
+      });
     });
     timeTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       duration = duration + 1;
@@ -157,7 +170,7 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                             Row(
                               children: [
                                 Text(
-                                  "跳表金額: $price 元",
+                                  "跳表金額: ${price.toInt()} 元",
                                   style: const TextStyle(
                                     color: Colors.black,
                                     fontSize: 18,
@@ -365,7 +378,7 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                                             {
 
                                               CalculatedInfo calculateInfo = UserDataSingleton.instance.setting.calculatedInfo;
-                                              double totalPrice = calculateTotalCost(
+                                              double totalPrice = PriceUtil().calculateTotalCost(
                                                   calculateInfo.perKmOfFare,
                                                   calculateInfo.perMinOfFare,
                                                   calculateInfo.initialFare,

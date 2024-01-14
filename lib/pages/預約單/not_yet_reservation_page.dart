@@ -108,38 +108,41 @@ class _NotYetReservationState extends State<NotYetReservation> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              formattedDate,
+                              "預約時間: $formattedDate",
                               overflow: TextOverflow.clip,
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 18,
                               ),// Handle long text
                             ),
                             Text(
                               '從: ${billList[index].billInfo.onLocation}',
                               overflow: TextOverflow.clip,
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 18,
                               ),
                             ),
                             Text(
+                              (billList[index].billInfo.offLocation == null ||
+                                  billList[index].billInfo.offLocation == "") ?
+                              '到: 無上車地點' :
                               '到: ${billList[index].billInfo.offLocation}',
                               overflow: TextOverflow.clip,
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 18,
                               ),
                             ),
                             Text(
                               '服務備註: ${billList[index].billInfo.passengerNote}',
                               overflow: TextOverflow.clip,
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 18,
                               ),
                             ),
                             Text(
                               '乘客人數: ${billList[index].billInfo.userNumber}人',
                               overflow: TextOverflow.clip,
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 18,
                               ),
                             ),
                             Divider(

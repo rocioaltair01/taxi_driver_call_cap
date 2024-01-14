@@ -29,14 +29,20 @@ void main() async{
   //Get the token
   String? token = await messaging.getAPNSToken();
   print('FCM Token: $token');
-  initializeDateFormatting('zh', null).then((_) {
-    runApp(
-        ChangeNotifierProvider(
-            create: (context) => StatusProvider(),
-            child: MyApp()
-        )
-    );
-  });
+  runApp(
+      ChangeNotifierProvider(
+          create: (context) => StatusProvider(),
+          child: MyApp()
+      )
+  );
+  // initializeDateFormatting('zh', null).then((_) {
+  //   runApp(
+  //       ChangeNotifierProvider(
+  //           create: (context) => StatusProvider(),
+  //           child: MyApp()
+  //       )
+  //   );
+  // });
 }
 
 class MyApp extends StatelessWidget {

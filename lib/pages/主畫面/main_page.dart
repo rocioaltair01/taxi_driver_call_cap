@@ -132,8 +132,8 @@ class MainPageState extends State<MainPage> {
               : (statusProvider.currentStatus == GuestStatus.ARRIVED)
               ? SayIsArrivedPage(bill: bill)
               : statusProvider.currentStatus == GuestStatus.IS_NOT_OPEN
-              ? OfflinePage()
-              : OnlinePage(),
+              ? const OfflinePage()
+              : const OnlinePage(),
         );
       },
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:new_glad_driver/util/google_map_util.dart';
 import 'package:provider/provider.dart';
 import 'package:new_glad_driver/pages/%E4%B8%BB%E7%95%AB%E9%9D%A2/%E7%B4%B0%E7%AF%80%E9%A0%81/customer_message_page.dart';
 import 'package:new_glad_driver/util/dialog_util.dart';
@@ -10,6 +11,7 @@ import '../../../model/預約單/reservation_model.dart';
 import '../../../respository/主畫面/arrived_success_api.dart';
 import '../細節頁/estimate_price.dart';
 import '../main_page.dart';
+
 
 class PrepareGetPage extends StatefulWidget {
   final BillInfoResevation? bill;
@@ -21,10 +23,6 @@ class PrepareGetPage extends StatefulWidget {
 
 class _PrepareGetPageState extends State<PrepareGetPage> {
   late GoogleMapController mapController;
-
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
   LatLng? _currentPosition;
 
   @override
@@ -50,6 +48,10 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
     });
   }
 
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -64,7 +66,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                 child: GoogleMap(
                   onMapCreated: _onMapCreated,
                   initialCameraPosition: CameraPosition(
-                    target: _currentPosition ?? LatLng(0, 0),
+                    target: _currentPosition!,
                     zoom: 16.0,
                   ),
                   myLocationEnabled: true,
@@ -141,7 +143,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                 )),
                                 InkWell(
                                   onTap: () {
-                                    openGoogleMap(widget.bill!.onLocation);
+                                    GoogleMapUtil().openGoogleMap(widget.bill!.offLocation,_currentPosition);
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.all(12),
@@ -180,7 +182,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                 ),
                                 InkWell(
                                   onTap: () {
-                                    openGoogleMap(widget.bill!.offLocation);
+                                    GoogleMapUtil().openGoogleMap(widget.bill!.offLocation,_currentPosition);
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.all(12),
@@ -219,7 +221,6 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                       left: 0,
                       right: 0,
                       child: SizedBox(
-                        height: 160,
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Row(
@@ -233,7 +234,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(8),
                                           ),
-                                          minimumSize: Size(double.infinity, 50),
+                                          minimumSize: const Size(double.infinity, 50),
                                         ),
                                         onPressed: () {
                                           Navigator.push(
@@ -252,14 +253,8 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                         ),
                                       ),
                                       Container(height: 20,),
-                                      ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          minimumSize: const Size(double.infinity, 50),
-                                        ),
-                                        onPressed: () async{
+                                      GestureDetector(
+                                        onDoubleTap:() async{
                                           if (mainPageKey.currentState?.bill?.reservationId != null)
                                           {
                                             print("markArrivalSuccess ${mainPageKey.currentState?.bill?.orderStatus}");
@@ -280,14 +275,24 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                             GlobalDialog.showAlertDialog(context, "no", "message");
                                           }
                                         },
-                                        child: const Text(
-                                          '已到定點',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.black,
+                                            borderRadius: BorderRadius.circular(10), // Adjust the value as needed
                                           ),
-                                        ),
-                                      ),
+                                          height: 50,
+                                          child: const Center(
+                                            child: Text(
+                                              '已到定點',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          )
+                                        )
+                                      )
                                     ],
                                   )
                               ),
@@ -302,7 +307,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(8),
                                           ),
-                                          minimumSize: Size(double.infinity, 50),
+                                          minimumSize: const Size(double.infinity, 50),
                                         ),
                                         onPressed: () {
                                           Navigator.push(
@@ -337,16 +342,16 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
     );
   }
 
-  void openGoogleMap(String endAddress) async {
-    double currentLat = _currentPosition?.latitude ?? 0;
-    double currentLng = _currentPosition?.longitude ?? 0;
-
-    if (endAddress.isNotEmpty) {
-      String url = 'https://www.google.com/maps/dir/?api=1&origin=$currentLat,$currentLng&destination=$endAddress';
-      final Uri uri = Uri.parse(url);
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      print('Please enter start and end addresses');
-    }
-  }
+  // void openGoogleMap(String endAddress) async {
+  //   double currentLat = _currentPosition?.latitude ?? 0;
+  //   double currentLng = _currentPosition?.longitude ?? 0;
+  //
+  //   if (endAddress.isNotEmpty) {
+  //     String url = 'https://www.google.com/maps/dir/?api=1&origin=$currentLat,$currentLng&destination=$endAddress';
+  //     final Uri uri = Uri.parse(url);
+  //     await launchUrl(uri, mode: LaunchMode.externalApplication);
+  //   } else {
+  //     print('Please enter start and end addresses');
+  //   }
+  // }
 }

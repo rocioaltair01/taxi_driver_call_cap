@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:new_glad_driver/util/dialog_util.dart';
 
 import '../../constants/constants.dart';
 import '../../model/user_data_singleton.dart';
@@ -31,6 +32,8 @@ class UpdateArrivePhotoApi {
     required String filePath,
     required int orderId,
     required int orderType,
+
+    required Function(String res) onError
   }) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse('$baseUrl/app/api/driver/upload/on_location?torder_type=$orderType&id=$orderId');
@@ -60,11 +63,10 @@ class UpdateArrivePhotoApi {
       } else {
         final responseJson = await http.Response.fromStream(response);
         print("yoyo 2 ${response.statusCode} ${responseJson.body}");
-        print("Update Arrive Photo Failed: Failed to update arrive photo");
+        onError(responseJson.body);
         throw Exception('Failed to update arrive photo');
       }
     } catch (error) {
-      print("yoyo 3");
       print("Update Arrive Photo Error: Failed to update arrive photo: $error");
       throw Exception('Failed to update arrive photo: $error');
     }

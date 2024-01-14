@@ -56,6 +56,7 @@ class _SplashPageState extends State<SplashPage> {
 
   void navigateMainPage() async {
     await Future.delayed(const Duration(seconds: 3));
+    NavigationService().routeTo('/LoginPage', arguments: 'just a test');
     NavigationService().routeTo('/TabbarPage', arguments: 'just a test');
   }
 
@@ -87,25 +88,16 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: isLoading ? const Center(child: SpinKitFadingCircle(
         color: Colors.black,
         size: 80.0,
       ),) : Center(
-        child: Column(
-          mainAxisAlignment:MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/images/launch.png'),
-            const Text(
-              "司機專用",
-              style: TextStyle(
-                color: Colors.white, // Set the text color to gray
-                fontSize: 30, // Set the font size to 40
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        )
+        child:Image.asset(
+            height: 200,
+            width: 200,
+            'assets/images/launch.png'
+        ),
       )
     );
   }

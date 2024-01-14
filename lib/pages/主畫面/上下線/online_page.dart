@@ -80,16 +80,16 @@ class _OnlinePageState extends State<OnlinePage> {
       print('Socket: Received GetOrderInfo event: $data');
     });
 
-    socket.on('Cancel', (data) {
-      int cancelledOrderId = data['orderId']; // Assuming orderId is available in the 'Cancel' event data
-      print('Socket: Received Cancel event: $data');
-      if (mounted)
-      {
-        setState(() {
-          ticketDetail.removeWhere((item) => item.orderId == cancelledOrderId);
-        });
-      }
-    });
+    // socket.on('Cancel', (data) {
+    //   int cancelledOrderId = data['orderId']; // Assuming orderId is available in the 'Cancel' event data
+    //   print('Socket: Received Cancel event: $data');
+    //   if (mounted)
+    //   {
+    //     setState(() {
+    //       ticketDetail.removeWhere((item) => item.orderId == cancelledOrderId);
+    //     });
+    //   }
+    // });
 
     socket.connect();
   }
@@ -240,9 +240,9 @@ class _OnlinePageState extends State<OnlinePage> {
               height: 1,
               color: Colors.black,
             ),
-            Container(
-              height: 300,
-              color: Colors.white,
+            Expanded(
+              //height: 300,
+              //color: Colors.white,
               child: CustomScrollView(
                 slivers: <Widget>[
                   SliverList(
@@ -272,42 +272,6 @@ class _OnlinePageState extends State<OnlinePage> {
                                     indexdialog = index;
                                     isShowDialog = true;
                                   });
-                                  // DialogUtils.showGrabTicketDialog(
-                                  //     id: ticketDetail[index].orderId.toString(),
-                                  //   title: "搶單",
-                                  //   content: "上車地點: 台南市中西區成功路1號",
-                                  //   time: (ticketDetail[index].time == 0) ? 1 : ticketDetail[index].time,
-                                  //   context: context,
-                                  //   onOkPressed: (double selectedTime) async{
-                                  //       print("selectedTime $selectedTime");
-                                  //     GrabTicketResponse response = await GrabTicketApi.grabTicket(
-                                  //         orderId: ticketDetail[index].orderId.toString(),
-                                  //         time: 1,
-                                  //         status: 0
-                                  //     );
-                                  //
-                                  //     if (response.success)
-                                  //     {
-                                  //       if (mounted)
-                                  //       {
-                                  //         setState(() {
-                                  //          // ticketDetail.removeWhere((item) => item.orderId == ticketDetail[index].orderId);
-                                  //         });
-                                  //         Navigator.of(context).push(
-                                  //           MaterialPageRoute(
-                                  //             builder: (context) => GrabSuccessPage(),
-                                  //           ),
-                                  //         );
-                                  //       }
-                                  //     } else {
-                                  //       DialogUtils.showErrorDialog("", "搶單失敗", context);
-                                  //     }
-                                  //     //DialogUtils.showGrabTicketDialog("12345", "上車地點: 台南市中西區成功路1號", "", context);
-                                  //   },
-                                  //   onCancelPressed: () {
-                                  //
-                                  //   },
-                                  // );
                                 },
                               ),
                             ],
@@ -317,10 +281,35 @@ class _OnlinePageState extends State<OnlinePage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("${(ticketDetail[index].distance / 1000).toStringAsFixed(1)}公里"),
-                                Text(ticketDetail[index].onLocation),
-                                Text(ticketDetail[index].offLocation ?? ""),
-                                Text(ticketDetail[index].note ?? ""),
+                                //here
+                                Text(
+                                    "${(ticketDetail[index].distance / 1000).toStringAsFixed(1)}公里",
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                Text(
+                                    ticketDetail[index].onLocation,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                Text(
+                                  ticketDetail[index].offLocation ?? "",
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                Text(
+                                  ticketDetail[index].note ?? "",
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
+                                  ),
+                                ),
                                 Container(
                                   height: 1,
                                   color: Colors.black,
@@ -336,9 +325,6 @@ class _OnlinePageState extends State<OnlinePage> {
                 ],
               ),
             ),
-
-
-            Expanded(child: Container()),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(

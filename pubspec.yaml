@@ -42,7 +42,7 @@ dependencies:
   geolocator:
   url_launcher:
   flutter_polyline_points:
-  webview_flutter:
+  webview_flutter: ^4.4.4
   intl:
   flutter_spinkit:
   flutter_html:

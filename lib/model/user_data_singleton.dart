@@ -68,6 +68,7 @@ class UserData {
   final int count;
   final LoginSetting setting;
   String _phoneNumber;
+  String _password;
   LatLng _currentLocation;
 
   UserData({
@@ -85,11 +86,13 @@ class UserData {
     required this.count,
     required this.setting,
     required String phoneNumber,
+    required String password,
     required LatLng currentLocation
-  }):_phoneNumber = phoneNumber, _currentLocation = currentLocation;
+  }):_phoneNumber = phoneNumber, _password = password, _currentLocation = currentLocation;
 
   // Getter for phoneNumber
   String get phoneNumber => _phoneNumber;
+  String get password => _password;
   LatLng get currentLocation => _currentLocation;
 
   // Method to update phoneNumber
@@ -109,6 +112,28 @@ class UserData {
       count: this.count,
       setting: this.setting,
       phoneNumber: newPhoneNumber,
+      password: this.password,
+      currentLocation: currentLocation
+    );
+  }
+
+  UserData updatePassword(String newPassword) {
+    return UserData(
+        id: this.id,
+        teamCode: this.teamCode,
+        serviceList: this.serviceList,
+        token: this.token,
+        type: this.type,
+        authorize: this.authorize,
+        initialGps: this.initialGps,
+        mongoTable: this.mongoTable,
+        plan: this.plan,
+        callNumber: this.callNumber,
+        name: this.name,
+        count: this.count,
+        setting: this.setting,
+        phoneNumber: this.phoneNumber,
+        password: newPassword,
         currentLocation: currentLocation
     );
   }
@@ -129,6 +154,7 @@ class UserData {
         count: this.count,
         setting: this.setting,
         phoneNumber: this.phoneNumber,
+        password: this.password,
         currentLocation: newLocation
     );
   }
@@ -149,6 +175,7 @@ class UserData {
       count: json['count'],
       setting: LoginSetting.fromJson(json['setting']),
       phoneNumber: (json['phoneNumber'] == null) ? '' : json['phoneNumber'],
+      password: (json['password'] == null) ? '' : json['password'],
       currentLocation: (json['currentLocation'] == null) ? LatLng(0, 0) : json['currentLocation'],
     );
   }

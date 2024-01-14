@@ -3,6 +3,7 @@ import 'package:new_glad_driver/model/user_data_singleton.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 
+
 class HotSpotPage extends StatefulWidget {
   const HotSpotPage({super.key});
 

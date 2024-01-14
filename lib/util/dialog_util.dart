@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../model/user_data_singleton.dart';
+import '../respository/設定/update_password_api.dart';
+
 class GlobalDialog {
   static void showAlertDialog(BuildContext context, String title, String message) {
     showDialog(
@@ -9,6 +12,7 @@ class GlobalDialog {
         return AlertDialog(
           contentPadding: EdgeInsets.zero, // Remove default padding
           content: Container(
+            width: double.infinity,
             height: 350,
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -80,7 +84,7 @@ class GlobalDialog {
           contentPadding: EdgeInsets.zero, // Remove default padding
           content: Container(
             height: 350,
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24.0), // Set border radius
@@ -90,29 +94,29 @@ class GlobalDialog {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: Colors.black,
                         fontSize: 26
                     ),
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Text(
                     "金額: $price 元",
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 22
                     ),
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Text(
                     "里程數: ${distance} 公里",
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 18
                     ),
                   ),
@@ -132,7 +136,7 @@ class GlobalDialog {
                           Navigator.of(context).pop();// Call the function when '確定' button is pressed
                           // Navigator.of(context).pop();
                         },
-                        child: Text(
+                        child: const Text(
                           '取消',
                           style: TextStyle(
                               fontSize: 18
@@ -151,7 +155,7 @@ class GlobalDialog {
                           onOkPressed();
                           Navigator.of(context).pop();
                         },
-                        child: Text(
+                        child: const Text(
                           '結帳',
                           style: TextStyle(
                               fontSize: 18
@@ -184,7 +188,7 @@ class GlobalDialog {
           actions: <Widget>[
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
+                minimumSize: const  Size(double.infinity, 50),
               ),
               onPressed: () {
                 onOkPressed();
@@ -193,6 +197,135 @@ class GlobalDialog {
               child: Text('確定'),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void showUpdatePasswordDialog({
+    required BuildContext context,
+    required String title,
+    required Function(String newPass,String oldPass, String rewriteNewPass) onOkPressed,
+    required Function() onCancelPressed,
+  }) {
+    final TextEditingController oldPassTextController = TextEditingController();
+    final TextEditingController newPassTextController = TextEditingController();
+    final TextEditingController rewriteNewPassTextController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.zero,
+          content: Container(
+
+            width: double.infinity,
+                height: 400,
+                padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24.0), // Set border radius
+            border: Border.all(color: Colors.black), // Add border
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                    child: Center(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                              fontSize: 30
+                          ),
+                        )
+                    )
+                ),
+                TextFormField(
+                  controller: oldPassTextController,
+                  decoration: const InputDecoration(
+                    labelText: '舊密碼',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: newPassTextController,
+                  decoration: const InputDecoration(
+                    labelText: '新密碼',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: rewriteNewPassTextController,
+                  decoration: const InputDecoration(
+                    labelText: '再次輸入新密碼',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Row(
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 50),
+                          backgroundColor: Colors.grey,
+                        ),
+                        onPressed: () {
+                          onCancelPressed();
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text(
+                          '取消',
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 20,),
+                    Flexible(
+                      flex: 1,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 50),
+                        ),
+                        onPressed: () {
+                          UserData userData = UserDataSingleton.instance;
+
+                          if (oldPassTextController.text == "") {
+                            showAlertDialog(context, "修改密碼失敗", "未輸入舊密碼");
+                          } else if (newPassTextController.text == "") {
+                            showAlertDialog(context, "修改密碼失敗", "未輸入新密碼");
+                          } else if (rewriteNewPassTextController.text == "") {
+                            showAlertDialog(context, "修改密碼失敗", "未輸入再次輸入新密碼");
+                          } else if (oldPassTextController.text != userData.password) {
+                            showAlertDialog(context, "修改密碼失敗", "舊密碼錯誤");
+                          } else if (newPassTextController.text != rewriteNewPassTextController.text){
+                            showAlertDialog(context, "修改密碼失敗", "新密碼與再次輸入新密碼不符");
+                          } else {
+                            UpdatePasswordApi().updatePassword(newPassTextController.text);
+                            Navigator.of(context).pop();
+                          }
+                          onOkPressed(
+                            newPassTextController.text,
+                            oldPassTextController.text,
+                            rewriteNewPassTextController.text,
+                          );
+                        },
+                        child: const Text(
+                          '確定',
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            ),
+          )
         );
       },
     );
@@ -211,7 +344,7 @@ class GlobalDialog {
           contentPadding: EdgeInsets.zero,
           content: Container(
             height: 350,
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24.0), // Set border radius
@@ -223,7 +356,7 @@ class GlobalDialog {
                     child: Center(
                         child: Text(
                             message,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 20
                           ),
                         )
@@ -242,7 +375,7 @@ class GlobalDialog {
                           onCancelPressed(); // Call the function when '確定' button is pressed
                           Navigator.of(context).pop();
                         },
-                        child: Text(
+                        child: const Text(
                             '取消',
                           style: TextStyle(
                             fontSize: 18
@@ -250,7 +383,7 @@ class GlobalDialog {
                         ),
                       ),
                     ),
-                    SizedBox(width: 20,),
+                    const SizedBox(width: 20,),
                     Flexible(
                       flex: 1,
                         child: ElevatedButton(
@@ -261,7 +394,7 @@ class GlobalDialog {
                             onOkPressed();
                             Navigator.of(context).pop();
                           },
-                          child: Text(
+                          child: const Text(
                               '確定',
                             style: TextStyle(
                                 fontSize: 18
@@ -356,8 +489,8 @@ class DialogUtils {
                 ),
                 Column(
                   children: [
-                    SizedBox(height: 20,),
-                    Container(
+                    const SizedBox(height: 20,),
+                    SizedBox(
                       height: 80,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
@@ -387,7 +520,7 @@ class DialogUtils {
                                 child: Center(
                                   child: Text(
                                     numbers[index].toString(),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -399,8 +532,8 @@ class DialogUtils {
                         },
                       ),
                     ),
-                    SizedBox(height: 20,),
-                    Container(
+                    const SizedBox(height: 20,),
+                    SizedBox(
                       height: 80,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
@@ -427,7 +560,7 @@ class DialogUtils {
                                 child: Center(
                                   child: Text(
                                     numbers2[index].toString(),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -448,14 +581,14 @@ class DialogUtils {
                       flex: 1,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          minimumSize: Size(double.infinity, 50),
+                          minimumSize: const Size(double.infinity, 50),
                           backgroundColor: Colors.grey,
                         ),
                         onPressed: () {
                           onCancelPressed();
                           Navigator.of(context).pop();
                         },
-                        child: Text(
+                        child: const Text(
                           '取消',
                           style: TextStyle(
                             fontSize: 18,
@@ -463,18 +596,18 @@ class DialogUtils {
                         ),
                       ),
                     ),
-                    SizedBox(width: 20,),
+                    const SizedBox(width: 20,),
                     Flexible(
                       flex: 1,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          minimumSize: Size(double.infinity, 50),
+                          minimumSize: const Size(double.infinity, 50),
                         ),
                         onPressed: () {
                           onOkPressed(selectedTime);
                           Navigator.of(context).pop();
                         },
-                        child: Text(
+                        child: const Text(
                           '確定',
                           style: TextStyle(
                             fontSize: 18,
@@ -491,195 +624,6 @@ class DialogUtils {
       },
     );
   }
-
-
-// static void showGrabTicketDialog({
-//     required String id,
-//     required String title,
-//     required String content,
-//     required int time,
-//     required BuildContext context,
-//     required Function(double selectedTime) onOkPressed,
-//     required Function() onCancelPressed,
-//   }) {
-//     double selectedTime = 1;
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         List<double> numbers = [time.toDouble(), (time*1.5), (time*2)];
-//         List<double> numbers2 = [(time*2.5), (time*3),(time*3.5)];
-//         return Dialog(
-//           shape: RoundedRectangleBorder(
-//             borderRadius: BorderRadius.circular(16.0),
-//           ),
-//           elevation: 0,
-//           backgroundColor: Colors.transparent,
-//           child: Container(
-//             height: 380,
-//             width: double.infinity,
-//             padding: const EdgeInsets.all(16.0),
-//             decoration: BoxDecoration(
-//               shape: BoxShape.rectangle,
-//               color: Colors.white,
-//               borderRadius: BorderRadius.circular(16.0),
-//               border: Border.all(
-//                 color: Colors.black,
-//                 width: 1,
-//               ),
-//             ),
-//             child: Column(
-//               mainAxisSize: MainAxisSize.min,
-//               children: <Widget>[
-//                 Text(
-//                   title,
-//                   style: const TextStyle(
-//                     fontSize: 20,
-//                     fontWeight: FontWeight.bold,
-//                   ),
-//                 ),
-//                 Expanded(
-//                     child: Center(
-//                       child: Text(
-//                         content,
-//                         textAlign: TextAlign.center,
-//                         style: const TextStyle(
-//                           fontSize: 16,
-//                         ),
-//                       ),
-//                     )
-//                 ),
-//                 Column(
-//                   children: [
-//                     SizedBox(height: 20,),
-//                     Container(
-//                       height: 80, // 給一個固定的高度，可以根據需求調整
-//                       child: ListView.builder(
-//                         scrollDirection: Axis.horizontal,
-//                         itemCount: numbers.length,
-//                         itemBuilder: (BuildContext context, int index) {
-//                           return Padding(
-//                             padding: EdgeInsets.symmetric(horizontal: 10),
-//                             child: GestureDetector(
-//                               onTap: () {
-//                                 selectedTime = numbers2[index];
-//                               },
-//                               child: Container(
-//                                 width: 60,
-//                                 height: 60,
-//                                 decoration: BoxDecoration(
-//                                   shape: BoxShape.circle,
-//                                   border: Border.all(
-//                                     color: Colors.black,
-//                                     width: 1,
-//                                   ),
-//                                 ),
-//                                 child: Center(
-//                                   child: Text(
-//                                     numbers[index].toString(),
-//                                     style: TextStyle(
-//                                       fontSize: 24,
-//                                       fontWeight: FontWeight.bold,
-//                                     ),
-//                                   ),
-//                                 ),
-//                               ),
-//                             ),
-//                           );
-//                         },
-//                       ),
-//                     ),
-//                     SizedBox(height: 20,),
-//                     Container(
-//                       height: 80, // 給一個固定的高度，可以根據需求調整
-//                       child: ListView.builder(
-//                         scrollDirection: Axis.horizontal,
-//                         itemCount: numbers2.length,
-//                         itemBuilder: (BuildContext context, int index) {
-//                           return Padding(
-//                             padding: EdgeInsets.symmetric(horizontal: 10),
-//                             child: GestureDetector(
-//                               onTap: () {
-//                                 print("grabTicket ${numbers2[index]}");
-//                                 selectedTime = numbers2[index];
-//                               },
-//                               child: Container(
-//                                 width: 60,
-//                                 height: 60,
-//                                 decoration: BoxDecoration(
-//                                   shape: BoxShape.circle,
-//                                   border: Border.all(
-//                                     color: Colors.black,
-//                                     width: 1,
-//                                   ),
-//                                 ),
-//                                 child: Center(
-//                                   child: Text(
-//                                     numbers2[index].toString(),
-//                                     style: TextStyle(
-//                                       fontSize: 24,
-//                                       fontWeight: FontWeight.bold,
-//                                     ),
-//                                   ),
-//                                 ),
-//                               ),
-//                             ),
-//                           );
-//                         },
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//                 const SizedBox(height: 20),
-//                 //Expanded(child: Container()),
-//                 Row(
-//                   children: [
-//                     Flexible(
-//                       flex: 1,
-//                       child: ElevatedButton(
-//                         style: ElevatedButton.styleFrom(
-//                             minimumSize: Size(double.infinity, 50),
-//                             backgroundColor: Colors.grey
-//                         ),
-//                         onPressed: () {
-//                           onCancelPressed(); // Call the function when '確定' button is pressed
-//                           Navigator.of(context).pop();
-//                         },
-//                         child: Text(
-//                           '取消',
-//                           style: TextStyle(
-//                               fontSize: 18
-//                           ),
-//                         ),
-//                       ),
-//                     ),
-//                     SizedBox(width: 20,),
-//                     Flexible(
-//                       flex: 1,
-//                       child: ElevatedButton(
-//                         style: ElevatedButton.styleFrom(
-//                           minimumSize: Size(double.infinity, 50),
-//                         ),
-//                         onPressed: () {
-//                           onOkPressed(selectedTime);
-//                           Navigator.of(context).pop();
-//                         },
-//                         child: Text(
-//                           '確定',
-//                           style: TextStyle(
-//                               fontSize: 18
-//                           ),
-//                         ),
-//                       ),
-//                     )
-//                   ],
-//                 )
-//               ],
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//   }
 
   static void showImageDialog(String title, String image, BuildContext context) {
     showDialog(

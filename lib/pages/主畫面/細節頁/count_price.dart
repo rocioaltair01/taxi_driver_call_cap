@@ -238,7 +238,7 @@ class _CountPricePageState extends State<CountPricePage> {
                                         //distanceText = response.routes[0].legs[0].distance.text.replaceFirst(' 公尺', '');
                                         double distanceValue = double.parse(distanceText);
                                         CalculatedInfo calculateInfo = UserDataSingleton.instance.setting.calculatedInfo;
-                                        double price = calculateTotalCost(
+                                        double price = PriceUtil().calculateTotalCost(
                                             calculateInfo.perKmOfFare,
                                             calculateInfo.perMinOfFare,
                                             calculateInfo.initialFare,

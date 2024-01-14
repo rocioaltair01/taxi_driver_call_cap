@@ -14,9 +14,7 @@ void main() {
 class LoginApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: LoginPage(),
-    );
+    return const LoginPage();
   }
 }
 
@@ -56,10 +54,7 @@ class _LoginFormState extends State<LoginForm> {
     // String password = _passwordController.text;
     // String teamCode = _teamCodeController.text;
     String firebaseToken = '123'; // Replace with actual firebase token
-    if (teamCode.isEmpty) {
-      DialogUtils.showErrorDialog("錯誤", "請輸入車隊編號",context);
-      return;
-    }
+
     if (username.isEmpty) {
       DialogUtils.showErrorDialog("錯誤", "請輸入帳號",context);
       return;
@@ -76,6 +71,7 @@ class _LoginFormState extends State<LoginForm> {
       LoginResponseModel responseModel = LoginResponseModel.fromJson(loginData);
       UserData userData = responseModel.result;
       userData = userData.updatePhoneNumber(username);
+      userData = userData.updatePassword(password);
       UserDataSingleton.initialize(userData);
       // Save user information after initializing UserDataSingleton
       await UserPreferences.saveUserInformation(username, password, teamCode);
