@@ -31,7 +31,8 @@ class UpdateFridayTimeApi {
   Future<UpdateFridayTimeApiResponse> updateFridayTime(
       int orderId,
       int orderType,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
 
@@ -53,6 +54,7 @@ class UpdateFridayTimeApi {
         throw Exception('Failed to update Friday time: ${response.statusCode}');
       }
     } catch (e) {
+      onNetworkError();
       print("@=== Update Friday Time Error: $e");
       throw Exception('Failed to update Friday time');
     }

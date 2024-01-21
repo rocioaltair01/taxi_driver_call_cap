@@ -31,7 +31,8 @@ class GetTicketStatusApi {
   Future<GetTicketStatusApiResponse> getTicketStatus(
       int orderId,
       int orderType,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
 
@@ -53,6 +54,7 @@ class GetTicketStatusApi {
       }
     } catch (e) {
       print("@=== Failed $e");
+      onNetworkError();
       throw Exception('Failed GetTicketStatusApi');
     }
   }

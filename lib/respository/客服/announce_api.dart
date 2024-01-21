@@ -9,7 +9,8 @@ import '../../model/user_data_singleton.dart';
 
 class AnnounceApi {
   static Future<AnnounceList> getAnnouncement(
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse(
@@ -32,6 +33,7 @@ class AnnounceApi {
         throw Exception('Failed getAnnouncement data');
       }
     } catch (error) {
+      onNetworkError();
       throw Exception('Failed getAnnouncement data: $error');
     }
   }

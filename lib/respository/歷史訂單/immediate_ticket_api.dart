@@ -16,7 +16,8 @@ class ImmediateTicketApi {
   static Future<ImmediateTicketResponse> getImmediateTickets(
       int year,
       int month,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse(
@@ -38,6 +39,7 @@ class ImmediateTicketApi {
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
+      onNetworkError();
       throw Exception('Failed to fetch data: $error');
     }
   }

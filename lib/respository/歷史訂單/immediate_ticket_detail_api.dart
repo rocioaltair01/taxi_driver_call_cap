@@ -16,7 +16,8 @@ class ImmediateTicketDetailResponse {
 class ImmediateTicketDetailApi {
   static Future<ImmediateTicketDetailResponse> getImmediateTicketDetail(
       int orderId,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse('$baseUrl/app/api/driver/order/detail/$orderId');
@@ -40,6 +41,7 @@ class ImmediateTicketDetailApi {
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
+      onNetworkError();
       print("@=== Failed to fetch ImmediateTicketDetailApi $error");
       throw Exception('Failed to fetch ImmediateTicketDetailApi: $error');
     }

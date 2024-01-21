@@ -30,7 +30,8 @@ class UpdatePasswordApiResponse {
 class UpdatePasswordApi {
   Future<UpdatePasswordApiResponse> updatePassword(
       String newPassword,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
 
@@ -58,6 +59,7 @@ class UpdatePasswordApi {
         throw Exception('Failed updatePassword: ${response.statusCode}');
       }
     } catch (e) {
+      onNetworkError();
       throw Exception('Failed updatePassword');
     }
   }

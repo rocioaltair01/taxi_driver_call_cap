@@ -35,6 +35,9 @@ class _BasicSettingPageState extends State<BasicSettingPage> {
               "錯誤",
               responseModel.message
           );
+        },
+        () {
+          GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
         }
       ),
       builder: (context, snapshot) {
@@ -199,6 +202,9 @@ class _BasicSettingPageState extends State<BasicSettingPage> {
                                                   "錯誤",
                                                   responseModel.message
                                               );
+                                            },
+                                            () {
+                                              GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
                                             }
                                         );
                                         // UserDataSingleton.reset();
@@ -449,25 +455,28 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                                   if(mounted) {
                                     if(file != null) {
                                       UpdateUserImageApi.updateUserImage(
-                                          filePath: file.path,
-                                          type: widget.type,
-                                          onSuccess: () {
-                                            Navigator.pop(context);
-                                            GlobalDialog.showAlertDialog(
-                                                context,
-                                                "成功",
-                                                "更新司機資料成功"
-                                            );
-                                          },
-                                          onError: (res) {
-                                            final jsonData = json.decode(res) as Map<String, dynamic>;
-                                            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
-                                            GlobalDialog.showAlertDialog(
-                                                context,
-                                                "錯誤",
-                                                responseModel.message
-                                            );
-                                          }
+                                        filePath: file.path,
+                                        type: widget.type,
+                                        onSuccess: () {
+                                          Navigator.pop(context);
+                                          GlobalDialog.showAlertDialog(
+                                              context,
+                                              "成功",
+                                              "更新司機資料成功"
+                                          );
+                                        },
+                                        onError: (res) {
+                                          final jsonData = json.decode(res) as Map<String, dynamic>;
+                                          ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                                          GlobalDialog.showAlertDialog(
+                                              context,
+                                              "錯誤",
+                                              responseModel.message
+                                          );
+                                        },
+                                        onNetworkError: () {
+                                          GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
+                                        }
                                       );
                                     }
                                   }

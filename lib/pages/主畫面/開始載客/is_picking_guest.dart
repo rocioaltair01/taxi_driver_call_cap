@@ -427,6 +427,9 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                                                           "錯誤",
                                                           responseModel.message
                                                       );
+                                                    },
+                                                    () {
+                                                      GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
                                                     }
                                                 );
                                               }

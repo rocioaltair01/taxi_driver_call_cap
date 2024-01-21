@@ -9,7 +9,8 @@ class LoginApi {
       String password,
       String teamCode,
       String firebaseToken,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     final loginUrl = '$baseUrl/app/api/driver/login';
 
@@ -34,6 +35,7 @@ class LoginApi {
         throw Exception('Failed to log in');
       }
     } catch (error) {
+      onNetworkError();
       throw Exception('Failed to log in: $error');
     }
   }

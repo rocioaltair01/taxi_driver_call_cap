@@ -8,7 +8,7 @@ import 'constants/route_generator.dart';
 import 'firebase_options.dart';
 import 'pages/splash_page.dart';
 import 'pages/主畫面/main_page.dart';
-import 'respository/navigation_service.dart';
+import 'navigation_service.dart';
 
 List<CameraDescription> cameras = <CameraDescription>[];
 

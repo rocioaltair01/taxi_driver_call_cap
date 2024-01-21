@@ -51,6 +51,9 @@ class _GrabSuccessPageState extends State<GrabSuccessPage> {
                 "錯誤",
                 responseModel.message
             );
+          },
+          () {
+            GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
           }
       );
       if (response.statusCode == 200) {

@@ -8,7 +8,8 @@ import '../../model/user_data_singleton.dart';
 class GrabReservationApi {
   static Future<UpdateDriverGrabReservationResponse> grabReservation(
       int number,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse(
@@ -32,6 +33,7 @@ class GrabReservationApi {
         throw Exception('Failed to fetch data11');
       }
     } catch (error) {
+      onNetworkError();
       throw Exception('Failed to fetch data11: $error');
     }
   }

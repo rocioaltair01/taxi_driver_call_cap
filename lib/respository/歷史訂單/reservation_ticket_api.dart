@@ -16,7 +16,8 @@ class ReservationTicketApi {
   static Future<FetchDataResponse> getReservationTickets(
       int year,
       int month,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse(
@@ -40,6 +41,7 @@ class ReservationTicketApi {
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
+      onNetworkError();
       throw Exception('Failed to fetch data: $error');
     }
   }

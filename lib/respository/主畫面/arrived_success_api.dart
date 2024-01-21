@@ -32,7 +32,8 @@ class ArrivedSuccessApi {
   Future<ArrivedSuccessApiResponse> markArrivalSuccess(
       int orderId,
       int orderType,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
     print("orderId$orderType");
@@ -55,12 +56,8 @@ class ArrivedSuccessApi {
       }
     } catch (e) {
       print("@=== Failed markArrivalSuccess e $e");
-      return ArrivedSuccessApiResponse(
-        event: "putGetInTime",
-        success: false,
-        message: "Failed to mark arrival success: $e",
-        result: false,
-      );
+      onNetworkError();
+      throw Exception('Failed to mark arrival success');
     }
   }
 }

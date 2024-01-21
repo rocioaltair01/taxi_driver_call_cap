@@ -20,7 +20,8 @@ class ReservationApi {
       int year,
       int month,
       String task,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse(
@@ -44,6 +45,7 @@ class ReservationApi {
         throw Exception('Failed to fetch getReservationTickets');
       }
     } catch (error) {
+      onNetworkError();
       throw Exception('Failed to fetch getReservationTickets: $error');
     }
   }

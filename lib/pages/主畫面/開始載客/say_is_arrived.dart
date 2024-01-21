@@ -101,6 +101,9 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                 "錯誤",
                 responseModel.message
             );
+          },
+          () {
+            GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
           }
       );
       //status- number- 0 (未結束訂單), 1 (訂單完成), 2(司機取消), 3(乘客取消)
@@ -392,6 +395,9 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                                   "錯誤",
                                                   responseModel.message
                                               );
+                                            },
+                                            () {
+                                              GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
                                             }
                                         );
                                         Navigator.push(
@@ -434,6 +440,9 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                                           "錯誤",
                                                           responseModel.message
                                                       );
+                                                    },
+                                                    () {
+                                                      GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
                                                     }
                                                 );
                                                 if (result.success == true)
@@ -554,6 +563,9 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                                     "錯誤",
                                                     responseModel.message
                                                 );
+                                              },
+                                              () {
+                                                GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
                                               }
                                           );
                                           if (res.success)
@@ -693,18 +705,21 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                               if(file != null && widget.bill != null) {
                                 print("@=== Picture saved to ${file.path}");
                                 UpdateArrivePhotoApi.updateArrivePhoto(
-                                    filePath: file.path,
-                                    orderId: widget.bill!.reservationId ?? 0,
-                                    orderType: mainPageKey.currentState!.order_type,
-                                    onError: (res) {
-                                      final jsonData = json.decode(res) as Map<String, dynamic>;
-                                      ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
-                                      GlobalDialog.showAlertDialog(
-                                          context,
-                                          "錯誤",
-                                          responseModel.message
-                                      );
-                                    }
+                                  filePath: file.path,
+                                  orderId: widget.bill!.reservationId ?? 0,
+                                  orderType: mainPageKey.currentState!.order_type,
+                                  onError: (res) {
+                                    final jsonData = json.decode(res) as Map<String, dynamic>;
+                                    ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                                    GlobalDialog.showAlertDialog(
+                                        context,
+                                        "錯誤",
+                                        responseModel.message
+                                    );
+                                  },
+                                  onNetworkError: () {
+                                    GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
+                                  }
                                 );
                               }
                             }

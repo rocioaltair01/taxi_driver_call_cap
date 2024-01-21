@@ -134,6 +134,9 @@ class _OnlinePageState extends State<OnlinePage> {
                 "錯誤",
                 responseModel.message
             );
+          },
+          () {
+            GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
           }
       );
 
@@ -449,6 +452,9 @@ class _OnlinePageState extends State<OnlinePage> {
                     "錯誤",
                     responseModel.message
                 );
+              },
+              onNetworkError: () {
+                GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
               }
             );
             if (response.success)

@@ -43,7 +43,8 @@ class GrabTicketApi {
     required String orderId,
     required int time,
     required int status,
-    required Function(String res) onError
+    required Function(String res) onError,
+    required Function() onNetworkError
   }) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse('https://test-fleet-of-taxi.shopinn.tw/api/grab');
@@ -76,6 +77,7 @@ class GrabTicketApi {
         throw Exception('Failed to grab ticket');
       }
     } catch (error) {
+      onNetworkError();
       print("@=== Grab Ticket Error: Failed to grab ticket: $error");
       throw Exception('Failed to grab ticket: $error');
     }

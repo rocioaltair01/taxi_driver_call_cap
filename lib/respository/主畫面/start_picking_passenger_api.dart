@@ -31,7 +31,8 @@ class StartPickingPassengerApi {
   Future<StartPickingPassengerApiResponse> startPickingPassenger(
       int orderId,
       int order_type,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
     try {
@@ -47,11 +48,11 @@ class StartPickingPassengerApi {
         final decodedResponse = json.decode(response.body);
         return StartPickingPassengerApiResponse.fromJson(decodedResponse);
       } else {
-        final decodedResponse = json.decode(response.body);
         onError(response.body);
         throw Exception('Failed to StartPickingPassengerApi');
       }
     } catch (e) {
+      onNetworkError();
       print("@=== Failed startPickingPassenger$e");
       throw Exception('Failed to StartPickingPassengerApi');
     }

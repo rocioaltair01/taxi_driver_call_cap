@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../model/user_data_singleton.dart';
-import '../../respository/navigation_service.dart';
+import '../../navigation_service.dart';
 
 
 class FunctionSettingPage extends StatefulWidget {

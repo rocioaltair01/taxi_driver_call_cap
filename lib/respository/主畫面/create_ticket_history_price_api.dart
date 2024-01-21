@@ -31,7 +31,8 @@ class CreateTicketHistoryPriceApi {
   Future<CreateTicketHistoryPriceApiResponse> createTicketHistoryPrice(
       int orderId,
       Map<String, dynamic> requestBody,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
 
@@ -55,6 +56,7 @@ class CreateTicketHistoryPriceApi {
         throw Exception('Failed to create ticket history price: ${response.statusCode}');
       }
     } catch (e) {
+      onNetworkError();
       print("@=== Create Ticket History Price Error: $e");
       throw Exception('Failed to create ticket history price');
     }

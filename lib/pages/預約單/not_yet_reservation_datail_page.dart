@@ -145,6 +145,9 @@ class _NotYetReservationDetailPageState extends State<NotYetReservationDetailPag
                             "錯誤",
                             responseModel.message
                         );
+                      },
+                      () {
+                        GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
                       }
                   );
                   if (result.data.success == true)

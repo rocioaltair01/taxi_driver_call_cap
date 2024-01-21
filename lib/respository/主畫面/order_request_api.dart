@@ -15,7 +15,8 @@ class OrderRequestAboveApi {
   static Future<OrderRequestAboveResponse> getOrderRequestAbove(
       double lat,
       double lng,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse('https://test-fleet-of-taxi.shopinn.tw/api/order-info?lat=$lat&lng=$lng&orderIdsToExclude=0&orderIdsToExclude=0');
@@ -42,6 +43,7 @@ class OrderRequestAboveApi {
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
+      onNetworkError();
       print("@=== Order Request:: Above Error: Failed to fetch data: $error");
       throw Exception('Failed to fetch data: $error');
     }

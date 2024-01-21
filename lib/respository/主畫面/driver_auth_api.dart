@@ -43,7 +43,8 @@ class DriverAuthResult {
 class DriverAuthApi {
   static Future<DriverAuthResponse> getDriverAuth(
       String token,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     String url = "$baseUrl/app/api/driver/auth";
 
@@ -65,6 +66,7 @@ class DriverAuthApi {
         throw Exception('Failed to fetch driver authorization');
       }
     } catch (error) {
+      onNetworkError();
       throw Exception('Failed to fetch driver authorization: $error');
     }
   }

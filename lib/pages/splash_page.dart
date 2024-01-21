@@ -8,7 +8,7 @@ import '../constants/shared_user_preference.dart';
 import '../model/error_res_model.dart';
 import '../model/user_data_singleton.dart';
 import '../respository/login_api.dart';
-import '../respository/navigation_service.dart';
+import '../navigation_service.dart';
 import '../respository/主畫面/driver_auth_api.dart';
 import '../util/dialog_util.dart';
 
@@ -91,6 +91,9 @@ class _SplashPageState extends State<SplashPage> {
                 "錯誤",
                 responseModel.message
             );
+          },
+          () {
+            GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
           }
       );
       LoginResponseModel responseModel = LoginResponseModel.fromJson(loginData);
@@ -106,6 +109,9 @@ class _SplashPageState extends State<SplashPage> {
                 "錯誤",
                 responseModel.message
             );
+          },
+          () {
+            GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
           }
       );
       userData = userData.updateAuth(auth.result.authorize);

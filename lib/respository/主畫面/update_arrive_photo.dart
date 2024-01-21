@@ -31,7 +31,8 @@ class UpdateArrivePhotoApi {
     required String filePath,
     required int orderId,
     required int orderType,
-    required Function(String res) onError
+    required Function(String res) onError,
+    required Function() onNetworkError
   }) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse('$baseUrl/app/api/driver/upload/on_location?torder_type=$orderType&id=$orderId');
@@ -63,6 +64,7 @@ class UpdateArrivePhotoApi {
         throw Exception('Failed to update arrive photo');
       }
     } catch (error) {
+      onNetworkError();
       print("@=== Update Arrive Photo Error: Failed to update arrive photo: $error");
       throw Exception('Failed to update arrive photo: $error');
     }

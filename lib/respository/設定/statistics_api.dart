@@ -22,7 +22,8 @@ class StatisticsApi {
   static Future<StatisticsResponse> getStatistics(
       String year,
       String month,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     String url = "$baseUrl/app/api/statistics?year=$year&month=$month";
     UserData userData = UserDataSingleton.instance;
@@ -43,6 +44,7 @@ class StatisticsApi {
         throw Exception('Failed to fetch statistics');
       }
     } catch (error) {
+      onNetworkError();
       throw Exception('Failed to fetch statistics: $error');
     }
   }

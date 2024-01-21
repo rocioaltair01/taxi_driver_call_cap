@@ -74,7 +74,11 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
               );
               isShowAPIErrorDialog = true;
             }
-          });
+          },
+          () {
+            GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
+          }
+      );
       //status- number- 0 (未結束訂單), 1 (訂單完成), 2(司機取消), 3(乘客取消)
       //status = 2,3 都屬於取消
       if (res.status == 0) {
@@ -340,7 +344,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                             ArrivedSuccessApiResponse res = await ArrivedSuccessApi().markArrivalSuccess(
                                                 mainPageKey.currentState?.bill?.reservationId ?? 0,
                                                 mainPageKey.currentState?.order_type ?? 1,
-                                                    (res) {
+                                                (res) {
                                                   final jsonData = json.decode(res) as Map<String, dynamic>;
                                                   ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
                                                   GlobalDialog.showAlertDialog(
@@ -348,6 +352,9 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                                       "錯誤",
                                                       responseModel.message
                                                   );
+                                                },
+                                                () {
+                                                  GlobalDialog.showAlertDialog(context, "錯誤", "網路異常");
                                                 }
                                             );
                                             if (res.success == true)

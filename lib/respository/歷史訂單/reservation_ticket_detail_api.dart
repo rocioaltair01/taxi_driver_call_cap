@@ -15,7 +15,8 @@ class ReservationTicketDetailResponse {
 class ReservationTicketDetailApi {
   static Future<ReservationTicketDetailResponse> getReservationTicketDetail(
       int orderId,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse('$baseUrl/app/api/reservation/detail/$orderId');
@@ -37,6 +38,7 @@ class ReservationTicketDetailApi {
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
+      onNetworkError();
       throw Exception('Failed to fetch data: $error');
     }
   }

@@ -27,12 +27,12 @@ class GiveupErrorResponse {
   }
 }
 
-
 class GiveupApi {
   Future<GiveupErrorResponse> cancelOrderApply(
       int orderId,
       int orderType,
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
     print("@=== give up orderId $orderId");
@@ -54,6 +54,7 @@ class GiveupApi {
           throw Exception('Failed cancelOrderApply');
       }
     } catch (e) {
+      onNetworkError();
       throw Exception('Failed cancelOrderApply');
     }
   }

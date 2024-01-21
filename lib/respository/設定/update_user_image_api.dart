@@ -35,6 +35,7 @@ class UpdateUserImageApi {
     required String type,
     required Function() onSuccess,
     required Function(String res) onError,
+    required Function() onNetworkError
   }) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse('$baseUrl/app/api/driver/upload/info/?type=info');
@@ -66,6 +67,7 @@ class UpdateUserImageApi {
         throw Exception('Failed to update user image');
       }
     } catch (error) {
+      onNetworkError();
       print("@=== Update User Image Error: Failed to update user image: $error");
       throw Exception('Failed to update user image: $error');
     }

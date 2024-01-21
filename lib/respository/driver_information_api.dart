@@ -20,7 +20,8 @@ class DriverInformationResponse {
 
 class DriverInformationApi {
   static Future<DriverInformationResponse> getDriverInformation(
-      Function(String res) onError
+      Function(String res) onError,
+      Function() onNetworkError
       ) async {
     final Uri uri = Uri.parse('$baseUrl/app/api/driver/info');
 
@@ -43,6 +44,7 @@ class DriverInformationApi {
         throw Exception('Failed to fetch driver information');
       }
     } catch (error) {
+      onNetworkError();
       throw Exception('Failed to fetch driver information: $error');
     }
   }
