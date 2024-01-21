@@ -21,31 +21,31 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2, // Adjust the number of tabs as needed
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
-          elevation: 0, // Set the elevation to 0 to remove the shadow
+          elevation: 0,
           toolbarHeight: 0,
-          backgroundColor: Colors.white, // Set the background color of the AppBar
+          backgroundColor: Colors.white,
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(48.0), // Set the height of the TabBar
+            preferredSize: const Size.fromHeight(48.0),
             child: TabBar(
-              labelColor: Colors.black, // Set the color of the selected tab text
+              labelColor: Colors.black,
               unselectedLabelColor:
-              Colors.black.withOpacity(0.6), // Set the color of unselected tab text
+              Colors.black.withOpacity(0.6),
               indicatorColor:
-              Colors.black, // Set the color of the selected tab indicator
+              Colors.black,
               tabs: const [
                 Tab(
                   child: Text(
                     "立即單",
-                    style: TextStyle(fontSize: 18), // Adjust the font size as needed
+                    style: TextStyle(fontSize: 18),
                   ),
                 ),
                 Tab(
                   child: Text(
                     "預約單",
-                    style: TextStyle(fontSize: 18), // Adjust the font size as needed
+                    style: TextStyle(fontSize: 18),
                   ),
                 ),
               ],

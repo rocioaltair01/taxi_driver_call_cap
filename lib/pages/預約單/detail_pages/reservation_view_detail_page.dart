@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+import '../../../model/error_res_model.dart';
 import '../../../model/歷史訂單/reservation_ticket_detail_model.dart';
 import '../../../model/預約單/reservation_model.dart';
 import '../../../respository/預約單/grab_resevation_api.dart';
@@ -160,7 +163,18 @@ class _ReservationViewDetailPageState extends State<ReservationViewDetailPage> {
                 Expanded(child: ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      GrabReservationApi.grabReservation(widget.bill.billInfo.reservationId);
+                      GrabReservationApi.grabReservation(
+                          widget.bill.billInfo.reservationId,
+                          (res) {
+                            final jsonData = json.decode(res) as Map<String, dynamic>;
+                            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                            GlobalDialog.showAlertDialog(
+                                context,
+                                "錯誤",
+                                responseModel.message
+                            );
+                          }
+                      );
                     });
                     GlobalDialog.showCustomDialog(
                       context: context, // Pass the context where you want to show the dialog

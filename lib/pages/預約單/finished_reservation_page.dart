@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../../../model/預約單/reservation_model.dart';
 import '../../../util/dialog_util.dart';
 import '../../../respository/預約單/reservation_api.dart';
+import '../../model/error_res_model.dart';
 import '../../util/shared_util.dart';
 import 'detail_pages/finished_reservation_detail_page.dart';
 
@@ -29,7 +32,20 @@ class _FinishedReservationViewState extends State<FinishedReservationView> {
     });
 
     try {
-      final response = await ReservationApi.getReservationTickets(year, month, 'grabbed');
+      final response = await ReservationApi.getReservationTickets(
+          year,
+          month,
+          'grabbed',
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
 
       if (response.statusCode == 200) {
         if (response.data.isEmpty) {

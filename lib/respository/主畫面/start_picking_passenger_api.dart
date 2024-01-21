@@ -28,7 +28,11 @@ class StartPickingPassengerApiResponse {
 }
 // 已載乘客
 class StartPickingPassengerApi {
-  Future<StartPickingPassengerApiResponse> startPickingPassenger(int orderId, int order_type) async {
+  Future<StartPickingPassengerApiResponse> startPickingPassenger(
+      int orderId,
+      int order_type,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
     try {
       String url = '$baseUrl/app/api/socket/click_take_passen/$orderId?order_type=$order_type';
@@ -44,16 +48,12 @@ class StartPickingPassengerApi {
         return StartPickingPassengerApiResponse.fromJson(decodedResponse);
       } else {
         final decodedResponse = json.decode(response.body);
-        return StartPickingPassengerApiResponse.fromJson(decodedResponse);
+        onError(response.body);
+        throw Exception('Failed to StartPickingPassengerApi');
       }
     } catch (e) {
       print("@=== Failed startPickingPassenger$e");
-      return StartPickingPassengerApiResponse(
-        event: "putClickTakePassen",
-        success: false,
-        message: "Failed to start picking passenger: $e",
-        result: false,
-      );
+      throw Exception('Failed to StartPickingPassengerApi');
     }
   }
 }

@@ -13,7 +13,10 @@ class ReservationTicketDetailResponse {
 
 //提取單一立即單-成功
 class ReservationTicketDetailApi {
-  static Future<ReservationTicketDetailResponse> getReservationTicketDetail(int orderId) async {
+  static Future<ReservationTicketDetailResponse> getReservationTicketDetail(
+      int orderId,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse('$baseUrl/app/api/reservation/detail/$orderId');
 
@@ -30,6 +33,7 @@ class ReservationTicketDetailApi {
         final ticketDetail = ReservationTicketDetailModel.fromJson(jsonData);
         return ReservationTicketDetailResponse(statusCode: response.statusCode, data: ticketDetail);
       } else {
+        onError(response.body);
         throw Exception('Failed to fetch data');
       }
     } catch (error) {

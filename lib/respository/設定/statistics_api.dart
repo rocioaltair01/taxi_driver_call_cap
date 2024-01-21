@@ -19,7 +19,11 @@ class StatisticsResponse {
 }
 
 class StatisticsApi {
-  static Future<StatisticsResponse> getStatistics(String year, String month) async {
+  static Future<StatisticsResponse> getStatistics(
+      String year,
+      String month,
+      Function(String res) onError
+      ) async {
     String url = "$baseUrl/app/api/statistics?year=$year&month=$month";
     UserData userData = UserDataSingleton.instance;
     try {
@@ -35,6 +39,7 @@ class StatisticsApi {
         final statistics = StatisticsResult.fromJson(jsonData);
         return StatisticsResponse(statusCode: response.statusCode, data: statistics);
       } else {
+        onError(response.body);
         throw Exception('Failed to fetch statistics');
       }
     } catch (error) {

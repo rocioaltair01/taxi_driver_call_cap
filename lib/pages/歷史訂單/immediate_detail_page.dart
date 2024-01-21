@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import '../../model/error_res_model.dart';
 import '../../model/歷史訂單/immediate_ticket_detail_model.dart';
 import '../../respository/歷史訂單/immediate_ticket_detail_api.dart';
+import '../../util/dialog_util.dart';
 import 'components/history_list_item.dart';
 import 'components/history_next_list_item.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -43,7 +47,18 @@ class _ImmediateDetailPageState extends State<ImmediateDetailPage> {
     });
 
     try {
-      final response = await ImmediateTicketDetailApi.getImmediateTicketDetail(widget.orderNumber);
+      final response = await ImmediateTicketDetailApi.getImmediateTicketDetail(
+          widget.orderNumber,
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
 
       if (response.statusCode == 200) {
         setState(() {
@@ -128,8 +143,10 @@ class _ImmediateDetailPageState extends State<ImmediateDetailPage> {
                     HistoryNextListItem(label:'到:',value:(ticketDetail!.offLocation == null || ticketDetail!.offLocation == '') ? '此乘客無提供下車地點' : ticketDetail!.offLocation.toString(), currentPosition: ticketDetail!.onGps!),
                     const HistoryListItem(label:'乘客人數', value:'1位'),
                     HistoryListItem(label:'乘客備註:', value:ticketDetail!.passengerNote ?? ''),
-                    HistoryListItem(label:'里程數:', value:'${ticketDetail!.milage}(公里)'),
-                    HistoryListItem(label:'分鐘:', value:'  ${((ticketDetail!.routeSecond ?? 0)/60).toStringAsFixed(1)}(分鐘)'),
+                    HistoryListItem(label:'里程數:', value:'${ticketDetail!.milage ?? 0}(公里)'),
+                    ((ticketDetail!.routeSecond ?? 0)/60 == 0) ?
+                    HistoryListItem(label:'分鐘:', value: '0(分鐘)') :
+                    HistoryListItem(label:'分鐘:', value: '${((ticketDetail!.routeSecond ?? 0)/60).toStringAsFixed(1)}(分鐘)'),
                     HistoryListItem(label:'金額:', value:'＄${ticketDetail!.actualPrice.toString()}' ?? ''),
                     // ... Add more fields from the ticket detail model
                   ],

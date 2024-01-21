@@ -16,7 +16,12 @@ class ReservationResponse {
 }
 
 class ReservationApi {
-  static Future<ReservationResponse> getReservationTickets(int year, int month, String task) async {
+  static Future<ReservationResponse> getReservationTickets(
+      int year,
+      int month,
+      String task,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse(
         '$baseUrl/app/api/reservation/list?task=${task}&per_page=10&current_page=1year=${year.toString()}&month=${month.toString()}');
@@ -30,16 +35,16 @@ class ReservationApi {
       );
 
       if (response.statusCode == 200) {
-        print("aaa ${response.body}");
         final jsonData = json.decode(response.body);
         final ReservationList reservationData = ReservationList.fromJson(jsonData);
 
         return ReservationResponse(statusCode: response.statusCode, data: reservationData.result.billList);
       } else {
-        throw Exception('Failed to fetch data11');
+        onError(response.body);
+        throw Exception('Failed to fetch getReservationTickets');
       }
     } catch (error) {
-      throw Exception('Failed to fetch data11: $error');
+      throw Exception('Failed to fetch getReservationTickets: $error');
     }
   }
 }

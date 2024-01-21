@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../model/error_res_model.dart';
 import '../../../model/歷史訂單/immediate_ticket_detail_model.dart';
 import '../../../model/預約單/reservation_model.dart';
 import '../../../respository/歷史訂單/immediate_ticket_detail_api.dart';
+import '../../../util/dialog_util.dart';
 import '../main_page.dart';
 
 class GrabSuccessPage extends StatefulWidget {
@@ -37,7 +41,18 @@ class _GrabSuccessPageState extends State<GrabSuccessPage> {
         });
       }
     try {
-      final response = await ImmediateTicketDetailApi.getImmediateTicketDetail(widget.orderId);
+      final response = await ImmediateTicketDetailApi.getImmediateTicketDetail(
+          widget.orderId,
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
       if (response.statusCode == 200) {
         if (mounted) {
           setState(() {

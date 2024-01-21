@@ -346,9 +346,9 @@ class _OnlinePageState extends State<OnlinePage> {
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              minimumSize: const Size(double.infinity, 50), // Set the button height
+                              minimumSize: const Size(double.infinity, 50),
                             ),
                             onPressed: () {
                               Navigator.push(
@@ -378,9 +378,9 @@ class _OnlinePageState extends State<OnlinePage> {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            minimumSize: Size(double.infinity, 50), // Set the button height
+                            minimumSize: Size(double.infinity, 50),
                           ),
                           onPressed: () {
                             Navigator.push(
@@ -402,9 +402,9 @@ class _OnlinePageState extends State<OnlinePage> {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            minimumSize: Size(double.infinity, 50), // Set the button height
+                            minimumSize: Size(double.infinity, 50),
                           ),
                           onPressed: () {
                             Navigator.push(

@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:new_glad_driver/model/user_data_singleton.dart';
 
+import '../../model/error_res_model.dart';
 import '../../model/歷史訂單/reservation_list_model.dart';
 import '../../respository/歷史訂單/reservation_ticket_api.dart';
 import '../../util/dialog_util.dart';
@@ -23,7 +26,18 @@ class _NotYetReservationState extends State<NotYetReservation> {
       isLoading = true;
     });
     try {
-      final response = await ReservationTicketApi.getOngoingReservationTickets(false);
+      final response = await ReservationTicketApi.getOngoingReservationTickets(
+          false,
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
       if (response.statusCode == 200) {
         if (response.data.isEmpty) {
           setState(() {

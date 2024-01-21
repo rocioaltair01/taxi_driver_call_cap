@@ -13,7 +13,11 @@ class ImmediateTicketResponse {
 }
 
 class ImmediateTicketApi {
-  static Future<ImmediateTicketResponse> getImmediateTickets(int year, int month) async {
+  static Future<ImmediateTicketResponse> getImmediateTickets(
+      int year,
+      int month,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse(
         '$baseUrl/app/api/v2/driver/order?year=${year.toString()}&month=${month.toString()}&per_page=10&current_page=1');
@@ -30,6 +34,7 @@ class ImmediateTicketApi {
         final ImmediateListModel reservationData = ImmediateListModel.fromJson(jsonData['result']);
         return ImmediateTicketResponse(statusCode: response.statusCode, data: reservationData.billList);
       } else {
+        onError(response.body);
         throw Exception('Failed to fetch data');
       }
     } catch (error) {

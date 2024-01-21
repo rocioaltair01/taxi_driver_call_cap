@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
+import '../model/error_res_model.dart';
 import '../model/user_data_singleton.dart';
 import '../respository/設定/update_password_api.dart';
 
@@ -445,7 +448,18 @@ class GlobalDialog {
                                           isSuccess = false;
                                         });
                                       } else {
-                                        UpdatePasswordApi().updatePassword(newPassTextController.text);
+                                        UpdatePasswordApi().updatePassword(
+                                            newPassTextController.text,
+                                            (res) {
+                                              final jsonData = json.decode(res) as Map<String, dynamic>;
+                                              ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                                              GlobalDialog.showAlertDialog(
+                                                  context,
+                                                  "錯誤",
+                                                  responseModel.message
+                                              );
+                                            }
+                                        );
                                         userData = userData.updatePassword(newPassTextController.text);
                                         UserDataSingleton.reset();
                                         UserDataSingleton.initialize(userData);
@@ -579,6 +593,27 @@ class DialogUtils {
     );
   }
 
+  static void showErrorCancelDialog(
+      BuildContext context,
+      String title,
+      String content,
+      Function() onOkPressed
+      ) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomDialog(
+          title: title,
+          content: content,
+          onPressed: () {
+            Navigator.of(context).pop();
+            onOkPressed();
+          },
+        );
+      },
+    );
+  }
+
   static void showErrorCenterDialog(String content, BuildContext context) {
     showDialog(
       context: context,
@@ -593,7 +628,7 @@ class DialogUtils {
     );
   }
 
-  static void showCancelTicketCenterDialog(
+  static void showCancelCenterDialog(
       BuildContext context,
       String content,
       Function() onOkPressed

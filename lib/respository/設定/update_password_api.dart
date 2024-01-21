@@ -30,6 +30,7 @@ class UpdatePasswordApiResponse {
 class UpdatePasswordApi {
   Future<UpdatePasswordApiResponse> updatePassword(
       String newPassword,
+      Function(String res) onError
       ) async {
     UserData loginResult = UserDataSingleton.instance;
 
@@ -53,21 +54,11 @@ class UpdatePasswordApi {
         final decodedResponse = json.decode(response.body);
         return UpdatePasswordApiResponse.fromJson(decodedResponse);
       } else {
-        final decodedResponse = json.decode(response.body);
-        return UpdatePasswordApiResponse(
-          event: decodedResponse['event'],
-          success: false,
-          message: decodedResponse['error']['message'],
-          result: decodedResponse['result'],
-        );
+        onError(response.body);
+        throw Exception('Failed updatePassword: ${response.statusCode}');
       }
     } catch (e) {
-      return UpdatePasswordApiResponse(
-        event: 'updateDriverPassword',
-        success: false,
-        message: 'Failed to update password: $e',
-        result: '',
-      );
+      throw Exception('Failed updatePassword');
     }
   }
 }

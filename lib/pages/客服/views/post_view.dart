@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:new_glad_driver/util/dialog_util.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+import '../../../model/error_res_model.dart';
 import '../../../model/客服/announcement_model.dart';
 import '../../../respository/客服/announce_api.dart';
 import '../../../util/shared_util.dart';
@@ -32,7 +35,17 @@ class _PostViewState extends State<PostView> {
     });
 
     try {
-      announceList = await AnnounceApi.getAnnouncement();
+      announceList = await AnnounceApi.getAnnouncement(
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
 
       showHtmlContentList = List.generate(
         announceList?.result?.data.length ?? 0,

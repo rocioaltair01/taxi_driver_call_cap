@@ -39,6 +39,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
   Timer? getTicketStatusTimer;
   TicketStatus ticketStatus = TicketStatus.UNFINISHED;
   bool isShowCancelDialog = false;
+  bool isShowAPIErrorDialog = false;
 
   @override
   void initState() {
@@ -61,11 +62,18 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
           (res) {
             final jsonData = json.decode(res) as Map<String, dynamic>;
             ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
-            GlobalDialog.showAlertDialog(
-                context,
-                "錯誤",
-                responseModel.message
-            );
+            if (!isShowAPIErrorDialog) {
+              DialogUtils.showErrorCancelDialog(
+                  context,
+                  "錯誤",
+                  responseModel.message,
+                  () {
+                    StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
+                    statusProvider.updateStatus(GuestStatus.IS_NOT_OPEN);
+                  }
+              );
+              isShowAPIErrorDialog = true;
+            }
           });
       //status- number- 0 (未結束訂單), 1 (訂單完成), 2(司機取消), 3(乘客取消)
       //status = 2,3 都屬於取消
@@ -82,7 +90,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
           ticketStatus = TicketStatus.DRIVER_CANCEL;
         });
         if (!isShowCancelDialog) {
-          DialogUtils.showCancelTicketCenterDialog(context, "訂單已取消", () {
+          DialogUtils.showCancelCenterDialog(context, "訂單已取消", () {
             StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
             statusProvider.updateStatus(GuestStatus.IS_NOT_OPEN);
           });
@@ -93,7 +101,7 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
           ticketStatus = TicketStatus.PASSENGER_CANCEL;
         });
         if (!isShowCancelDialog) {
-          DialogUtils.showCancelTicketCenterDialog(context, "訂單已取消", () {
+          DialogUtils.showCancelCenterDialog(context, "訂單已取消", () {
             StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
             statusProvider.updateStatus(GuestStatus.IS_NOT_OPEN);
           });
@@ -346,12 +354,9 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                             {
                                               StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
                                               statusProvider.updateStatus(GuestStatus.ARRIVED);
-                                              //GlobalDialog.showAlertDialog(context, "回報到達成功", "message");
-                                            } else {
-                                              GlobalDialog.showAlertDialog(context, "not success", "message");
                                             }
                                           } else {
-                                            GlobalDialog.showAlertDialog(context, "no", "message");
+                                            GlobalDialog.showAlertDialog(context, "錯誤", "");
                                           }
                                         },
                                         child: Container(

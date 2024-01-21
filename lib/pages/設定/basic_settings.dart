@@ -26,7 +26,17 @@ class _BasicSettingPageState extends State<BasicSettingPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DriverInformationResponse>(
-      future: DriverInformationApi.getDriverInformation(),
+      future: DriverInformationApi.getDriverInformation(
+         (res) {
+          final jsonData = json.decode(res) as Map<String, dynamic>;
+          ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+          GlobalDialog.showAlertDialog(
+              context,
+              "錯誤",
+              responseModel.message
+          );
+        }
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: SpinKitFadingCircle(
@@ -179,7 +189,18 @@ class _BasicSettingPageState extends State<BasicSettingPage> {
 
                                           },
                                         );
-                                        UpdatePasswordApi().updatePassword("");
+                                        UpdatePasswordApi().updatePassword(
+                                            "",
+                                            (res) {
+                                              final jsonData = json.decode(res) as Map<String, dynamic>;
+                                              ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                                              GlobalDialog.showAlertDialog(
+                                                  context,
+                                                  "錯誤",
+                                                  responseModel.message
+                                              );
+                                            }
+                                        );
                                         // UserDataSingleton.reset();
                                         // service.goBack();
                                       },

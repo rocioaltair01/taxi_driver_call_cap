@@ -56,12 +56,7 @@ class CreateTicketHistoryPriceApi {
       }
     } catch (e) {
       print("@=== Create Ticket History Price Error: $e");
-      return CreateTicketHistoryPriceApiResponse(
-        event: "postOrderRecord",
-        success: false,
-        message: "Failed to create ticket history price: $e",
-        result: false,
-      );
+      throw Exception('Failed to create ticket history price');
     }
   }
 }

@@ -19,7 +19,9 @@ class DriverInformationResponse {
 }
 
 class DriverInformationApi {
-  static Future<DriverInformationResponse> getDriverInformation() async {
+  static Future<DriverInformationResponse> getDriverInformation(
+      Function(String res) onError
+      ) async {
     final Uri uri = Uri.parse('$baseUrl/app/api/driver/info');
 
     UserData userData = UserDataSingleton.instance;
@@ -37,6 +39,7 @@ class DriverInformationApi {
 
         return DriverInformationResponse(statusCode: response.statusCode, data: driverInfo);
       } else {
+        onError(response.body);
         throw Exception('Failed to fetch driver information');
       }
     } catch (error) {

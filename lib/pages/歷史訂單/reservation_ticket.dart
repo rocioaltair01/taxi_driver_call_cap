@@ -1,11 +1,18 @@
 
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../model/error_res_model.dart';
 import '../../model/歷史訂單/reservation_list_model.dart';
+import '../../model/預約單/reservation_model.dart';
 import '../../respository/歷史訂單/reservation_ticket_api.dart';
 import '../../util/dialog_util.dart';
 import '../../util/shared_util.dart';
+import '../tabbar_page.dart';
+import '../主畫面/main_page.dart';
 import 'components/date_header.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
@@ -45,7 +52,19 @@ class _ReservationTicketState extends State<ReservationTicket> {
     });
 
     try {
-      final response = await ReservationTicketApi.getReservationTickets(year, month);
+      final response = await ReservationTicketApi.getReservationTickets(
+          year,
+          month,
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
 
       if (response.statusCode == 200) {
         if (response.data.isEmpty) {
@@ -238,12 +257,45 @@ class _ReservationTicketState extends State<ReservationTicket> {
                 formattedDateOrderTime = formattedDateOrderTime.replaceAll("周", "週");
                 return GestureDetector(
                     onTap: () {
-                      print('Item at index $index ${billList[index].billInfo.reservationId}:: ${billList[index].billInfo.orderStatus}');
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => ReservationDetailPage(orderNumber: billList[index].billInfo.reservationId ?? 0, orderStatus: billList[index].billInfo.orderStatus ?? 0,)
-                        ),
-                      );
+                      // 派遣單直接到派遣流程
+                      if (billList[index].billInfo.orderStatus == 1) {
+                        pertabbarPageKey.currentState?.setState(() {
+                          pertabbarPageKey.currentState?.selectedTab = 2;
+                        });
+
+                        mainPageKey.currentState?.bill = BillInfoResevation(
+                          driverId: "",
+                          orderStatus: billList[index].billInfo.orderStatus ?? 0,
+                          reservationId: billList[index].billInfo.reservationId ?? 0,
+                          onLocation: billList[index].billInfo.onLocation ?? "",
+                          offLocation: billList[index].billInfo.offLocation ?? "",
+                          reservationType: "",
+                          reservationTime: "",
+                          passengerNote: billList[index].billInfo.passengerNote ?? "",
+                          onGps: billList[index].billInfo.onGps ?? [],
+                          offGps: billList[index].billInfo.offGps ?? [],
+                          userNumber: 0,
+                          acknowledgingOrderMethods: 0,
+                          serviceList: "",
+                          reservationTeam: "",
+                          blacklist: "",
+                          createdAt: "",
+                          clickMeterDate: null,
+                          getInTime: null,
+                          getPassengerTime: null,
+                          passengerOnLocationNote: "",
+                          isDeal: "",
+                        );
+                        StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
+                        mainPageKey.currentState?.order_type = 1;
+                        statusProvider.updateStatus(GuestStatus.PREPARED);
+                      } else {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (context) => ReservationDetailPage(orderNumber: billList[index].billInfo.reservationId ?? 0, orderStatus: billList[index].billInfo.orderStatus ?? 0,)
+                          ),
+                        );
+                      }
                     },
                   child: Container(
                     color: Colors.white,

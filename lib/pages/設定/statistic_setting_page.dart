@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+import '../../model/error_res_model.dart';
 import '../../respository/設定/statistics_api.dart';
 import '../../util/dialog_util.dart';
 import '../../util/shared_util.dart';
@@ -41,7 +44,19 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
       });
     }
     try {
-      final response = await StatisticsApi.getStatistics(year.toString(), month.toString());
+      final response = await StatisticsApi.getStatistics(
+          year.toString(),
+          month.toString(),
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
 
       if (response.statusCode == 200) {
           if (mounted) {

@@ -28,7 +28,11 @@ class UpdateFridayTimeApiResponse {
 }
 
 class UpdateFridayTimeApi {
-  Future<UpdateFridayTimeApiResponse> updateFridayTime(int orderId, int orderType) async {
+  Future<UpdateFridayTimeApiResponse> updateFridayTime(
+      int orderId,
+      int orderType,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
 
     try {
@@ -45,16 +49,12 @@ class UpdateFridayTimeApi {
         final decodedResponse = json.decode(response.body);
         return UpdateFridayTimeApiResponse.fromJson(decodedResponse);
       } else {
+        onError(response.body);
         throw Exception('Failed to update Friday time: ${response.statusCode}');
       }
     } catch (e) {
       print("@=== Update Friday Time Error: $e");
-      return UpdateFridayTimeApiResponse(
-        event: "putClickMeterDate",
-        success: false,
-        message: "Failed to update Friday time: $e",
-        result: null,
-      );
+      throw Exception('Failed to update Friday time');
     }
   }
 }

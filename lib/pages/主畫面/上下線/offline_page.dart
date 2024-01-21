@@ -51,8 +51,8 @@ class _OfflinePageState extends State<OfflinePage> {
                               child: Text(
                                 '休息中',
                                 style: TextStyle(
-                                  color: Colors.black, // Set text color to black
-                                  fontSize: 16, // Set font size as needed
+                                  color: Colors.black,
+                                  fontSize: 16,
                                 ),
                               ),
                             ),
@@ -100,7 +100,7 @@ class _OfflinePageState extends State<OfflinePage> {
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5), // Adjust the value as needed
+                                borderRadius: BorderRadius.circular(5),
                               ),
                               minimumSize: const Size(double.infinity, 50),
                             ),
@@ -132,7 +132,7 @@ class _OfflinePageState extends State<OfflinePage> {
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5), // Adjust the value as needed
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
                                 minimumSize: Size(double.infinity, 50),
                               ),
@@ -158,7 +158,7 @@ class _OfflinePageState extends State<OfflinePage> {
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5), // Adjust the value as needed
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
                                 minimumSize: Size(double.infinity, 50),
                               ),

@@ -28,6 +28,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: LoginForm(),
@@ -72,7 +73,21 @@ class _LoginFormState extends State<LoginForm> {
       isLoading = true;
     });
     try {
-      Map<String, dynamic> loginData = await LoginApi.login(username, password, teamCode, firebaseToken ?? "123");
+      Map<String, dynamic> loginData = await LoginApi.login(
+          username,
+          password,
+          teamCode,
+          firebaseToken ?? "123",
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
       LoginResponseModel responseModel = LoginResponseModel.fromJson(loginData);
       UserData userData = responseModel.result;
 
@@ -97,7 +112,6 @@ class _LoginFormState extends State<LoginForm> {
       NavigationService().routeTo('/TabbarPage', arguments: 'just a test');
     } catch (error) {
       print('@=== Login failed: $error');
-      DialogUtils.showErrorDialog("錯誤", "該司機帳號並未註冊或密碼錯誤",context);
     }
     setState(() {
       isLoading = false;

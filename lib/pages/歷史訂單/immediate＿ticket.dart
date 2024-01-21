@@ -1,10 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../model/error_res_model.dart';
 import '../../model/歷史訂單/immediate_list_model.dart';
+import '../../model/預約單/reservation_model.dart';
 import '../../respository/歷史訂單/immediate_ticket_api.dart';
 import '../../util/dialog_util.dart';
 import '../../util/shared_util.dart';
+import '../tabbar_page.dart';
+import '../主畫面/main_page.dart';
 import 'components/date_header.dart';
 import 'immediate_detail_page.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -41,7 +48,19 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
     });
 
     try {
-      final response = await ImmediateTicketApi.getImmediateTickets(year, month);
+      final response = await ImmediateTicketApi.getImmediateTickets(
+          year,
+          month,
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
 
       if (response.statusCode == 200) {
         if (response.data.isEmpty) {
@@ -243,15 +262,49 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
                 formattedDate = formattedDate.replaceAll("周", "週");
                 return GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ImmediateDetailPage(
-                            orderNumber: billList[index].id,
-                            orderStatus: billList[index].orderStatus,
-                          )
-                      ),
-                    );
+                    // 派遣單直接到派遣流程
+                    if (billList[index].orderStatus == 1) {
+                      pertabbarPageKey.currentState?.setState(() {
+                        pertabbarPageKey.currentState?.selectedTab = 2;
+                      });
+
+                      mainPageKey.currentState?.bill = BillInfoResevation(
+                        driverId: "",
+                        orderStatus: billList[index].orderStatus ?? 0,
+                        reservationId: billList[index].id,
+                        onLocation: billList[index].onLocation ?? "",
+                        offLocation: billList[index].offLocation ?? "",
+                        reservationType: "",
+                        reservationTime: "",
+                        passengerNote: billList[index].passengerNote ?? "",
+                        onGps: billList[index].onGps ?? [],
+                        offGps: billList[index].offGps ?? [],
+                        userNumber: 0,
+                        acknowledgingOrderMethods: 0,
+                        serviceList: "",
+                        reservationTeam: "",
+                        blacklist: "",
+                        createdAt: "",
+                        clickMeterDate: null,
+                        getInTime: null,
+                        getPassengerTime: null,
+                        passengerOnLocationNote: "",
+                        isDeal: "",
+                      );
+                      StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
+                      mainPageKey.currentState?.order_type = 0;
+                      statusProvider.updateStatus(GuestStatus.PREPARED);
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ImmediateDetailPage(
+                              orderNumber: billList[index].id,
+                              orderStatus: billList[index].orderStatus,
+                            )
+                        ),
+                      );
+                    }
                   },
                   child: Container(
                     color: Colors.white,

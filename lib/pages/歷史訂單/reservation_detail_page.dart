@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import '../../model/error_res_model.dart';
 import '../../model/歷史訂單/reservation_ticket_detail_model.dart';
 import '../../respository/歷史訂單/reservation_ticket_detail_api.dart';
+import '../../util/dialog_util.dart';
 import 'components/history_list_item.dart';
 import 'components/history_next_list_item.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -39,7 +43,18 @@ class _ReservationDetailPageState extends State<ReservationDetailPage> {
     });
 
     try {
-      final response = await ReservationTicketDetailApi.getReservationTicketDetail(widget.orderNumber);
+      final response = await ReservationTicketDetailApi.getReservationTicketDetail(
+          widget.orderNumber,
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
 
       if (response.statusCode == 200) {
         setState(() {
@@ -113,8 +128,10 @@ class _ReservationDetailPageState extends State<ReservationDetailPage> {
                       ? '此乘客無提供下車地點' : ticketDetail!.billInfo.offLocation.toString(), currentPosition: ticketDetail!.billInfo.offGps ?? [0,0],),
                   HistoryListItem(label:'乘客人數', value: '${ticketDetail!.billInfo.userNumber.toString()}位' ?? ''),
                   HistoryListItem(label:'乘客備註:', value: ticketDetail!.billInfo.passengerNote ?? ''),
-                  HistoryListItem(label:'里程數:', value: '${ticketDetail!.billInfo.milage}(公里)' ?? ''),
-                  HistoryListItem(label:'分鐘:', value: '${ticketDetail!.billInfo.routeSecond.toString()}(分鐘)' ?? ''),
+                  HistoryListItem(label:'里程數:', value: '${ticketDetail!.billInfo.milage ?? 0}(公里)' ?? ''),
+                  ((ticketDetail!.billInfo.routeSecond ?? 0)/60 == 0) ?
+                  HistoryListItem(label:'分鐘:', value: '0(分鐘)') :
+                  HistoryListItem(label:'分鐘:', value: '${((ticketDetail!.billInfo.routeSecond ?? 0)/60).toStringAsFixed(1)}(分鐘)'),
                   HistoryListItem(label:'金額:', value: '＄${ticketDetail!.billInfo.actualPrice}' ?? ''),
                 ],
               ),

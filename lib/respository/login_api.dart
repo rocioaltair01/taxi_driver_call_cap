@@ -4,7 +4,13 @@ import 'package:http/http.dart' as http;
 import '../constants/constants.dart';
 
 class LoginApi {
-  static Future<Map<String, dynamic>> login(String account, String password, String teamCode, String firebaseToken) async {
+  static Future<Map<String, dynamic>> login(
+      String account,
+      String password,
+      String teamCode,
+      String firebaseToken,
+      Function(String res) onError
+      ) async {
     final loginUrl = '$baseUrl/app/api/driver/login';
 
     try {
@@ -24,6 +30,7 @@ class LoginApi {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
+        onError(response.body);
         throw Exception('Failed to log in');
       }
     } catch (error) {

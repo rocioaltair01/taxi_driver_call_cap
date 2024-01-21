@@ -118,7 +118,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
           ticketStatus = TicketStatus.DRIVER_CANCEL;
         });
         if (!isShowCancelDialog) {
-          DialogUtils.showCancelTicketCenterDialog(context, "訂單已取消", () {
+          DialogUtils.showCancelCenterDialog(context, "訂單已取消", () {
             StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
             statusProvider.updateStatus(GuestStatus.IS_NOT_OPEN);
           });
@@ -129,7 +129,7 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
           ticketStatus = TicketStatus.PASSENGER_CANCEL;
         });
         if (!isShowCancelDialog) {
-          DialogUtils.showCancelTicketCenterDialog(context, "訂單已取消", () {
+          DialogUtils.showCancelCenterDialog(context, "訂單已取消", () {
             StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
             statusProvider.updateStatus(GuestStatus.IS_NOT_OPEN);
           });
@@ -383,7 +383,16 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                       onPressed: () async{
                                         await UpdateFridayTimeApi().updateFridayTime(
                                             widget.bill!.reservationId,
-                                            mainPageKey.currentState!.order_type
+                                            mainPageKey.currentState!.order_type,
+                                            (res) {
+                                              final jsonData = json.decode(res) as Map<String, dynamic>;
+                                              ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                                              GlobalDialog.showAlertDialog(
+                                                  context,
+                                                  "錯誤",
+                                                  responseModel.message
+                                              );
+                                            }
                                         );
                                         Navigator.push(
                                           context,
@@ -536,7 +545,16 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                         {
                                           StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(
                                               mainPageKey.currentState?.bill?.reservationId ?? 0,
-                                              mainPageKey.currentState?.order_type ?? 1
+                                              mainPageKey.currentState?.order_type ?? 1,
+                                              (res) {
+                                                final jsonData = json.decode(res) as Map<String, dynamic>;
+                                                ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                                                GlobalDialog.showAlertDialog(
+                                                    context,
+                                                    "錯誤",
+                                                    responseModel.message
+                                                );
+                                              }
                                           );
                                           if (res.success)
                                           {

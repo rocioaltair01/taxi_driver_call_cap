@@ -78,7 +78,21 @@ class _SplashPageState extends State<SplashPage> {
     print('@=== FCM Token firebaseToken: $firebaseToken');
 
     try {
-      Map<String, dynamic> loginData = await LoginApi.login(username, password, teamCode, firebaseToken ?? "123");
+      Map<String, dynamic> loginData = await LoginApi.login(
+          username,
+          password,
+          teamCode,
+          firebaseToken ?? "123",
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
       LoginResponseModel responseModel = LoginResponseModel.fromJson(loginData);
       UserData userData = responseModel.result;
 
@@ -101,7 +115,6 @@ class _SplashPageState extends State<SplashPage> {
       await UserPreferences.saveUserInformation(username, password, teamCode);
     } catch (error) {
       print('@=== Login failed: $error');
-      DialogUtils.showErrorDialog("錯誤", "該司機帳號並未註冊或密碼錯誤",context);
     }
   }
 

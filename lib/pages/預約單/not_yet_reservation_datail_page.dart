@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 
+import '../../model/error_res_model.dart';
 import '../../model/歷史訂單/reservation_list_model.dart';
 import '../../respository/預約單/reservation_grab_ticket_api.dart';
 import '../../util/dialog_util.dart';
@@ -132,7 +135,18 @@ class _NotYetReservationDetailPageState extends State<NotYetReservationDetailPag
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async{
-                  ReservationGrabTicketResponse result = await ReservationGrabTicketApi.grabTickets(widget.billData.billInfo.reservationId.toString());
+                  ReservationGrabTicketResponse result = await ReservationGrabTicketApi.grabTickets(
+                      widget.billData.billInfo.reservationId.toString(),
+                      (res) {
+                        final jsonData = json.decode(res) as Map<String, dynamic>;
+                        ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                        GlobalDialog.showAlertDialog(
+                            context,
+                            "錯誤",
+                            responseModel.message
+                        );
+                      }
+                  );
                   if (result.data.success == true)
                   {
                     DialogUtils.showImageDialog("接單成功","ok",context);

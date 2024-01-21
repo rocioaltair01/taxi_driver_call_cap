@@ -143,7 +143,7 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5), // Adjust the value as needed
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
                                 minimumSize: Size(double.infinity, 50),
                               ),
@@ -168,7 +168,7 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5), // Adjust the value as needed
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
                                 minimumSize: const Size(double.infinity, 50),
                               ),

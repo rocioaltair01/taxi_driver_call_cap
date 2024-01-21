@@ -14,7 +14,10 @@ class ImmediateTicketDetailResponse {
 
 //提取單一立即單-成功
 class ImmediateTicketDetailApi {
-  static Future<ImmediateTicketDetailResponse> getImmediateTicketDetail(int orderId) async {
+  static Future<ImmediateTicketDetailResponse> getImmediateTicketDetail(
+      int orderId,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse('$baseUrl/app/api/driver/order/detail/$orderId');
 
@@ -32,12 +35,13 @@ class ImmediateTicketDetailApi {
 
         return ImmediateTicketDetailResponse(statusCode: response.statusCode, data: ticketDetail);
       } else {
-        print("@=== Failed to fetch data: ${response.statusCode};; $orderId" );
+        print("@=== Failed to fetch ImmediateTicketDetailApi: ${response.statusCode} $orderId" );
+        onError(response.body);
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
-      print("@=== Failed to fetch data $error");
-      throw Exception('Failed to fetch data: $error');
+      print("@=== Failed to fetch ImmediateTicketDetailApi $error");
+      throw Exception('Failed to fetch ImmediateTicketDetailApi: $error');
     }
   }
 }

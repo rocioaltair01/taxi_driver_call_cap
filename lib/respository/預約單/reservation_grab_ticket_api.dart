@@ -11,7 +11,10 @@ class ReservationGrabTicketResponse {
 }
 
 class ReservationGrabTicketApi {
-  static Future<ReservationGrabTicketResponse> grabTickets(String ticketId) async {
+  static Future<ReservationGrabTicketResponse> grabTickets(
+      String ticketId,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse(
         '$baseUrl/app/api/reservation/grab/$ticketId');
@@ -25,12 +28,11 @@ class ReservationGrabTicketApi {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        print("hey E : ${response.body}");
         final UpdateDriverGrabReservationModel reservationData = UpdateDriverGrabReservationModel.fromJson(jsonData);
 
         return ReservationGrabTicketResponse(statusCode: response.statusCode, data: reservationData);
       } else {
-        print("hey E : Failed to fetch data");
+        onError(response.body);
         throw Exception('Failed to fetch data');
       }
     } catch (error) {

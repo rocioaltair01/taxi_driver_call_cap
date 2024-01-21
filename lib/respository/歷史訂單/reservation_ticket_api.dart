@@ -13,7 +13,11 @@ class FetchDataResponse {
 }
 
 class ReservationTicketApi {
-  static Future<FetchDataResponse> getReservationTickets(int year, int month) async {
+  static Future<FetchDataResponse> getReservationTickets(
+      int year,
+      int month,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse(
         '$baseUrl/app/api/reservation/list?task=all&per_page=25&current_page=1&year=${year.toString()}&month=${month.toString()}');
@@ -32,6 +36,7 @@ class ReservationTicketApi {
 
         return FetchDataResponse(statusCode: response.statusCode, data: reservationData.billList);
       } else {
+        onError(response.body);
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
@@ -39,10 +44,12 @@ class ReservationTicketApi {
     }
   }
 
-  static Future<FetchDataResponse> getOngoingReservationTickets(bool grabbed) async {
+  static Future<FetchDataResponse> getOngoingReservationTickets(
+      bool grabbed,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
     String queryGrabbed = grabbed ? 'grabbed' : 'ungrabbed';
-    print("hey : $baseUrl/app/api/reservation/list?task=$queryGrabbed&per_page=25&current_page=1");
     final Uri uri = Uri.parse(
         '$baseUrl/app/api/reservation/list?task=$queryGrabbed&per_page=25&current_page=1');
 
@@ -60,6 +67,7 @@ class ReservationTicketApi {
 
         return FetchDataResponse(statusCode: response.statusCode, data: reservationData.billList);
       } else {
+        onError(response.body);
         throw Exception('Failed to fetch data');
       }
     } catch (error) {

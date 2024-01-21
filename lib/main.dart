@@ -1,5 +1,4 @@
 import 'package:camera/camera.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -51,7 +50,7 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: [
-        const Locale('zh', 'TW'), // Traditional Chinese
+        const Locale('zh', 'TW'),
       ],
       onGenerateRoute: RouteGenerator.generateRoutes,
       initialRoute: '/',
@@ -59,7 +58,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         appBarTheme: const AppBarTheme(
-          iconTheme: IconThemeData(color: Colors.black), // Change the back button color to black
+          iconTheme: IconThemeData(color: Colors.black),
         ),
         primaryColor: Colors.black,
         scaffoldBackgroundColor: Colors.white,
@@ -67,13 +66,13 @@ class MyApp extends StatelessWidget {
           buttonColor: Colors.black,
           textTheme: ButtonTextTheme.primary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20.0)), // Adjust the value as needed
+            borderRadius: BorderRadius.all(Radius.circular(20.0)),
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.black,), //button color
-            foregroundColor: MaterialStateProperty.all<Color>(Color(0xffffffff),), //text (and icon)
+            backgroundColor: MaterialStateProperty.all<Color>(Colors.black,),
+            foregroundColor: MaterialStateProperty.all<Color>(Color(0xffffffff),),
           ),
         ),
       ),

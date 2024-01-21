@@ -6,9 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:new_glad_driver/model/user_data_singleton.dart';
 
-
-
-
 class CustomerMessagePage extends StatefulWidget {
   const CustomerMessagePage({super.key});
 

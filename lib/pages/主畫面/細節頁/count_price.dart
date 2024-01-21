@@ -248,7 +248,7 @@ class _CountPricePageState extends State<CountPricePage> {
                                             response.routes[0].legs[0].duration.value);
                                         return price.toInt().toString();
                                       }
-                                      return "0"; // If the property is not available, return the accumulated value
+                                      return "0";
                                     }).toString()} 元"),),
                                     Expanded(child: Text("公里數:${routesResponseList.fold<String>("0 km", (prev, response) {
                                       if (response.routes.isNotEmpty &&
@@ -275,7 +275,7 @@ class _CountPricePageState extends State<CountPricePage> {
                                         }
                                       }
                                       print("ROCIOii");
-                                      return "0 分鐘"; // If the property is not available, return the accumulated value
+                                      return "0 分鐘";
                                     })}"),)
                                   ],
                                 ),
@@ -290,7 +290,7 @@ class _CountPricePageState extends State<CountPricePage> {
                                         style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(5),
-                                            side: BorderSide(color: Colors.black, width: 1),// Adjust the value as needed
+                                            side: BorderSide(color: Colors.black, width: 1),
                                           ),
                                           primary: Colors.white,
                                           minimumSize: Size(double.infinity, 50),

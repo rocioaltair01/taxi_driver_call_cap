@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -6,9 +5,11 @@ import 'package:http/http.dart' as http;
 import '../../constants/constants.dart';
 import '../../model/user_data_singleton.dart';
 
-
 class GrabReservationApi {
-  static Future<UpdateDriverGrabReservationResponse> grabReservation(int number) async {
+  static Future<UpdateDriverGrabReservationResponse> grabReservation(
+      int number,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse(
         '$baseUrl/app/api/reservation/grab/${number.toString()}');
@@ -27,6 +28,7 @@ class GrabReservationApi {
 
         return reservationData;
       } else {
+        onError(response.body);
         throw Exception('Failed to fetch data11');
       }
     } catch (error) {
