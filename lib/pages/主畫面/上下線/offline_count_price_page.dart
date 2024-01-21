@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../../../model/error_res_model.dart';
 import '../../../model/user_data_singleton.dart';
 import '../../../respository/主畫面/create_ticket_history_price_api.dart';
 import '../../../util/dialog_util.dart';
@@ -44,7 +46,7 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
     distanceTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       CalculatedInfo calculateInfo = UserDataSingleton.instance.setting.calculatedInfo;
       calculateDistance();
-      print("ROCIO: price $price distance $distance duration $duration");
+      print("@=== Count price");
       setState(() {
         price = PriceUtil().calculateTotalCost(
             calculateInfo.perKmOfFare,
@@ -76,7 +78,6 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
         newPosition.longitude,
       );
 
-      // Update the distance and current position
       setState(() {
         distance += newDistance/1000;
         _currentPosition = LatLng(newPosition.latitude, newPosition.longitude);
@@ -195,7 +196,16 @@ class _OfflineCountPricePageState extends State<OfflineCountPricePage> {
 
                                 await CreateTicketHistoryPriceApi().createTicketHistoryPrice(
                                     mainPageKey.currentState?.bill?.reservationId ?? 0,
-                                    requestBody
+                                    requestBody,
+                                    (res) {
+                                      final jsonData = json.decode(res) as Map<String, dynamic>;
+                                      ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                                      GlobalDialog.showAlertDialog(
+                                          context,
+                                          "錯誤",
+                                          responseModel.message
+                                      );
+                                    }
                                 );
 
                                 GlobalDialog.showPaymentDialog(

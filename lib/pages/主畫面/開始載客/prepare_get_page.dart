@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -7,11 +10,20 @@ import 'package:new_glad_driver/pages/%E4%B8%BB%E7%95%AB%E9%9D%A2/%E7%B4%B0%E7%A
 import 'package:new_glad_driver/util/dialog_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../model/error_res_model.dart';
 import '../../../model/預約單/reservation_model.dart';
 import '../../../respository/主畫面/arrived_success_api.dart';
+import '../../../respository/主畫面/get_ticket_status_api.dart';
 import '../細節頁/estimate_price.dart';
 import '../main_page.dart';
 
+//status- number- 0 (未結束訂單), 1 (訂單完成), 2(司機取消), 3(乘客取消)
+enum TicketStatus {
+  UNFINISHED,
+  FINISH,
+  DRIVER_CANCEL,
+  PASSENGER_CANCEL
+}
 
 class PrepareGetPage extends StatefulWidget {
   final BillInfoResevation? bill;
@@ -24,11 +36,71 @@ class PrepareGetPage extends StatefulWidget {
 class _PrepareGetPageState extends State<PrepareGetPage> {
   late GoogleMapController mapController;
   LatLng? _currentPosition;
+  Timer? getTicketStatusTimer;
+  TicketStatus ticketStatus = TicketStatus.UNFINISHED;
+  bool isShowCancelDialog = false;
 
   @override
   void initState() {
     super.initState();
     getLocation();
+    startGetTicketStatusTimer();
+  }
+
+  @override
+  void dispose() {
+    getTicketStatusTimer?.cancel();
+    super.dispose();
+  }
+
+  void startGetTicketStatusTimer() {
+    getTicketStatusTimer = Timer.periodic(const Duration(seconds: 15), (timer) async {
+      GetTicketStatusApiResponse res = await GetTicketStatusApi().getTicketStatus(
+          widget.bill!.reservationId,
+          mainPageKey.currentState?.order_type ?? 1,
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          });
+      //status- number- 0 (未結束訂單), 1 (訂單完成), 2(司機取消), 3(乘客取消)
+      //status = 2,3 都屬於取消
+      if (res.status == 0) {
+        setState(() {
+          ticketStatus = TicketStatus.UNFINISHED;
+        });
+      } else if (res.status == 1) {
+        setState(() {
+          ticketStatus = TicketStatus.FINISH;
+        });
+      } else if (res.status == 2) {
+        setState(() {
+          ticketStatus = TicketStatus.DRIVER_CANCEL;
+        });
+        if (!isShowCancelDialog) {
+          DialogUtils.showCancelTicketCenterDialog(context, "訂單已取消", () {
+            StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
+            statusProvider.updateStatus(GuestStatus.IS_NOT_OPEN);
+          });
+          isShowCancelDialog = true;
+        }
+      } else if (res.status == 3) {
+        setState(() {
+          ticketStatus = TicketStatus.PASSENGER_CANCEL;
+        });
+        if (!isShowCancelDialog) {
+          DialogUtils.showCancelTicketCenterDialog(context, "訂單已取消", () {
+            StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
+            statusProvider.updateStatus(GuestStatus.IS_NOT_OPEN);
+          });
+          isShowCancelDialog = true;
+        }
+      }
+    });
   }
 
   getLocation() async {
@@ -257,11 +329,18 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
                                         onDoubleTap:() async{
                                           if (mainPageKey.currentState?.bill?.reservationId != null)
                                           {
-                                            print("markArrivalSuccess ${mainPageKey.currentState?.bill?.orderStatus}");
                                             ArrivedSuccessApiResponse res = await ArrivedSuccessApi().markArrivalSuccess(
                                                 mainPageKey.currentState?.bill?.reservationId ?? 0,
-                                                mainPageKey.currentState?.order_type ?? 1
-                                              // 0
+                                                mainPageKey.currentState?.order_type ?? 1,
+                                                    (res) {
+                                                  final jsonData = json.decode(res) as Map<String, dynamic>;
+                                                  ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                                                  GlobalDialog.showAlertDialog(
+                                                      context,
+                                                      "錯誤",
+                                                      responseModel.message
+                                                  );
+                                                }
                                             );
                                             if (res.success == true)
                                             {
@@ -341,17 +420,4 @@ class _PrepareGetPageState extends State<PrepareGetPage> {
       ),
     );
   }
-
-  // void openGoogleMap(String endAddress) async {
-  //   double currentLat = _currentPosition?.latitude ?? 0;
-  //   double currentLng = _currentPosition?.longitude ?? 0;
-  //
-  //   if (endAddress.isNotEmpty) {
-  //     String url = 'https://www.google.com/maps/dir/?api=1&origin=$currentLat,$currentLng&destination=$endAddress';
-  //     final Uri uri = Uri.parse(url);
-  //     await launchUrl(uri, mode: LaunchMode.externalApplication);
-  //   } else {
-  //     print('Please enter start and end addresses');
-  //   }
-  // }
 }

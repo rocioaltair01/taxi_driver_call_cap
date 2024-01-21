@@ -76,17 +76,16 @@ class SubmitOrderApi {
       );
 
       if (response.statusCode == 200) {
-        print("Submit Order Response: ${response.body}");
         final jsonData = json.decode(response.body) as Map<String, dynamic>;
         final submitOrderResult = SubmitOrderResponse.fromJson(jsonData);
 
         return submitOrderResult;
       } else {
-        print("Submit Order Failed: Failed to submit order");
+        print("@=== Submit Order Failed: Failed to submit order");
         throw Exception('Failed to submit order');
       }
     } catch (error) {
-      print("Submit Order Error: Failed to submit order: $error");
+      print("@=== Submit Order Error: Failed to submit order: $error");
       throw Exception('Failed to submit order: $error');
     }
   }

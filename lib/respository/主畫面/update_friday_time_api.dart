@@ -43,14 +43,12 @@ class UpdateFridayTimeApi {
 
       if (response.statusCode == 200) {
         final decodedResponse = json.decode(response.body);
-        print("Update Friday Time Response: ${response.body}");
         return UpdateFridayTimeApiResponse.fromJson(decodedResponse);
       } else {
-        print("Update Friday Time Failed: ${response.body}");
         throw Exception('Failed to update Friday time: ${response.statusCode}');
       }
     } catch (e) {
-      print("Update Friday Time Error: $e");
+      print("@=== Update Friday Time Error: $e");
       return UpdateFridayTimeApiResponse(
         event: "putClickMeterDate",
         success: false,

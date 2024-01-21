@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 import '../../model/user_data_singleton.dart';
 import '../../model/預約單/reservation_model.dart';
 import '../../respository/api_service.dart';
-import '../../respository/主畫面/get_ticket_status_api.dart';
 import '上下線/offline_page.dart';
 import '上下線/online_page.dart';
 import '開始載客/is_picking_guest.dart';
@@ -44,8 +43,6 @@ class MainPage extends StatefulWidget {
 }
 
 class MainPageState extends State<MainPage> {
-  String pick_status = "前往載客中";
-  // GuestStatus current_status = GuestStatus.IS_NOT_OPEN;
   BillInfoResevation? bill;
   LatLng? _currentPosition;
   int order_type = 1;
@@ -64,7 +61,7 @@ class MainPageState extends State<MainPage> {
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
-//
+
     double lat = position.latitude;
     double long = position.longitude;
 
@@ -73,22 +70,18 @@ class MainPageState extends State<MainPage> {
 
     setState(() {
       _currentPosition = location;
-      //_isOpen = false;
     });
 
-    _timer = Timer.periodic(Duration(seconds: 15), (Timer timer) {
+    UserData loginResult = UserDataSingleton.instance;
+    print('Token get: ${loginResult.token}');
+
+    _timer = Timer.periodic(const Duration(seconds: 15), (Timer timer) {
       callAPI();
-      if (bill != null)
-        GetTicketStatusApi().getTicketStatus(bill!.reservationId, order_type);
     });
   }
 
   void callAPI() async {
-
     UserData loginResult = UserDataSingleton.instance;
-
-    print('Token get: ${loginResult.token}');
-
     ApiService apiService = ApiService();
 
     double latitude = _currentPosition?.latitude ?? 0;
@@ -96,7 +89,7 @@ class MainPageState extends State<MainPage> {
     int plan = 0;
     int status = 1;
     int taxiSort = 0;
-// Trigger driver's GPS update
+
     try {
       await apiService.triggerDriverGps(
           latitude,
@@ -107,16 +100,8 @@ class MainPageState extends State<MainPage> {
           loginResult.token
       );
     } catch (error) {
-      // Handle error accordingly (show message, retry logic, etc.)
+      print("ERROR===更新司機位置 error: $error");
     }
-    // // 这里是调用API的逻辑
-    // try {
-    //   var response = await http.get(Uri.parse('https://your-api-endpoint.com'));
-    //   // 处理响应...
-    //   print('API called at ${DateTime.now()}');
-    // } catch (e) {
-    //   print('Error calling API: $e');
-    // }
   }
 
   @override

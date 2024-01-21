@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../../constants/constants.dart';
 import '../../model/user_data_singleton.dart';
 
 class UpdatePasswordApiResponse {
@@ -33,7 +34,7 @@ class UpdatePasswordApi {
     UserData loginResult = UserDataSingleton.instance;
 
     try {
-      String url = 'https://test-taxi.shopinn.tw/app/api/driver/password';
+      String url = '$baseUrl/app/api/driver/password';
 
       final Map<String, dynamic> body = {
         "password": newPassword,

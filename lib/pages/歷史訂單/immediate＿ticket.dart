@@ -43,7 +43,6 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
     try {
       final response = await ImmediateTicketApi.getImmediateTickets(year, month);
 
-      print("immediate response $response");
       if (response.statusCode == 200) {
         if (response.data.isEmpty) {
           setState(() {
@@ -62,9 +61,7 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
           isLoading = false;
           isEmpty = true;
         });
-        //?????
-        //DialogUtils.showErrorDialog("錯誤","網路異常",context);
-        print("Failed to fetch data fetchReservationTicketsData");
+        print("@=== Failed to fetch data fetchReservationTicketsData");
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
@@ -72,8 +69,8 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
         isLoading = false;
         isEmpty = true;
       });
-      print("error6 $error");
-      DialogUtils.showErrorDialog("錯誤","網路異常6",context);
+      print("@=== error6 $error");
+      DialogUtils.showErrorDialog("錯誤","網路異常",context);
       throw Exception('Error: $error');
     }
   }
@@ -246,7 +243,6 @@ class _ImmediateTicketState extends State<ImmediateTicket> {
                 formattedDate = formattedDate.replaceAll("周", "週");
                 return GestureDetector(
                   onTap: () {
-                    print('Item at index $index tapped!');
                     Navigator.push(
                       context,
                       MaterialPageRoute(

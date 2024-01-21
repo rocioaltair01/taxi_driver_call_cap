@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../main.dart';
 import '../../../model/預約單/reservation_model.dart';
+import '../../../respository/主畫面/get_ticket_status_api.dart';
 import '../../../respository/主畫面/giveup_api.dart';
 import '../../../respository/主畫面/start_picking_passenger_api.dart';
 import '../../../respository/主畫面/update_arrive_photo.dart';
@@ -20,6 +21,7 @@ import '../../../respository/主畫面/update_friday_time_api.dart';
 import '../上下線/offline_count_price_page.dart';
 import '../細節頁/estimate_price.dart';
 import '../main_page.dart';
+import 'prepare_get_page.dart';
 
 enum PickingStatus {
   ARRIVED,// 點選到達定點
@@ -27,7 +29,6 @@ enum PickingStatus {
   ARRIVED_10MIN,// 點選到達定點（10min）
   GIVINGUP,// 申請放棄中（10min）
 }
-
 
 class SayIsArrivedPage extends StatefulWidget {
   final BillInfoResevation? bill;
@@ -41,45 +42,100 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
   late GoogleMapController mapController;
   bool isGivingup = false;
   PickingStatus current_status = PickingStatus.ARRIVED;
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
-
   LatLng? _currentPosition;
   bool showCamera = false;
   String pick_status = "前往載客中";
-  // late CameraController _controller;
-  // late Future<void> _initializeControllerFuture;
-
+  Timer? fiveMinTimer;
+  Timer? tenMinTimer;
+  Timer? getTicketStatusTimer;
+  TicketStatus ticketStatus = TicketStatus.UNFINISHED;
+  bool isShowCancelDialog = false;
 
   @override
   void initState() {
     super.initState();
     getLocation();
     startTimer();
-    print("ccc $cameras");
-    // _controller = CameraController(
-    //   cameras.first,
-    //   ResolutionPreset.medium,
-    // );
-    //
-    // _initializeControllerFuture = _controller.initialize();
+    startGetTicketStatusTimer();
+  }
+
+  @override
+  void dispose() {
+    fiveMinTimer?.cancel();
+    tenMinTimer?.cancel();
+    getTicketStatusTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
   }
 
   void startTimer() {
     const Duration duration5 = Duration(minutes: 5);
-    Timer(duration5, () { // 計時五分鐘
+    fiveMinTimer = Timer(duration5, () { // 計時五分鐘
       setState(() {
         current_status = PickingStatus.ARRIVED_5MIN;
       });
-      print("ROCIO: 計時五分鐘");
+      print("@=== SayIsArrivedPage 計時五分鐘");
     });
     const Duration duration = Duration(minutes: 10);
-    Timer(duration, () { //  計時十分鐘
+    tenMinTimer = Timer(duration, () { //  計時十分鐘
       setState(() {
         current_status = PickingStatus.ARRIVED_10MIN;
       });
-      print("ROCIO: 計時十分鐘");
+      print("@=== SayIsArrivedPage 計時十分鐘");
+    });
+  }
+
+  void startGetTicketStatusTimer() {
+    getTicketStatusTimer = Timer.periodic(const Duration(seconds: 15), (timer) async {
+      GetTicketStatusApiResponse res = await GetTicketStatusApi().getTicketStatus(
+          widget.bill!.reservationId,
+          mainPageKey.currentState?.order_type ?? 1,
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
+      //status- number- 0 (未結束訂單), 1 (訂單完成), 2(司機取消), 3(乘客取消)
+      //status = 2,3 都屬於取消
+      if (res.status == 0) {
+        setState(() {
+          ticketStatus = TicketStatus.UNFINISHED;
+        });
+      } else if (res.status == 1) {
+        setState(() {
+          ticketStatus = TicketStatus.FINISH;
+        });
+      } else if (res.status == 2) {
+        setState(() {
+          ticketStatus = TicketStatus.DRIVER_CANCEL;
+        });
+        if (!isShowCancelDialog) {
+          DialogUtils.showCancelTicketCenterDialog(context, "訂單已取消", () {
+            StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
+            statusProvider.updateStatus(GuestStatus.IS_NOT_OPEN);
+          });
+          isShowCancelDialog = true;
+        }
+      } else if (res.status == 3) {
+        setState(() {
+          ticketStatus = TicketStatus.PASSENGER_CANCEL;
+        });
+        if (!isShowCancelDialog) {
+          DialogUtils.showCancelTicketCenterDialog(context, "訂單已取消", () {
+            StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
+            statusProvider.updateStatus(GuestStatus.IS_NOT_OPEN);
+          });
+          isShowCancelDialog = true;
+        }
+      }
     });
   }
 
@@ -142,7 +198,12 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                 top: 50,
                 left: 20,
                 right: 0,
-                child: Text("$pick_status"),
+                child: Text(
+                  "$pick_status",
+                  style: const TextStyle(
+                      fontSize: 18
+                  ),
+                ),
               ),
             ],
           ),
@@ -355,17 +416,22 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                                             onOkPressed: () async{
                                               if (mainPageKey.currentState?.bill?.reservationId != null) {
                                                 GiveupErrorResponse result = await GiveupApi().cancelOrderApply(mainPageKey.currentState?.bill?.reservationId ?? 0,
-                                                    mainPageKey.currentState?.bill?.orderStatus ?? 1);
-                                                print("result.success ${result.success}");
+                                                    mainPageKey.currentState?.bill?.orderStatus ?? 1,
+                                                    (res) {
+                                                      final jsonData = json.decode(res) as Map<String, dynamic>;
+                                                      ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                                                      GlobalDialog.showAlertDialog(
+                                                          context,
+                                                          "錯誤",
+                                                          responseModel.message
+                                                      );
+                                                    }
+                                                );
                                                 if (result.success == true)
                                                 {
-                                                  // mainPageKey.currentState?.setState(() {
-                                                  //   mainPageKey.currentState?.say_is_arrived = false;
-                                                  // });
                                                   setState(() {
                                                     isGivingup = true;
                                                   });
-                                                  // GlobalDialog.showAlertDialog(context, "放棄成功", result.message);
                                                 } else {
                                                   GlobalDialog.showAlertDialog(context, "申請放棄失敗", result.message);
                                                 }
@@ -510,650 +576,6 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
                         ),
                       )
                   ),
-                  // (current_status == PickingStatus.ARRIVED) ?
-                  // Positioned(
-                  //     bottom: 0,
-                  //     left: 0,
-                  //     right: 0,
-                  //     child:  Padding(
-                  //       padding: const EdgeInsets.all(16.0),
-                  //       child: Row(
-                  //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  //         children: [
-                  //           Expanded(
-                  //               child: Column(
-                  //                 children: [
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () {
-                  //                       Navigator.push(
-                  //                         context,
-                  //                         MaterialPageRoute(
-                  //                             builder: (context) => EstimatePrice()
-                  //                         ),
-                  //                       );
-                  //                     },
-                  //                     child: const Text(
-                  //                       '估算金額',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //                   Container(height: 20,),
-                  //                   Container(height: 50,)
-                  //                 ],
-                  //               )
-                  //           ),
-                  //           Container(
-                  //             width: 10,
-                  //           ),
-                  //           Expanded(
-                  //             child:  Column(
-                  //               children: [
-                  //                 ElevatedButton(
-                  //                   style: ElevatedButton.styleFrom(
-                  //                     shape: RoundedRectangleBorder(
-                  //                       borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                     ),
-                  //                     minimumSize: Size(double.infinity, 50), // Set the button height
-                  //                   ),
-                  //                   onPressed: () {
-                  //                     setState(() {
-                  //                       showCamera = true;
-                  //                     });
-                  //                   },
-                  //                   child: const Text(
-                  //                     '拍照',
-                  //                     style: TextStyle(
-                  //                       fontSize: 16,
-                  //                       fontWeight: FontWeight.bold,
-                  //                     ),
-                  //                   ),
-                  //                 ),
-                  //                 Container(height: 20,),
-                  //                 Container(height: 50,),
-                  //               ],
-                  //             ),
-                  //           ),
-                  //           Container(
-                  //             width: 10,
-                  //           ),
-                  //           Expanded(
-                  //               child: Column(
-                  //                 children: [
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () async{
-                  //                       if (mainPageKey.currentState?.bill?.reservationId != null)
-                  //                       {
-                  //
-                  //                       }
-                  //                     },
-                  //                     child: const Text(
-                  //                       '聯絡客人',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //
-                  //                   Container(height: 20,),
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () async{
-                  //                       if (mainPageKey.currentState?.bill?.reservationId != null)
-                  //                       {
-                  //                         StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(
-                  //                             mainPageKey.currentState?.bill?.reservationId ?? 0,
-                  //                             mainPageKey.currentState?.order_type ?? 1
-                  //                         );
-                  //                         if (res.success)
-                  //                         {
-                  //                           StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
-                  //                           statusProvider.updateStatus(GuestStatus.PICKING_GUEST);
-                  //                           // setState(() {
-                  //                           //   pick_status = "前往目的地";
-                  //                           // });
-                  //                           //GlobalDialog.showAlertDialog(context, "開始載客成功", res.message);
-                  //                         } else {
-                  //                           GlobalDialog.showAlertDialog(context, "開始載客失敗", res.message);
-                  //                         }
-                  //                       }
-                  //                     },
-                  //                     child: const Text(
-                  //                       '已載客',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   )
-                  //                 ],
-                  //               )
-                  //           )
-                  //         ],
-                  //       ),
-                  //     )
-                  // ) :
-                  // (current_status == PickingStatus.ARRIVED_5MIN) ?
-                  // Positioned(
-                  //     bottom: 0,
-                  //     left: 0,
-                  //     right: 0,
-                  //     child:  Padding(
-                  //       padding: const EdgeInsets.all(16.0),
-                  //       child: Row(
-                  //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  //         children: [
-                  //           Expanded(
-                  //               child: Column(
-                  //                 children: [
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () {
-                  //                       Navigator.push(
-                  //                         context,
-                  //                         MaterialPageRoute(
-                  //                             builder: (context) => EstimatePrice()
-                  //                         ),
-                  //                       );
-                  //                     },
-                  //                     child: const Text(
-                  //                       '估算金額',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //                   Container(height: 20,),
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () async{
-                  //                       await UpdateFridayTimeApi().updateFridayTime(
-                  //                           widget.bill!.reservationId,
-                  //                           mainPageKey.currentState!.order_type
-                  //                       );
-                  //                       Navigator.push(
-                  //                         context,
-                  //                         MaterialPageRoute(
-                  //                             builder: (context) => OfflineCountPricePage()
-                  //                         ),
-                  //                       );
-                  //                     },
-                  //                     child: const Text(
-                  //                       '週五跳錶',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //                 ],
-                  //               )
-                  //           ),
-                  //           Container(
-                  //             width: 10,
-                  //           ),
-                  //           Expanded(
-                  //             child:  Column(
-                  //               children: [
-                  //                 ElevatedButton(
-                  //                   style: ElevatedButton.styleFrom(
-                  //                     shape: RoundedRectangleBorder(
-                  //                       borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                     ),
-                  //                     minimumSize: Size(double.infinity, 50), // Set the button height
-                  //                   ),
-                  //                   onPressed: () {
-                  //                   },
-                  //                   child: const Text(
-                  //                     '拍照',
-                  //                     style: TextStyle(
-                  //                       fontSize: 16,
-                  //                       fontWeight: FontWeight.bold,
-                  //                     ),
-                  //                   ),
-                  //                 ),
-                  //                 Container(height: 20,),
-                  //                 Container(height: 50,),
-                  //               ],
-                  //             ),
-                  //           ),
-                  //           Container(
-                  //             width: 10,
-                  //           ),
-                  //           Expanded(
-                  //               child: Column(
-                  //                 children: [
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () async{
-                  //                       if (mainPageKey.currentState?.bill?.reservationId != null)
-                  //                       {
-                  //                       }
-                  //                     },
-                  //                     child: const Text(
-                  //                       '聯絡客人',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //
-                  //                   Container(height: 20,),
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () async{
-                  //                       if (mainPageKey.currentState?.bill?.reservationId != null)
-                  //                       {
-                  //                         StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(
-                  //                             mainPageKey.currentState?.bill?.reservationId ?? 0,
-                  //                             mainPageKey.currentState?.order_type ?? 1
-                  //                         );
-                  //                         if (res.success)
-                  //                         {
-                  //                           StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
-                  //                           statusProvider.updateStatus(GuestStatus.PICKING_GUEST);
-                  //                           // setState(() {
-                  //                           //   pick_status = "前往目的地";
-                  //                           // });
-                  //                           //GlobalDialog.showAlertDialog(context, "開始載客成功", res.message);
-                  //                         } else {
-                  //                           GlobalDialog.showAlertDialog(context, "開始載客失敗", res.message);
-                  //                         }
-                  //                       }
-                  //                     },
-                  //                     child: const Text(
-                  //                       '已載客',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   )
-                  //                 ],
-                  //               )
-                  //           )
-                  //         ],
-                  //       ),
-                  //     )
-                  // ) :
-                  // (current_status == PickingStatus.ARRIVED_10MIN) ?
-                  // Positioned(
-                  //     bottom: 0,
-                  //     left: 0,
-                  //     right: 0,
-                  //     child:  Padding(
-                  //       padding: const EdgeInsets.all(16.0),
-                  //       child: Row(
-                  //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  //         children: [
-                  //           Expanded(
-                  //               child: Column(
-                  //                 children: [
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () {
-                  //                       Navigator.push(
-                  //                         context,
-                  //                         MaterialPageRoute(
-                  //                             builder: (context) => EstimatePrice()
-                  //                         ),
-                  //                       );
-                  //                     },
-                  //                     child: const Text(
-                  //                       '估算金額',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //                   Container(height: 20,),
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       backgroundColor: isGivingup ? Colors.grey : Colors.black,
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8),
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50),
-                  //                     ),
-                  //                     onPressed: () async{
-                  //                       GlobalDialog.showGiveupDialog(
-                  //                           context: context,
-                  //                           message: "確定要申請放棄訂單嗎？",
-                  //                           onOkPressed: () async{
-                  //                             if (mainPageKey.currentState?.bill?.reservationId != null) {
-                  //                               GiveupErrorResponse result = await GiveupApi().cancelOrderApply(mainPageKey.currentState?.bill?.reservationId ?? 0,
-                  //                                   mainPageKey.currentState?.bill?.orderStatus ?? 1);
-                  //                               print("result.success ${result.success}");
-                  //                               if (result.success == true)
-                  //                               {
-                  //                                 // mainPageKey.currentState?.setState(() {
-                  //                                 //   mainPageKey.currentState?.say_is_arrived = false;
-                  //                                 // });
-                  //                                 setState(() {
-                  //                                   isGivingup = true;
-                  //                                 });
-                  //                                 // GlobalDialog.showAlertDialog(context, "放棄成功", result.message);
-                  //                               } else {
-                  //                                 GlobalDialog.showAlertDialog(context, "申請放棄失敗", result.message);
-                  //                               }
-                  //                             }
-                  //                           },
-                  //                           onCancelPressed: () {
-                  //
-                  //                           }
-                  //                       );
-                  //                     },
-                  //                     child: Text(
-                  //                       isGivingup ? '申請放棄中' : '申請放棄',
-                  //                       style: const TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //                 ],
-                  //               )
-                  //           ),
-                  //           Container(
-                  //             width: 10,
-                  //           ),
-                  //           Expanded(
-                  //             child:  Column(
-                  //               children: [
-                  //                 ElevatedButton(
-                  //                   style: ElevatedButton.styleFrom(
-                  //                     shape: RoundedRectangleBorder(
-                  //                       borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                     ),
-                  //                     minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                   ),
-                  //                   onPressed: () {
-                  //                   },
-                  //                   child: const Text(
-                  //                     '拍照',
-                  //                     style: TextStyle(
-                  //                       fontSize: 16,
-                  //                       fontWeight: FontWeight.bold,
-                  //                     ),
-                  //                   ),
-                  //                 ),
-                  //                 Container(height: 20,),
-                  //                 Container(height: 50,),
-                  //               ],
-                  //             ),
-                  //           ),
-                  //           Container(
-                  //             width: 10,
-                  //           ),
-                  //           Expanded(
-                  //               child: Column(
-                  //                 children: [
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () async{
-                  //
-                  //                     },
-                  //                     child: const Text(
-                  //                       '聯絡客人',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //
-                  //                   Container(height: 20,),
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () async{
-                  //                       if (mainPageKey.currentState?.bill?.reservationId != null)
-                  //                       {
-                  //                         StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(
-                  //                             mainPageKey.currentState?.bill?.reservationId ?? 0,
-                  //                             mainPageKey.currentState?.order_type ?? 1
-                  //                         );
-                  //                         if (res.success)
-                  //                         {
-                  //                           StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
-                  //                           statusProvider.updateStatus(GuestStatus.PICKING_GUEST);
-                  //                           setState(() {
-                  //                             pick_status = "前往目的地";
-                  //                           });
-                  //                           //GlobalDialog.showAlertDialog(context, "開始載客成功", res.message);
-                  //                         } else {
-                  //                           GlobalDialog.showAlertDialog(context, "開始載客失敗", res.message);
-                  //                         }
-                  //                       }
-                  //                     },
-                  //                     child: const Text(
-                  //                       '已載客',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   )
-                  //                 ],
-                  //               )
-                  //           )
-                  //         ],
-                  //       ),
-                  //     )
-                  // ) :
-                  // (current_status == PickingStatus.GIVINGUP) ?
-                  // Positioned(
-                  //     bottom: 0,
-                  //     left: 0,
-                  //     right: 0,
-                  //     child:  Padding(
-                  //       padding: const EdgeInsets.all(16.0),
-                  //       child: Row(
-                  //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  //         children: [
-                  //           Expanded(
-                  //               child: Column(
-                  //                 children: [
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () {
-                  //                       Navigator.push(
-                  //                         context,
-                  //                         MaterialPageRoute(
-                  //                             builder: (context) => EstimatePrice()
-                  //                         ),
-                  //                       );
-                  //                     },
-                  //                     child: const Text(
-                  //                       '估算金額',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //                   Container(height: 20,),
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () {
-                  //                     },
-                  //                     child: const Text(
-                  //                       '申請放棄中',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //                 ],
-                  //               )
-                  //           ),
-                  //           Container(
-                  //             width: 10,
-                  //           ),
-                  //           Expanded(
-                  //             child:  Column(
-                  //               children: [
-                  //                 ElevatedButton(
-                  //                   style: ElevatedButton.styleFrom(
-                  //                     shape: RoundedRectangleBorder(
-                  //                       borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                     ),
-                  //                     minimumSize: Size(double.infinity, 50), // Set the button height
-                  //                   ),
-                  //                   onPressed: () {
-                  //                   },
-                  //                   child: const Text(
-                  //                     '拍照',
-                  //                     style: TextStyle(
-                  //                       fontSize: 16,
-                  //                       fontWeight: FontWeight.bold,
-                  //                     ),
-                  //                   ),
-                  //                 ),
-                  //                 Container(height: 20,),
-                  //                 Container(height: 50,),
-                  //               ],
-                  //             ),
-                  //           ),
-                  //           Container(
-                  //             width: 10,
-                  //           ),
-                  //           Expanded(
-                  //               child: Column(
-                  //                 children: [
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () async{
-                  //                       if (mainPageKey.currentState?.bill?.reservationId != null)
-                  //                       {
-                  //                       }
-                  //                     },
-                  //                     child: const Text(
-                  //                       '聯絡客人',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   ),
-                  //
-                  //                   Container(height: 20,),
-                  //                   ElevatedButton(
-                  //                     style: ElevatedButton.styleFrom(
-                  //                       shape: RoundedRectangleBorder(
-                  //                         borderRadius: BorderRadius.circular(8), // Adjust the border radius as needed
-                  //                       ),
-                  //                       minimumSize: const Size(double.infinity, 50), // Set the button height
-                  //                     ),
-                  //                     onPressed: () async{
-                  //                       if (mainPageKey.currentState?.bill?.reservationId != null)
-                  //                       {
-                  //                         StartPickingPassengerApiResponse res = await StartPickingPassengerApi().startPickingPassenger(
-                  //                             mainPageKey.currentState?.bill?.reservationId ?? 0,
-                  //                             mainPageKey.currentState?.order_type ?? 1
-                  //                         );
-                  //                         if (res.success)
-                  //                         {
-                  //                           StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
-                  //                           statusProvider.updateStatus(GuestStatus.PICKING_GUEST);
-                  //                           setState(() {
-                  //                             pick_status = "前往目的地";
-                  //                           });
-                  //                           //GlobalDialog.showAlertDialog(context, "開始載客成功", res.message);
-                  //                         } else {
-                  //                           GlobalDialog.showAlertDialog(context, "開始載客失敗", res.message);
-                  //                         }
-                  //                       }
-                  //                     },
-                  //                     child: const Text(
-                  //                       '已載客',
-                  //                       style: TextStyle(
-                  //                         fontSize: 16,
-                  //                         fontWeight: FontWeight.bold,
-                  //                       ),
-                  //                     ),
-                  //                   )
-                  //                 ],
-                  //               )
-                  //           )
-                  //         ],
-                  //       ),
-                  //     )
-                  // ) :
-                  // Text ("Error")
                 ],
               )
           )
@@ -1176,8 +598,6 @@ class _SayIsArrivedPageState extends State<SayIsArrivedPage> {
   }
 }
 
-
-// // A screen that allows users to take a picture using a given camera.
 class TakePictureScreen extends StatefulWidget {
   final BillInfoResevation? bill;
 
@@ -1197,22 +617,16 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   @override
   void initState() {
     super.initState();
-    // To display the current output from the Camera,
-    // create a CameraController.
     _controller = CameraController(
-      // Get a specific camera from the list of available cameras.
       cameras.first,
-      // Define the resolution to use.
       ResolutionPreset.medium,
     );
 
-    // Next, initialize the controller. This returns a Future.
     _initializeControllerFuture = _controller.initialize();
   }
 
   @override
   void dispose() {
-    // Dispose of the controller when the widget is disposed.
     _controller.dispose();
     super.dispose();
   }
@@ -1220,14 +634,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     // appBar: AppBar(title: const Text('Take a picture')),
       body: Column(
         children: [
-          // Container(
-          //   height: 200,
-          //   child:    TakePictureScreen(),
-          // ),
-
           Container(
             color: Colors.black,
             child: AspectRatio(
@@ -1265,7 +673,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                           _controller.takePicture().then((XFile? file) {
                             if(mounted) {
                               if(file != null && widget.bill != null) {
-                                print("Picture saved to ${file.path}");
+                                print("@=== Picture saved to ${file.path}");
                                 UpdateArrivePhotoApi.updateArrivePhoto(
                                     filePath: file.path,
                                     orderId: widget.bill!.reservationId ?? 0,

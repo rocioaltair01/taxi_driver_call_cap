@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -11,6 +12,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:new_glad_driver/pages/%E4%B8%BB%E7%95%AB%E9%9D%A2/%E4%B8%8A%E4%B8%8B%E7%B7%9A/grab_success_page.dart';
 import 'package:new_glad_driver/util/dialog_util.dart';
 
+import '../../../model/error_res_model.dart';
 import '../../../model/user_data_singleton.dart';
 import '../../../model/主畫面/instant_item_model.dart';
 import '../../../respository/主畫面/grab_ticket_api.dart';
@@ -29,15 +31,15 @@ class OnlinePage extends StatefulWidget {
 }
 
 class _OnlinePageState extends State<OnlinePage> {
-  // late IOWebSocketChannel channel;
   String message = '';
-
   bool isLoading = false;
   List<InstantItemModel> ticketDetail = [];
 
   Map<String, dynamic>? submitTicket;
   LatLng? _currentPosition;
   late IO.Socket socket;
+  int indexdialog = 0;
+  bool isShowDialog = false;
 
   @override
   void initState() {
@@ -55,29 +57,29 @@ class _OnlinePageState extends State<OnlinePage> {
     });
 
     socket.onConnect((_) {
-      print('Socket: connected');
+      print('@=== Socket: connected');
     });
 
     socket.onDisconnect((_) {
-      print('Socket: disconnected');
+      print('@=== Socket: disconnected');
     });
 
     socket.onReconnect((_) {
-      print('Socket: reconnected');
+      print('@=== Socket: reconnected');
     });
 
     socket.onReconnectAttempt((_) {
-      print('Socket: reconnect attempt');
+      print('@=== Socket: reconnect attempt');
     });
 
     socket.onError((error) {
-      print('Socket: error: $error');
+      print('@=== Socket: error: $error');
     });
 
     socket.on('GetOrderInfo', (data) {
       if (mounted)
         fetchData();
-      print('Socket: Received GetOrderInfo event: $data');
+      print('@=== Socket: Received GetOrderInfo event: $data');
     });
 
     // socket.on('Cancel', (data) {
@@ -121,8 +123,19 @@ class _OnlinePageState extends State<OnlinePage> {
     });
 
     try {
-      print("hey ${_currentPosition?.latitude} ${_currentPosition?.longitude}");
-      final response = await OrderRequestAboveApi.getOrderRequestAbove(_currentPosition?.latitude ?? 0, _currentPosition?.longitude ?? 0);
+      final response = await OrderRequestAboveApi.getOrderRequestAbove(
+          _currentPosition?.latitude ?? 0,
+          _currentPosition?.longitude ?? 0,
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
 
       if (response.statusCode == 200) {
         if (mounted)
@@ -131,16 +144,13 @@ class _OnlinePageState extends State<OnlinePage> {
           List<InstantItemModel> filteredTicketDetail = [];
 
           for (var item in response.data!) {
-            // Check if the orderId is already in the set
             if (!uniqueOrderIds.contains(item.orderId)) {
-              // Add the item to the filtered list and set
               filteredTicketDetail.add(item);
               uniqueOrderIds.add(item.orderId.toInt());
             }
           }
 
           setState(() {
-            //ticketDetail = response.data!;
             ticketDetail = filteredTicketDetail;
             isLoading = false;
           });
@@ -152,12 +162,10 @@ class _OnlinePageState extends State<OnlinePage> {
       setState(() {
         isLoading = false;
       });
+      print("@=== Failed getOrderRequestAbove $error");
       throw Exception('Error: $error');
     }
   }
-
-  int indexdialog = 0;
-  bool isShowDialog = false;
 
   @override
   Widget build(BuildContext context) {
@@ -428,22 +436,28 @@ class _OnlinePageState extends State<OnlinePage> {
           title: "搶單",
           content: "上車地點: 台南市中西區成功路1號",
           time: (ticketDetail[indexdialog].time.toInt() == 0) ? 1 : ticketDetail[indexdialog].time.toInt(),
-          //context: context,
           onOkPressed: (double selectedTime) async{
-              print("selectedTime $selectedTime");
             GrabTicketResponse response = await GrabTicketApi.grabTicket(
-                orderId: ticketDetail[indexdialog].orderId.toString(),
-                time: 1,
-                status: 0
+              orderId: ticketDetail[indexdialog].orderId.toString(),
+              time: 1,
+              status: 0,
+              onError: (res) {
+                final jsonData = json.decode(res) as Map<String, dynamic>;
+                ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                GlobalDialog.showAlertDialog(
+                    context,
+                    "錯誤",
+                    responseModel.message
+                );
+              }
             );
             if (response.success)
             {
               if (mounted)
               {
-                setState(() {
-                 // ticketDetail.removeWhere((item) => item.orderId == ticketDetail[index].orderId);
-                });
-                print("object");
+                // setState(() {
+                //  // ticketDetail.removeWhere((item) => item.orderId == ticketDetail[index].orderId);
+                // });
                 Navigator.push(context, BottomToTopPageRoute(page: GrabSuccessPage(orderId: ticketDetail[indexdialog].orderId.toInt(), selectedTime : selectedTime)));
               }
             } else {
@@ -452,7 +466,6 @@ class _OnlinePageState extends State<OnlinePage> {
             setState(() {
               isShowDialog = false;
             });
-            //DialogUtils.showGrabTicketDialog("12345", "上車地點: 台南市中西區成功路1號", "", context);
           },
           onCancelPressed: () {
             setState(() {

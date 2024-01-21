@@ -26,12 +26,12 @@ class SettingPage extends StatelessWidget {
                 Tab(text: "功能設定"),
                 Tab(text: "月統計表"),
               ],
-              labelStyle: TextStyle(fontSize: 18),
-              unselectedLabelStyle: TextStyle(fontSize: 18),
+              labelStyle: const TextStyle(fontSize: 18),
+              unselectedLabelStyle: const TextStyle(fontSize: 18),
             ),
           ),
         ),
-        body: TabBarView(
+        body: const TabBarView(
           children: [
             BasicSettingPage(),
             FunctionSettingPage(),

@@ -1,7 +1,4 @@
-
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-import 'login_response_model.dart';
 
 class UserDataSingleton {
   static UserData? _instance;
@@ -69,6 +66,7 @@ class UserData {
   final LoginSetting setting;
   String _phoneNumber;
   String _password;
+  int _authStatus;//authorize- number- 0: 授權, 1: 停權, 2: 審核中
   LatLng _currentLocation;
 
   UserData({
@@ -87,12 +85,14 @@ class UserData {
     required this.setting,
     required String phoneNumber,
     required String password,
+    required int authStatus,
     required LatLng currentLocation
-  }):_phoneNumber = phoneNumber, _password = password, _currentLocation = currentLocation;
+  }):_phoneNumber = phoneNumber,_authStatus = authStatus, _password = password, _currentLocation = currentLocation;
 
   // Getter for phoneNumber
   String get phoneNumber => _phoneNumber;
   String get password => _password;
+  int get authStatus => _authStatus;
   LatLng get currentLocation => _currentLocation;
 
   // Method to update phoneNumber
@@ -113,7 +113,30 @@ class UserData {
       setting: this.setting,
       phoneNumber: newPhoneNumber,
       password: this.password,
+      authStatus: this.authStatus,
       currentLocation: currentLocation
+    );
+  }
+
+  UserData updateAuth(int newAuth) {
+    return UserData(
+        id: this.id,
+        teamCode: this.teamCode,
+        serviceList: this.serviceList,
+        token: this.token,
+        type: this.type,
+        authorize: this.authorize,
+        initialGps: this.initialGps,
+        mongoTable: this.mongoTable,
+        plan: this.plan,
+        callNumber: this.callNumber,
+        name: this.name,
+        count: this.count,
+        setting: this.setting,
+        phoneNumber: this.phoneNumber,
+        password: this.password,
+        authStatus: newAuth,
+        currentLocation: currentLocation
     );
   }
 
@@ -134,6 +157,7 @@ class UserData {
         setting: this.setting,
         phoneNumber: this.phoneNumber,
         password: newPassword,
+        authStatus: this.authStatus,
         currentLocation: currentLocation
     );
   }
@@ -155,6 +179,7 @@ class UserData {
         setting: this.setting,
         phoneNumber: this.phoneNumber,
         password: this.password,
+        authStatus: this.authStatus,
         currentLocation: newLocation
     );
   }
@@ -176,6 +201,7 @@ class UserData {
       setting: LoginSetting.fromJson(json['setting']),
       phoneNumber: (json['phoneNumber'] == null) ? '' : json['phoneNumber'],
       password: (json['password'] == null) ? '' : json['password'],
+      authStatus: (json['authStatus'] == null) ? 2 : json['authStatus'],
       currentLocation: (json['currentLocation'] == null) ? LatLng(0, 0) : json['currentLocation'],
     );
   }

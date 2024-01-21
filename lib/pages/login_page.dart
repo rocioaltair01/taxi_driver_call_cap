@@ -1,10 +1,15 @@
+import 'dart:convert';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../constants/shared_user_preference.dart';
+import '../model/error_res_model.dart';
 import '../model/user_data_singleton.dart';
 import '../respository/login_api.dart';
 import '../respository/navigation_service.dart';
+import '../respository/主畫面/driver_auth_api.dart';
 import '../util/dialog_util.dart';
 
 void main() {
@@ -24,7 +29,7 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: LoginForm(),
       ),
     );
@@ -50,10 +55,10 @@ class _LoginFormState extends State<LoginForm> {
       String password,
       String teamCode
       ) async {
-    // String username = _usernameController.text;
-    // String password = _passwordController.text;
-    // String teamCode = _teamCodeController.text;
-    String firebaseToken = '123'; // Replace with actual firebase token
+
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? firebaseToken = await messaging.getAPNSToken();
+    print('@=== FCM Token firebaseToken: $firebaseToken');
 
     if (username.isEmpty) {
       DialogUtils.showErrorDialog("錯誤", "請輸入帳號",context);
@@ -67,17 +72,31 @@ class _LoginFormState extends State<LoginForm> {
       isLoading = true;
     });
     try {
-      Map<String, dynamic> loginData = await LoginApi.login(username, password, teamCode, firebaseToken);
+      Map<String, dynamic> loginData = await LoginApi.login(username, password, teamCode, firebaseToken ?? "123");
       LoginResponseModel responseModel = LoginResponseModel.fromJson(loginData);
       UserData userData = responseModel.result;
+
       userData = userData.updatePhoneNumber(username);
+      DriverAuthResponse auth = await DriverAuthApi.getDriverAuth(
+          userData.token,
+          (res) {
+            final jsonData = json.decode(res) as Map<String, dynamic>;
+            ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+            GlobalDialog.showAlertDialog(
+                context,
+                "錯誤",
+                responseModel.message
+            );
+          }
+      );
+      userData = userData.updateAuth(auth.result.authorize);
       userData = userData.updatePassword(password);
       UserDataSingleton.initialize(userData);
-      // Save user information after initializing UserDataSingleton
+
       await UserPreferences.saveUserInformation(username, password, teamCode);
       NavigationService().routeTo('/TabbarPage', arguments: 'just a test');
     } catch (error) {
-      print('Login failed: $error');
+      print('@=== Login failed: $error');
       DialogUtils.showErrorDialog("錯誤", "該司機帳號並未註冊或密碼錯誤",context);
     }
     setState(() {

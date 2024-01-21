@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../../../model/預約單/reservation_model.dart';
-import '../../../util/dialog_util.dart';
 import '../../../util/shared_util.dart';
 import '../../tabbar_page.dart';
 import '../../主畫面/main_page.dart';
 import '../../歷史訂單/components/history_list_item.dart';
 import '../../歷史訂單/components/history_next_list_item.dart';
-import '../../歷史訂單/history_detail_map.dart';
 
 class FinishedReservationViewDetailPage extends StatefulWidget {
   final BillList bill;
@@ -65,7 +62,7 @@ class _FinishedReservationViewDetailPageState extends State<FinishedReservationV
                 // _buildRow('付款方式', '現金付款'),
                 HistoryListItem(label:'預約時間', value: DateUtil().getDate(widget.bill.billInfo.reservationTime)),
                 HistoryListItem(label:'付款方式', value: widget.bill.billInfo.reservationId.toString()),
-                HistoryListItem(label:'付款方式', value: '現金付款'),
+                const HistoryListItem(label:'付款方式', value: '現金付款'),
               ],
             ),
             const SizedBox(height: 20,),

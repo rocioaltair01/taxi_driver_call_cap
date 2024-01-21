@@ -29,8 +29,11 @@ class ArrivedSuccessApiResponse {
 
 // 更新到達時間
 class ArrivedSuccessApi {
-  //orderType
-  Future<ArrivedSuccessApiResponse> markArrivalSuccess(int orderId, int orderType) async {
+  Future<ArrivedSuccessApiResponse> markArrivalSuccess(
+      int orderId,
+      int orderType,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
     print("orderId$orderType");
     try {
@@ -45,14 +48,13 @@ class ArrivedSuccessApi {
 
       if (response.statusCode == 200) {
         final decodedResponse = json.decode(response.body);
-        print("arrived ${response.body}");
         return ArrivedSuccessApiResponse.fromJson(decodedResponse);
       } else {
-        print("arrived ${response.body}");
+        onError(response.body);
         throw Exception('Failed to mark arrival success ${response.statusCode}');
       }
     } catch (e) {
-      print("e $e");
+      print("@=== Failed markArrivalSuccess e $e");
       return ArrivedSuccessApiResponse(
         event: "putGetInTime",
         success: false,

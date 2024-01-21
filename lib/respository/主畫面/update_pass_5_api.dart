@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../../constants/constants.dart';
 import '../../model/user_data_singleton.dart';
 
 class UpdatePass5ApiResponse {
@@ -44,7 +45,7 @@ class UpdatePass5Api {
   Future<UpdatePass5ApiResponse> updatePass5Api() async {
     UserData loginResult = UserDataSingleton.instance;
     try {
-      final url = Uri.parse('https://test-taxi.shopinn.tw/app/api/others/meter_date/16354/?order_state=0&order_type=1');
+      final url = Uri.parse('$baseUrl/app/api/others/meter_date/16354/?order_state=0&order_type=1');
       final response = await http.put(
         url,
         headers: {

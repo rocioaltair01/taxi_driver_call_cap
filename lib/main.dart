@@ -3,7 +3,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'constants/route_generator.dart';
@@ -24,15 +23,11 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  //Get the token
-  String? token = await messaging.getAPNSToken();
-  print('FCM Token: $token');
   runApp(
       ChangeNotifierProvider(
           create: (context) => StatusProvider(),
-          child: MyApp()
+          child: const MyApp()
       )
   );
   // initializeDateFormatting('zh', null).then((_) {

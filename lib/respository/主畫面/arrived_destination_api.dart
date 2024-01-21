@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../../constants/constants.dart';
 import '../../model/user_data_singleton.dart';
 
 class ArrivedDestinationApiResponse {
@@ -28,10 +29,15 @@ class ArrivedDestinationApiResponse {
 
 // 到達目的地
 class ArrivedDestinationApi {
-  Future<ArrivedDestinationApiResponse> markArrivedDestination(int orderId,int orderType) async {
+  Future<ArrivedDestinationApiResponse> markArrivedDestination(
+  {
+    required int orderId,
+    required int orderType,
+    required Function(String res) onError
+  }) async {
     UserData loginResult = UserDataSingleton.instance;
     try {
-      String url = 'https://test-taxi.shopinn.tw/app/api/socket/click_arrive_location/$orderId?order_type=0'
+      String url = '$baseUrl/app/api/socket/click_arrive_location/$orderId?order_type=0'
           '$orderType';
 
       final Map<String, dynamic> body = {
@@ -50,21 +56,19 @@ class ArrivedDestinationApi {
       );
 
       if (response.statusCode == 200) {
-        print("hey ${response.body}");
         final decodedResponse = json.decode(response.body);
         return ArrivedDestinationApiResponse.fromJson(decodedResponse);
       } else {
         final decodedResponse = json.decode(response.body);
+        onError(response.body);
         return ArrivedDestinationApiResponse(
             event: decodedResponse['event'],
           success:false,
           message: decodedResponse['error']['message'],
           result: decodedResponse['result'],
-
         );
       }
     } catch (e) {
-      print("Faield $e");
       return ArrivedDestinationApiResponse(
         event: 'putClickArriveLocation',
         success: false,

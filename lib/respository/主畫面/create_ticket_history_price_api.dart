@@ -28,7 +28,11 @@ class CreateTicketHistoryPriceApiResponse {
 }
 
 class CreateTicketHistoryPriceApi {
-  Future<CreateTicketHistoryPriceApiResponse> createTicketHistoryPrice(int orderId, Map<String, dynamic> requestBody) async {
+  Future<CreateTicketHistoryPriceApiResponse> createTicketHistoryPrice(
+      int orderId,
+      Map<String, dynamic> requestBody,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
 
     try {
@@ -45,14 +49,13 @@ class CreateTicketHistoryPriceApi {
 
       if (response.statusCode == 200) {
         final decodedResponse = json.decode(response.body);
-        print("Create Ticket History Price Response: ${response.body}");
         return CreateTicketHistoryPriceApiResponse.fromJson(decodedResponse);
       } else {
-        print("Create Ticket History Price Failed: ${response.body}");
+        onError(response.body);
         throw Exception('Failed to create ticket history price: ${response.statusCode}');
       }
     } catch (e) {
-      print("Create Ticket History Price Error: $e");
+      print("@=== Create Ticket History Price Error: $e");
       return CreateTicketHistoryPriceApiResponse(
         event: "postOrderRecord",
         success: false,

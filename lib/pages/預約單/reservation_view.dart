@@ -63,64 +63,15 @@ class _ReservationViewState extends State<ReservationView> {
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    int selectedYear = year;
-    int selectedMonth = month;
-
-    final picked = await showModalBottomSheet(
-      context: context,
-      builder: (BuildContext builder) {
-        return Container(
-          height: 350.0,
-          child: Column(
-            children: [
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: DateTime(year, month),
-                  minimumDate: DateTime(2000),
-                  maximumDate: DateTime(2100),
-                  onDateTimeChanged: (DateTime newDateTime) {
-                    setState(() {
-                      selectedYear = newDateTime.year;
-                      selectedMonth = newDateTime.month;
-                    });
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      year = selectedYear;
-                      month = selectedMonth;
-                    });
-                    Navigator.pop(context, '完成');
-                  },
-                  child: Text('Complete'),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-
-    if (picked != null && picked == 'Complete') {
-      await fetchData(); // Fetch data with the updated year and month
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    fetchData(); // Fetch data when the widget is initialized
+    fetchData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return isLoading // Check if isLoading is true
+    return isLoading
         ? const Column(
       children: [
         Expanded(
@@ -154,7 +105,6 @@ class _ReservationViewState extends State<ReservationView> {
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
                 onTap: () async {
-                  print("object");
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -237,9 +187,7 @@ class _ReservationViewState extends State<ReservationView> {
   String getDate(String dateString)
   {
     DateTime dateTime = DateTime.parse(dateString);
-
     String formattedDate = DateFormat('MM-dd HH:mm (E)').format(dateTime.toLocal());
-    print(formattedDate); // Output: 12-11 13:33 (Mon)
     return formattedDate;
   }
 }

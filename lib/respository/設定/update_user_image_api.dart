@@ -54,21 +54,19 @@ class UpdateUserImageApi {
 
       if (response.statusCode == 200) {
         final responseJson = await http.Response.fromStream(response);
-        print("Update User Image Response: ${responseJson.body}");
+
         final jsonData = json.decode(responseJson.body) as Map<String, dynamic>;
         final updateUserImageResult = UpdateUserImageResponse.fromJson(jsonData);
 
-        print("Result: ${updateUserImageResult.result}");
         onSuccess();
         return updateUserImageResult;
       } else {
         final responseJson = await http.Response.fromStream(response);
-        print("Error: ${response.statusCode} ${responseJson.body}");
         onError(responseJson.body);
         throw Exception('Failed to update user image');
       }
     } catch (error) {
-      print("Update User Image Error: Failed to update user image: $error");
+      print("@=== Update User Image Error: Failed to update user image: $error");
       throw Exception('Failed to update user image: $error');
     }
   }

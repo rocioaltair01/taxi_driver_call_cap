@@ -73,7 +73,8 @@ class _ReservationTicketState extends State<ReservationTicket> {
         isEmpty = true;
         isLoading = false;
       });
-      DialogUtils.showErrorDialog("錯誤","網路異常7",context);
+      print("@=== getReservationTickets Failed");
+      DialogUtils.showErrorDialog("錯誤","網路異常",context);
       throw Exception('Error: $error');
     }
   }

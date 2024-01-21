@@ -28,7 +28,7 @@ class _ReservationPageState extends State<ReservationPage> {
           toolbarHeight: 0,
           backgroundColor: Colors.white, // Set the background color of the AppBar
           bottom: PreferredSize(
-            preferredSize: Size.fromHeight(48.0), // Set the height of the TabBar
+            preferredSize: const Size.fromHeight(48.0), // Set the height of the TabBar
             child: TabBar(
               labelColor: Colors.black, // Set the color of the selected tab text
               unselectedLabelColor:
@@ -55,7 +55,7 @@ class _ReservationPageState extends State<ReservationPage> {
         body: TabBarView(
           children: [
             NotYetReservation(),
-            FinishedReservationView()
+            const FinishedReservationView()
           ],
         ),
       ),

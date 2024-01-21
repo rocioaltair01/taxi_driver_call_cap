@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../model/user_data_singleton.dart';
 import '../respository/設定/update_password_api.dart';
@@ -211,121 +210,272 @@ class GlobalDialog {
     final TextEditingController oldPassTextController = TextEditingController();
     final TextEditingController newPassTextController = TextEditingController();
     final TextEditingController rewriteNewPassTextController = TextEditingController();
+    bool isSuccess = false;
+    bool isError = false;
+    String isErrorMsg = "";
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          content: Container(
-
-            width: double.infinity,
-                height: 400,
-                padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24.0), // Set border radius
-            border: Border.all(color: Colors.black), // Add border
-            ),
-            child: Column(
-              children: [
-                Expanded(
-                    child: Center(
-                        child: Text(
-                          title,
-                          style: const TextStyle(
-                              fontSize: 30
-                          ),
-                        )
-                    )
-                ),
-                TextFormField(
-                  controller: oldPassTextController,
-                  decoration: const InputDecoration(
-                    labelText: '舊密碼',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: newPassTextController,
-                  decoration: const InputDecoration(
-                    labelText: '新密碼',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: rewriteNewPassTextController,
-                  decoration: const InputDecoration(
-                    labelText: '再次輸入新密碼',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    Flexible(
-                      flex: 1,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                          backgroundColor: Colors.grey,
-                        ),
-                        onPressed: () {
-                          onCancelPressed();
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text(
-                          '取消',
-                          style: TextStyle(
-                            fontSize: 18,
-                          ),
-                        ),
+        return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                  contentPadding: EdgeInsets.zero,
+                  content: isSuccess == true ? Container(
+                    height: 270,
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16.0),
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 1,
                       ),
                     ),
-                    const SizedBox(width: 20,),
-                    Flexible(
-                      flex: 1,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                        ),
-                        onPressed: () {
-                          UserData userData = UserDataSingleton.instance;
-
-                          if (oldPassTextController.text == "") {
-                            showAlertDialog(context, "修改密碼失敗", "未輸入舊密碼");
-                          } else if (newPassTextController.text == "") {
-                            showAlertDialog(context, "修改密碼失敗", "未輸入新密碼");
-                          } else if (rewriteNewPassTextController.text == "") {
-                            showAlertDialog(context, "修改密碼失敗", "未輸入再次輸入新密碼");
-                          } else if (oldPassTextController.text != userData.password) {
-                            showAlertDialog(context, "修改密碼失敗", "舊密碼錯誤");
-                          } else if (newPassTextController.text != rewriteNewPassTextController.text){
-                            showAlertDialog(context, "修改密碼失敗", "新密碼與再次輸入新密碼不符");
-                          } else {
-                            UpdatePasswordApi().updatePassword(newPassTextController.text);
-                            Navigator.of(context).pop();
-                          }
-                          onOkPressed(
-                            newPassTextController.text,
-                            oldPassTextController.text,
-                            rewriteNewPassTextController.text,
-                          );
-                        },
-                        child: const Text(
-                          '確定',
-                          style: TextStyle(
-                            fontSize: 18,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text(
+                          "修改密碼成功",
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                    )
-                  ],
-                ),
-              ],
-            ),
-          )
+                        Expanded(
+                          child:
+                          Center(
+                            child: Image.asset(
+                              'assets/images/ok.png',
+                              width: 100,
+                              height: 100,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        //Expanded(child: Container()),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                          ),
+                          child: const SizedBox(
+                            width: double.infinity,
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Center(child: Text(
+                                '確定',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                ),
+                              )
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ) :
+                      isError == true ? Container(
+                        width: double.infinity,
+                        height: 350,
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24.0), // Set border radius
+                          border: Border.all(color: Colors.black), // Add border
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text(
+                                "修改失敗",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 26
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text(
+                                isErrorMsg,
+                                style: TextStyle(
+                                    fontSize: 18
+                                ),
+                              ),
+                            ),
+                            Expanded(child: Container()),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16.0),
+                                ),
+                                minimumSize: Size(double.infinity, 50),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  isError = false;
+                                  isSuccess = false;
+                                });
+                                //Navigator.of(context).pop();
+                              },
+                              child: Text(
+                                '確定',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ) :
+                      Container(
+                        width: double.infinity,
+                        height: 400,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24.0), // Set border radius
+                          border: Border.all(color: Colors.black), // Add border
+                        ),
+                        child: Column(
+                          children: [
+                            Expanded(
+                                child: Center(
+                                    child: Text(
+                                      title,
+                                      style: const TextStyle(
+                                          fontSize: 30
+                                      ),
+                                    )
+                                )
+                            ),
+                            TextFormField(
+                              controller: oldPassTextController,
+                              decoration: const InputDecoration(
+                                labelText: '舊密碼',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            TextFormField(
+                              controller: newPassTextController,
+                              decoration: const InputDecoration(
+                                labelText: '新密碼',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            TextFormField(
+                              controller: rewriteNewPassTextController,
+                              decoration: const InputDecoration(
+                                labelText: '再次輸入新密碼',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Flexible(
+                                  flex: 1,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      minimumSize: const Size(double.infinity, 50),
+                                      backgroundColor: Colors.grey,
+                                    ),
+                                    onPressed: () {
+                                      onCancelPressed();
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text(
+                                      '取消',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 20,),
+                                Flexible(
+                                  flex: 1,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      minimumSize: const Size(double.infinity, 50),
+                                    ),
+                                    onPressed: () {
+                                      UserData userData = UserDataSingleton.instance;
+
+                                      if (oldPassTextController.text == "") {
+                                        setState(() {
+                                          isErrorMsg = "未輸入舊密碼";
+                                          isError = true;
+                                          isSuccess = false;
+                                        });
+                                      } else if (newPassTextController.text == "") {
+                                        setState(() {
+                                          isErrorMsg = "未輸入新密碼";
+                                          isError = true;
+                                          isSuccess = false;
+                                        });
+                                      } else if (rewriteNewPassTextController.text == "") {
+                                        setState(() {
+                                          isErrorMsg = "未輸入再次輸入新密碼";
+                                          isError = true;
+                                          isSuccess = false;
+                                        });
+                                      } else if (oldPassTextController.text != userData.password) {
+                                        setState(() {
+                                          isErrorMsg = "舊密碼錯誤";
+                                          isError = true;
+                                          isSuccess = false;
+                                        });
+                                      } else if (newPassTextController.text != rewriteNewPassTextController.text){
+                                        setState(() {
+                                          isErrorMsg = "新密碼與再次輸入新密碼不符";
+                                          isError = true;
+                                          isSuccess = false;
+                                        });
+                                      } else {
+                                        UpdatePasswordApi().updatePassword(newPassTextController.text);
+                                        userData = userData.updatePassword(newPassTextController.text);
+                                        UserDataSingleton.reset();
+                                        UserDataSingleton.initialize(userData);
+                                        setState(() {
+                                          isError = false;
+                                          isSuccess = true;
+                                        });
+
+                                      }
+                                      onOkPressed(
+                                        newPassTextController.text,
+                                        oldPassTextController.text,
+                                        rewriteNewPassTextController.text,
+                                      );
+                                    },
+                                    child: const Text(
+                                      '確定',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+              );
+            }
         );
       },
     );
@@ -423,6 +573,39 @@ class DialogUtils {
           content: content,
           onPressed: () {
             Navigator.of(context).pop();
+          },
+        );
+      },
+    );
+  }
+
+  static void showErrorCenterDialog(String content, BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomErrorCenterDialog(
+          content: content,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        );
+      },
+    );
+  }
+
+  static void showCancelTicketCenterDialog(
+      BuildContext context,
+      String content,
+      Function() onOkPressed
+      ) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomErrorCenterDialog(
+          content: content,
+          onPressed: () {
+            Navigator.of(context).pop();
+            onOkPressed();
           },
         );
       },
@@ -665,7 +848,7 @@ class CustomImageDialog extends StatelessWidget {
   }
 
   Widget contentBox(BuildContext context) {
-    return  Container(
+    return Container(
       height: 270,
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
@@ -816,6 +999,84 @@ class CustomDialog extends StatelessWidget {
   }
 }
 
+class CustomErrorCenterDialog extends StatelessWidget {
+  final String content;
+  final VoidCallback onPressed;
+
+  const CustomErrorCenterDialog({
+    required this.content,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      child: contentBox(context),
+    );
+  }
+
+  Widget contentBox(BuildContext context) {
+    return Container(
+      height: 270,
+      width: double.infinity,
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(
+          color: Colors.black,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Expanded(
+              child: Center(
+                child: Text(
+                  content,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+          ),
+          const SizedBox(height: 20),
+          //Expanded(child: Container()),
+          ElevatedButton(
+            onPressed: onPressed,
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30.0),
+              ),
+            ),
+            child: const SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Center(child: Text(
+                  '確定',
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
+                )
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class GrabTicketDialog extends StatefulWidget {
   final String id;

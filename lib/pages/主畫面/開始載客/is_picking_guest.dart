@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -6,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:new_glad_driver/util/dialog_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../model/error_res_model.dart';
 import '../../../model/user_data_singleton.dart';
 import '../../../model/預約單/reservation_model.dart';
 import '../../../respository/主畫面/arrived_destination_api.dart';
@@ -152,7 +154,12 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                 top: 50,
                 left: 20,
                 right: 0,
-                child: Text(pick_status),
+                child: Text(
+                    pick_status,
+                  style: const TextStyle(
+                      fontSize: 18
+                  ),
+                ),
               ),
             ],
           ),
@@ -371,12 +378,20 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
                                         onPressed: () async{
                                           if (mainPageKey.currentState?.bill?.reservationId != null) {
                                             ArrivedDestinationApiResponse result = await ArrivedDestinationApi().markArrivedDestination(
-                                                mainPageKey.currentState?.bill?.reservationId ?? 0,
-                                                mainPageKey.currentState?.order_type ?? 1
+                                                orderId: mainPageKey.currentState?.bill?.reservationId ?? 0,
+                                                orderType: mainPageKey.currentState?.order_type ?? 1,
+                                                onError: (res) {
+                                                  final jsonData = json.decode(res) as Map<String, dynamic>;
+                                                  ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                                                  GlobalDialog.showAlertDialog(
+                                                      context,
+                                                      "錯誤",
+                                                      responseModel.message
+                                                  );
+                                                }
                                             );
                                             if (result.success == true)
                                             {
-
                                               CalculatedInfo calculateInfo = UserDataSingleton.instance.setting.calculatedInfo;
                                               double totalPrice = PriceUtil().calculateTotalCost(
                                                   calculateInfo.perKmOfFare,
@@ -403,7 +418,16 @@ class _IsPickingQuestPageState extends State<IsPickingQuestPage> {
 
                                                 await CreateTicketHistoryPriceApi().createTicketHistoryPrice(
                                                     mainPageKey.currentState?.bill?.reservationId ?? 0,
-                                                    requestBody
+                                                    requestBody,
+                                                    (res) {
+                                                      final jsonData = json.decode(res) as Map<String, dynamic>;
+                                                      ErrorResponse responseModel = ErrorResponse.fromJson(jsonData['error']);
+                                                      GlobalDialog.showAlertDialog(
+                                                          context,
+                                                          "錯誤",
+                                                          responseModel.message
+                                                      );
+                                                    }
                                                 );
                                               }
                                               GlobalDialog.showPaymentDialog(

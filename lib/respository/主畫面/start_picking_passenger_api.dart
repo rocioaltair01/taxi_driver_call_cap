@@ -41,15 +41,13 @@ class StartPickingPassengerApi {
 
       if (response.statusCode == 200) {
         final decodedResponse = json.decode(response.body);
-        print("response.body ${response.body}");
         return StartPickingPassengerApiResponse.fromJson(decodedResponse);
       } else {
         final decodedResponse = json.decode(response.body);
-        print("response.body2 ${response.body}");
         return StartPickingPassengerApiResponse.fromJson(decodedResponse);
       }
     } catch (e) {
-      print("faied $e");
+      print("@=== Failed startPickingPassenger$e");
       return StartPickingPassengerApiResponse(
         event: "putClickTakePassen",
         success: false,

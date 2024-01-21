@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../../model/歷史訂單/immediate_ticket_detail_model.dart';
 import '../../../model/預約單/reservation_model.dart';
 import '../../../respository/歷史訂單/immediate_ticket_detail_api.dart';
-import '../../tabbar_page.dart';
 import '../main_page.dart';
 
 class GrabSuccessPage extends StatefulWidget {
@@ -38,24 +37,21 @@ class _GrabSuccessPageState extends State<GrabSuccessPage> {
         });
       }
     try {
-      print("dk fdd;j");
       final response = await ImmediateTicketDetailApi.getImmediateTicketDetail(widget.orderId);
-      print("dcvk;j");
       if (response.statusCode == 200) {
         if (mounted) {
           setState(() {
-            print("dk;j");
             ticketDetail = response.data;
-            if (ticketDetail != null)
-            {
-              //orderTime = ticketDetail!.orderTime.toString();
-            }
+            // if (ticketDetail != null)
+            // {
+            //   //orderTime = ticketDetail!.orderTime.toString();
+            // }
             isLoading = false;
           });
         }
 
       } else {
-        print("response.statusCode${response.statusCode}");
+        print("@=== getImmediateTicketDetail Failed response.statusCode ${response.statusCode}");
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
@@ -64,7 +60,7 @@ class _GrabSuccessPageState extends State<GrabSuccessPage> {
           isLoading = false;
         });
       }
-
+      print("@=== getImmediateTicketDetail Failed");
       throw Exception('Error: $error');
     }
   }
@@ -86,13 +82,13 @@ class _GrabSuccessPageState extends State<GrabSuccessPage> {
                 ),
                 Text("上車地點：${ticketDetail?.onLocation}"),
                 Text("訂單備註：${ticketDetail?.passengerNote}"),
-                Text("搶單成功"),
+                const Text("搶單成功"),
               ],
             ),
           ),
           Expanded(child: Container()),
           Padding(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
@@ -104,8 +100,7 @@ class _GrabSuccessPageState extends State<GrabSuccessPage> {
                 Navigator.pop(context);
                 StatusProvider statusProvider = Provider.of<StatusProvider>(context, listen: false);
                 statusProvider.updateStatus(GuestStatus.PREPARED);
-                //await fetchData();
-                print("fetchData $ticketDetail");
+
                 mainPageKey.currentState?.order_type = 0;
                 mainPageKey.currentState?.bill = BillInfoResevation(
                   driverId: null,
@@ -130,11 +125,6 @@ class _GrabSuccessPageState extends State<GrabSuccessPage> {
                   passengerOnLocationNote: "",
                   isDeal: "",
                 );
-                // pertabbarPageKey.currentState?.setState(() {
-                //   pertabbarPageKey.currentState?.selectedTab = 2;
-                // });
-                //mainPageKey.currentState?.bill = widget.bill;
-
               },
               child: const Text(
                 '前往載客',
@@ -145,7 +135,7 @@ class _GrabSuccessPageState extends State<GrabSuccessPage> {
               ),
             ),
           ),
-          SizedBox(height: 60,)
+          const SizedBox(height: 60,)
         ],
       ),
     );

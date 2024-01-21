@@ -3,7 +3,12 @@ import 'package:http/http.dart' as http;
 
 class DirectionsAPIRequest {
   Future<dynamic> estimateDirections(
-      String origin, String destination, String waypoints, String token, bool avoidHighways) async {
+      String origin,
+      String destination,
+      String waypoints,
+      String token,
+      bool avoidHighways,
+      ) async {
     try {
       String avoid = avoidHighways ? "&avoid=highways" : "";
       String url =

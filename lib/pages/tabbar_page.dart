@@ -26,7 +26,7 @@ class _TabbarPageState extends State<TabbarPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     pages = [
       const HistoryPage(),
       const ReservationPage(),
@@ -34,17 +34,13 @@ class _TabbarPageState extends State<TabbarPage> with WidgetsBindingObserver {
         key: mainPageKey,
       ),
       SettingPage(),
-      ChatPage(),
+      const ChatPage(),
     ];
-    // _timer = Timer.periodic(Duration(seconds: 15), (Timer timer) {
-    //   // 在这里调用你的API
-    //   callAPI();
-    // });
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -54,16 +50,20 @@ class _TabbarPageState extends State<TabbarPage> with WidgetsBindingObserver {
 
     switch (state) {
       case AppLifecycleState.resumed:
+        print("@=== AppLifecycleState resumed");
         break;
       case AppLifecycleState.inactive:
+        print("@=== AppLifecycleState inactive");
         break;
       case AppLifecycleState.paused:
+        print("@=== AppLifecycleState paused");
         break;
       case AppLifecycleState.detached:
         UserDataSingleton.reset();
-        print("AppLifecycleState detached");
+        print("@=== AppLifecycleState detached");
         break;
       case AppLifecycleState.hidden:
+        print("@=== AppLifecycleState hidden");
         break;
     }
   }
@@ -76,7 +76,6 @@ class _TabbarPageState extends State<TabbarPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    //print("loginNavigatorKey3${widget.loginNavigatorKey.currentState}");
     return ChangeNotifierProvider(
         create: (context) => StatusProvider(),
         child: PersistentBottomBarScaffold(

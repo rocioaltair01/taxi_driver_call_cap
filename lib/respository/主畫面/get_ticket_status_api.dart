@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../../constants/constants.dart';
 import '../../model/user_data_singleton.dart';
 
 class GetTicketStatusApiResponse {
@@ -27,12 +28,15 @@ class GetTicketStatusApiResponse {
 }
 
 class GetTicketStatusApi {
-  Future<GetTicketStatusApiResponse> getTicketStatus(int orderId, int orderType) async {
+  Future<GetTicketStatusApiResponse> getTicketStatus(
+      int orderId,
+      int orderType,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
 
     try {
-      String url = 'https://test-taxi.shopinn.tw/app/api/order/condition/$orderId/?order_type=$orderType';
-
+      String url = '$baseUrl/app/api/order/condition/$orderId/?order_type=$orderType';
       final response = await http.get(
         Uri.parse(url),
         headers: {
@@ -44,22 +48,12 @@ class GetTicketStatusApi {
         final decodedResponse = json.decode(response.body);
         return GetTicketStatusApiResponse.fromJson(decodedResponse);
       } else {
-        final decodedResponse = json.decode(response.body);
-        return GetTicketStatusApiResponse(
-          event: decodedResponse['event'],
-          success: false,
-          message: decodedResponse['error']['message'],
-          status: -1, // Provide a default value or handle it according to your logic
-        );
+        onError(response.body);
+        throw Exception('Failed GetTicketStatusApi');
       }
     } catch (e) {
-      print("Failed $e");
-      return GetTicketStatusApiResponse(
-        event: 'getOrderCondition',
-        success: false,
-        message: 'Failed to get ticket status: $e',
-        status: -1, // Provide a default value or handle it according to your logic
-      );
+      print("@=== Failed $e");
+      throw Exception('Failed GetTicketStatusApi');
     }
   }
 }

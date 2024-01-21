@@ -12,7 +12,11 @@ class OrderRequestAboveResponse {
 }
 
 class OrderRequestAboveApi {
-  static Future<OrderRequestAboveResponse> getOrderRequestAbove(double lat, double lng) async {
+  static Future<OrderRequestAboveResponse> getOrderRequestAbove(
+      double lat,
+      double lng,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse('https://test-fleet-of-taxi.shopinn.tw/api/order-info?lat=$lat&lng=$lng&orderIdsToExclude=0&orderIdsToExclude=0');
 
@@ -25,7 +29,6 @@ class OrderRequestAboveApi {
       );
 
       if (response.statusCode == 200) {
-        // print("Order Request:: Above Response: ${response.body}");
         final jsonData = json.decode(response.body);
 
         List<InstantItemModel> items = (jsonData['result'] as List)
@@ -34,11 +37,12 @@ class OrderRequestAboveApi {
 
         return OrderRequestAboveResponse(statusCode: response.statusCode, data: items);
       } else {
-        print("Order Request:: Above Failed: Failed to fetch data${response.statusCode}");
+        onError(response.body);
+        print("@=== Order Request:: Above Failed: Failed to fetch data${response.statusCode}");
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
-      print("Order Request:: Above Error: Failed to fetch data: $error");
+      print("@=== Order Request:: Above Error: Failed to fetch data: $error");
       throw Exception('Failed to fetch data: $error');
     }
   }

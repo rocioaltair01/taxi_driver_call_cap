@@ -116,7 +116,7 @@ class _ImmediateDetailPageState extends State<ImmediateDetailPage> {
                     HistoryListItem(label:'單號',
                       value:(widget.orderStatus == 0) ? '${ticketDetail!.id.toString()} ' : '${ticketDetail!.id.toString()}',
                       twoValue:true,statusValue: widget.orderStatus,),
-                    HistoryListItem(label:'付款方式', value:'現金付款'),
+                    const HistoryListItem(label:'付款方式', value:'現金付款'),
                   ],
                 ),
               const SizedBox(height: 20,),
@@ -126,7 +126,7 @@ class _ImmediateDetailPageState extends State<ImmediateDetailPage> {
                   [
                     HistoryNextListItem(label:'從:', value:ticketDetail!.onLocation ?? '',currentPosition: ticketDetail!.onGps!),
                     HistoryNextListItem(label:'到:',value:(ticketDetail!.offLocation == null || ticketDetail!.offLocation == '') ? '此乘客無提供下車地點' : ticketDetail!.offLocation.toString(), currentPosition: ticketDetail!.onGps!),
-                    HistoryListItem(label:'乘客人數', value:'1位'),
+                    const HistoryListItem(label:'乘客人數', value:'1位'),
                     HistoryListItem(label:'乘客備註:', value:ticketDetail!.passengerNote ?? ''),
                     HistoryListItem(label:'里程數:', value:'${ticketDetail!.milage}(公里)'),
                     HistoryListItem(label:'分鐘:', value:'  ${((ticketDetail!.routeSecond ?? 0)/60).toStringAsFixed(1)}(分鐘)'),

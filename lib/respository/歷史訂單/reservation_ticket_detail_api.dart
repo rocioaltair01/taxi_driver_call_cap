@@ -26,10 +26,8 @@ class ReservationTicketDetailApi {
       );
 
       if (response.statusCode == 200) {
-        print("hey E : ${response.body}");
         final jsonData = json.decode(response.body);
         final ticketDetail = ReservationTicketDetailModel.fromJson(jsonData);
-        print("hey EE : ${ticketDetail}");
         return ReservationTicketDetailResponse(statusCode: response.statusCode, data: ticketDetail);
       } else {
         throw Exception('Failed to fetch data');

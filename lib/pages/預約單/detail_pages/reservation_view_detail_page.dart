@@ -47,7 +47,7 @@ class _ReservationViewDetailPageState extends State<ReservationViewDetailPage> {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 label,
-                style: TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16),
               ),
             ),
             Expanded(child: Container()),
@@ -55,13 +55,13 @@ class _ReservationViewDetailPageState extends State<ReservationViewDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
                 value,
-                style: TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16),
                 softWrap: true,
               ),
             ),
           ],
         ),
-        Divider(
+        const Divider(
           color: Colors.grey,
           thickness: 1,
           height: 1,
@@ -85,7 +85,7 @@ class _ReservationViewDetailPageState extends State<ReservationViewDetailPage> {
                 child: Text(
                   label,
                   overflow: TextOverflow.clip,
-                  style: TextStyle(fontSize: 20),
+                  style: const TextStyle(fontSize: 20),
                 ),
               ),
               //Expanded(child: Container()),
@@ -95,18 +95,18 @@ class _ReservationViewDetailPageState extends State<ReservationViewDetailPage> {
                   child: Text(
                     value,
                     overflow: TextOverflow.clip,
-                    style: TextStyle(fontSize: 20),
+                    style: const TextStyle(fontSize: 20),
                   ),
                 ),
               ),
-              Icon(
+              const Icon(
                 Icons.arrow_right,
                 size: 32, // 设置图标大小
                 color: Colors.blue, // 设置图标颜色
               ),
             ],
           ),
-          Divider(
+          const Divider(
             color: Colors.grey,
             thickness: 1,
             height: 1,
@@ -122,7 +122,7 @@ class _ReservationViewDetailPageState extends State<ReservationViewDetailPage> {
       backgroundColor: Colors.grey[300],
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text(
+        title: const Text(
           '訂單細節',
           style: TextStyle(color: Colors.black),
         ),
@@ -130,7 +130,7 @@ class _ReservationViewDetailPageState extends State<ReservationViewDetailPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: isLoading
-            ? Center(child: SpinKitRotatingCircle(
+            ? const Center(child: SpinKitRotatingCircle(
                 color: Colors.black,
                 size: 80.0,
               )) // Show a loader while data is fetched
@@ -144,7 +144,7 @@ class _ReservationViewDetailPageState extends State<ReservationViewDetailPage> {
                 _buildRow('預約時間', widget.bill.billInfo.reservationTime),
               ],
             ),
-            SizedBox(height: 20,),
+            const SizedBox(height: 20,),
             _buildTable(
               context,
               [
@@ -154,7 +154,7 @@ class _ReservationViewDetailPageState extends State<ReservationViewDetailPage> {
                 _buildRow('乘客人數', '${widget.bill.billInfo.userNumber.toString()}位' ?? ''),
               ],
             ),
-            SizedBox(height: 40,),
+            const SizedBox(height: 40,),
             Row(
               children: [
                 Expanded(child: ElevatedButton(
@@ -177,12 +177,12 @@ class _ReservationViewDetailPageState extends State<ReservationViewDetailPage> {
                       borderRadius: BorderRadius.circular(20), // Adjust the border radius as needed
                     ),
                     backgroundColor: Colors.deepOrangeAccent,
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       fontSize: 18,
                     ),
                     onPrimary: Colors.black,
                   ),
-                  child: Text('應徵預約單'),
+                  child: const Text('應徵預約單'),
                 ),)
               ],
             )

@@ -43,6 +43,7 @@ class GrabTicketApi {
     required String orderId,
     required int time,
     required int status,
+    required Function(String res) onError
   }) async {
     UserData loginResult = UserDataSingleton.instance;
     final Uri uri = Uri.parse('https://test-fleet-of-taxi.shopinn.tw/api/grab');
@@ -65,17 +66,17 @@ class GrabTicketApi {
       );
 
       if (response.statusCode != 400) {
-        print("Grab Ticket Response: ${response.body}");
         final jsonData = json.decode(response.body) as Map<String, dynamic>;
         final grabTicketResult = GrabTicketResponse.fromJson(jsonData);
 
         return grabTicketResult;
       } else {
-        print("Grab Ticket Failed: Failed to grab ticket ${response.statusCode}");
+        onError(response.body);
+        print("@=== Grab Ticket Failed: Failed to grab ticket ${response.statusCode}");
         throw Exception('Failed to grab ticket');
       }
     } catch (error) {
-      print("Grab Ticket Error: Failed to grab ticket: $error");
+      print("@=== Grab Ticket Error: Failed to grab ticket: $error");
       throw Exception('Failed to grab ticket: $error');
     }
   }

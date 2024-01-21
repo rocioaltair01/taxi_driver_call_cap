@@ -10,7 +10,6 @@ import 'package:route_panel/route_panel.dart';
 import '../../main.dart';
 import '../../model/error_res_model.dart';
 import '../../model/user_data_singleton.dart';
-import '../../model/預約單/reservation_model.dart';
 import '../../respository/driver_information_api.dart';
 import '../../respository/設定/update_password_api.dart';
 import '../../respository/設定/update_user_image_api.dart';
@@ -73,7 +72,7 @@ class _BasicSettingPageState extends State<BasicSettingPage> {
                                   decoration: BoxDecoration(
                                     color: Colors.grey[200],
                                     shape: BoxShape.circle,
-                                    image: DecorationImage(
+                                    image: const DecorationImage(
                                       fit: BoxFit.cover,
                                       image: AssetImage('assets/images/user.png'),
                                     ),
@@ -87,7 +86,7 @@ class _BasicSettingPageState extends State<BasicSettingPage> {
                                   ),
                                 ),
                                 onTap: () {
-                                    Navigator.push(context, BottomToTopPageRoute(page: TakePictureScreen()));
+                                    Navigator.push(context, BottomToTopPageRoute(page: TakePictureScreen(type: 'shot',)));
                                 },
                               ),
                               const SizedBox(height: 12),
@@ -121,7 +120,7 @@ class _BasicSettingPageState extends State<BasicSettingPage> {
                               ),
                               Container(
                                 height: 60,
-                                padding: EdgeInsets.fromLTRB(24, 8, 24, 8),
+                                padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
@@ -296,37 +295,40 @@ class _BasicSettingPageState extends State<BasicSettingPage> {
   }
 }
 
-
-
-
-
 Widget _buildBox(String text,BuildContext context) {
-  return Container(
-    margin: EdgeInsets.all(8),
-    decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey, width: 1),
-    ),
-    height: (MediaQuery.of(context).size.width / 4 - 16 - 8),
-    child: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/add.png', // Replace with the path to your image
-            width: 10, // Adjust the width of the image as needed
-            height: 10, // Adjust the height of the image as needed
-          ),
-        ],
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(context, BottomToTopPageRoute(page: TakePictureScreen(type: 'info',)));
+    },
+    child: Container(
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey, width: 1),
+      ),
+      height: (MediaQuery.of(context).size.width / 4 - 16 - 8),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/add.png', // Replace with the path to your image
+              width: 10, // Adjust the width of the image as needed
+              height: 10, // Adjust the height of the image as needed
+            ),
+          ],
+        ),
       ),
     ),
   );
 }
 
+
+
 class TakePictureScreen extends StatefulWidget {
-  // final BillInfoResevation? bill;
+  final String type;
 
   const TakePictureScreen({
-    // this.bill,
+    required this.type,
     super.key,
   });
   @override
@@ -336,7 +338,6 @@ class TakePictureScreen extends StatefulWidget {
 class TakePictureScreenState extends State<TakePictureScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
-
 
   @override
   void initState() {
@@ -356,7 +357,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
   @override
   void dispose() {
-    // Dispose of the controller when the widget is disposed.
     _controller.dispose();
     super.dispose();
   }
@@ -378,11 +378,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
         ),
         body: Column(
           children: [
-            // Container(
-            //   height: 200,
-            //   child:    TakePictureScreen(),
-            // ),
-
             Container(
               color: Colors.black,
               child: AspectRatio(
@@ -434,13 +429,13 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                                     if(file != null) {
                                       UpdateUserImageApi.updateUserImage(
                                           filePath: file.path,
-                                          type: "info",
+                                          type: widget.type,
                                           onSuccess: () {
                                             Navigator.pop(context);
                                             GlobalDialog.showAlertDialog(
                                                 context,
                                                 "成功",
-                                                "更新頭貼成功"
+                                                "更新司機資料成功"
                                             );
                                           },
                                           onError: (res) {

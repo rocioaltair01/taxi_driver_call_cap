@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:new_glad_driver/pages/%E4%B8%BB%E7%95%AB%E9%9D%A2/%E4%B8%8A%E4%B8%8B%E7%B7%9A/offline_count_price_page.dart';
 
+import '../../../model/user_data_singleton.dart';
+import '../../../util/dialog_util.dart';
+import '../../../util/dialog_util.dart';
 import '../main_page.dart';
 import '../細節頁/estimate_price.dart';
 import '../細節頁/hotspot_page.dart';
@@ -66,9 +69,13 @@ class _OfflinePageState extends State<OfflinePage> {
         Center(
             child: InkWell(
               onTap: () {
-                setState(() {
-                  statusProvider.updateStatus(GuestStatus.IS_OPEN);
-                });
+                if (UserDataSingleton.instance.authStatus == 0) {
+                  setState(() {
+                    statusProvider.updateStatus(GuestStatus.IS_OPEN);
+                  });
+                } else {
+                  DialogUtils.showErrorCenterDialog("目前停權中", context);
+                }
               },
               child: Image.asset(
                 'assets/images/run.png',

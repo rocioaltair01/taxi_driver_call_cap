@@ -27,17 +27,16 @@ class ImmediateTicketDetailApi {
       );
 
       if (response.statusCode == 200) {
-        print("hey E : ${response.body}");
         final jsonData = json.decode(response.body);
         final ticketDetail = ImmediateTicketDetailModel.fromJson(jsonData['result']);
 
         return ImmediateTicketDetailResponse(statusCode: response.statusCode, data: ticketDetail);
       } else {
-        print("hey E : Failed to fetch data: ${response.statusCode};; $orderId" );
+        print("@=== Failed to fetch data: ${response.statusCode};; $orderId" );
         throw Exception('Failed to fetch data');
       }
     } catch (error) {
-      print("hey Ei : Failed to fetch data");
+      print("@=== Failed to fetch data $error");
       throw Exception('Failed to fetch data: $error');
     }
   }

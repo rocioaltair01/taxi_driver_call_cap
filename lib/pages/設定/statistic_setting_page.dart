@@ -32,11 +32,7 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
     "七月", "八月", "九月", "十月", "十一月", "十二月"
   ];
 
-  List<String> yearNamesInChinese = [
-    "2000年", "2001年", "2002年", "2003年", "2004年", "2005年", "2006年", "2007年",
-    "2008年", "2009年", "2010年", "2011年", "2012年", "2013年", "2014年", "2015年",
-    "2016年", "2017年", "2018年", "2019年", "2020年", "2021年", "2022年", "2023年"
-  ];
+  List<String> yearNamesInChinese = [];
 
   Future<void> fetchData() async {
     if (mounted) {
@@ -81,7 +77,7 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
     final picked = await showModalBottomSheet(
       context: context,
       builder: (BuildContext builder) {
-        return Container(
+        return SizedBox(
           height: 280.0,
           child: Column(
             children: [
@@ -109,7 +105,7 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
                           children: List<Widget>.generate(24, (int index) {
                             return Text(
                               yearNamesInChinese[index], // Replace with your list of Chinese month names
-                              style: TextStyle(fontSize: 22.0),
+                              style: const TextStyle(fontSize: 22.0),
                             );
                           }),
                         ),
@@ -129,7 +125,7 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
                           children: List<Widget>.generate(12, (int index) {
                             return Text(
                               monthNamesInChinese[index], // Replace with your list of Chinese month names
-                              style: TextStyle(fontSize: 22.0),
+                              style: const TextStyle(fontSize: 22.0),
                             );
                           }),
                         ),
@@ -198,7 +194,7 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
             padding: EdgeInsets.all(16),
             child: Column(
               children: [
-                Align(
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     "立即單",
@@ -208,7 +204,7 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
                       StatisticItem(
@@ -222,7 +218,7 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
                       StatisticItem(
                         title: "成功率",
                         content: (statisticsData?.transactionSuccessCount == 0 && statisticsData?.transactionCount == 0) ? '0%'
-                            : '${((statisticsData?.transactionSuccessCount ?? 0)/ (statisticsData?.transactionCount ?? 0)*100).toString()}%',
+                            : '${((statisticsData?.transactionSuccessCount ?? 0)/ (statisticsData?.transactionCount ?? 0)*100).toInt()}%',
                       ),
                     ],
                   ),
@@ -234,7 +230,7 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
                   ),),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Row(
                     // 2
                     children: [
@@ -249,19 +245,19 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
                       StatisticItem(
                           title: "成功率",
                           content: (statisticsData?.reservationSuccessCount == 0 && statisticsData?.reservationCount == 0) ? '0%' :
-                          "${((statisticsData?.reservationSuccessCount ?? 0)/(statisticsData?.reservationCount ?? 0)*100).toString()}%"
+                          "${((statisticsData?.reservationSuccessCount ?? 0)/(statisticsData?.reservationCount ?? 0)*100).toInt()}%"
                       )
                     ],
                   ),
                 ),
-                Align(
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text("特約商家",style: TextStyle(
                       fontSize: 18
                   ),),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
                       StatisticItem(
@@ -275,13 +271,13 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
                       StatisticItem(
                         title: "成功率",
                         content: (statisticsData?.storeOrderNumber == 0 && statisticsData?.storeOrderSuccess == 0) ? '0%'
-                            : '${((statisticsData?.storeOrderSuccess ?? 0)/(statisticsData?.storeOrderNumber ?? 0)*100).toString()}%',
+                            : '${((statisticsData?.storeOrderSuccess ?? 0)/(statisticsData?.storeOrderNumber ?? 0)*100).toInt()}%',
                       ),
                     ],
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
                       StatisticItem(
@@ -300,7 +296,7 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
                       StatisticItem(
@@ -323,7 +319,6 @@ class _StatisticSettingPageState extends State<StatisticSettingPage> {
                     ],
                   ),
                 ),
-
               ],
             ),
           )

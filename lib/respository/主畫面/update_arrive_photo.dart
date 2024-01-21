@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:new_glad_driver/util/dialog_util.dart';
 
 import '../../constants/constants.dart';
 import '../../model/user_data_singleton.dart';
@@ -32,7 +31,6 @@ class UpdateArrivePhotoApi {
     required String filePath,
     required int orderId,
     required int orderType,
-
     required Function(String res) onError
   }) async {
     UserData loginResult = UserDataSingleton.instance;
@@ -54,20 +52,18 @@ class UpdateArrivePhotoApi {
 
       if (response.statusCode == 200) {
         final responseJson = await http.Response.fromStream(response);
-        print("Update Arrive Photo Response: ${responseJson.body}");
         final jsonData = json.decode(responseJson.body) as Map<String, dynamic>;
         final updateArrivePhotoResult = UpdateArrivePhotoResponse.fromJson(jsonData);
 
-        print("yoyo $updateArrivePhotoResult");
         return updateArrivePhotoResult;
       } else {
         final responseJson = await http.Response.fromStream(response);
-        print("yoyo 2 ${response.statusCode} ${responseJson.body}");
+        print("@=== Update Arrive Photo Error: Failed to update arrive photo:${response.statusCode} ${responseJson.body}");
         onError(responseJson.body);
         throw Exception('Failed to update arrive photo');
       }
     } catch (error) {
-      print("Update Arrive Photo Error: Failed to update arrive photo: $error");
+      print("@=== Update Arrive Photo Error: Failed to update arrive photo: $error");
       throw Exception('Failed to update arrive photo: $error');
     }
   }

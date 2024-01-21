@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../../constants/constants.dart';
 import '../../model/user_data_singleton.dart';
 
 class GiveupErrorResponse {
@@ -28,11 +29,15 @@ class GiveupErrorResponse {
 
 
 class GiveupApi {
-  Future<GiveupErrorResponse> cancelOrderApply(int orderId, int orderType) async {
+  Future<GiveupErrorResponse> cancelOrderApply(
+      int orderId,
+      int orderType,
+      Function(String res) onError
+      ) async {
     UserData loginResult = UserDataSingleton.instance;
-    print("give up orderId $orderId");
+    print("@=== give up orderId $orderId");
     try {
-      String url = 'https://test-taxi.shopinn.tw/app/api/driver/order/cancel_apply/$orderId';
+      String url = '$baseUrl/app/api/driver/order/cancel_apply/$orderId';
 
         final response = await http.put(
           Uri.parse(url),
@@ -41,30 +46,15 @@ class GiveupApi {
           },
         );
 
-
         if (response.statusCode == 200) {
           final decodedResponse = json.decode(response.body);
-          print("give up ${response.body}");
           return GiveupErrorResponse.fromJson(decodedResponse);
         } else {
-          final decodedResponse = json.decode(response.body);
-          print("give up 3 ${response.body}");
-          return GiveupErrorResponse(
-            event : decodedResponse['event'],
-            success : decodedResponse['success'],
-            message : decodedResponse['error']['message'],
-            result : '',
-          );
+          onError(response.body);
+          throw Exception('Failed cancelOrderApply');
       }
-
     } catch (e) {
-      print("jk;");
-      return GiveupErrorResponse(
-        event: "updateApplyCancel",
-        success: false,
-          message: '',
-          result: ''
-      );
+      throw Exception('Failed cancelOrderApply');
     }
   }
 }
